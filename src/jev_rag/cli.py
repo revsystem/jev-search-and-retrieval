@@ -232,6 +232,19 @@ def cmd_ask(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_usecases(args: argparse.Namespace) -> int:
+    """Print the published use cases next to what implements each one."""
+    from jev_rag.usecases import USE_CASES, format_registry
+
+    print("TypeSafe 公式ドキュメント Search and retrieval の実装対応\n")
+    print(format_registry())
+    if args.verbose:
+        print()
+        for use_case in USE_CASES:
+            print(f"- {use_case.bullet}\n  {use_case.note}")
+    return 0
+
+
 def cmd_check(args: argparse.Namespace) -> int:
     """Send one trivial question to confirm the configured Jev route answers."""
     from jev_rag.jev.questions import Noul
@@ -289,6 +302,10 @@ def main(argv: list[str] | None = None) -> int:
         help="Jevで文脈を選別してから生成する（0で無効）",
     )
     ask.set_defaults(func=cmd_ask)
+
+    usecases = sub.add_parser("usecases", help="公式ユースケースと実装の対応を表示する")
+    usecases.add_argument("--verbose", action="store_true", help="設計メモも表示する")
+    usecases.set_defaults(func=cmd_usecases)
 
     check = sub.add_parser("check", help="Jevの疎通確認")
     check.add_argument("--transport", choices=["gateway", "direct", "fake"])

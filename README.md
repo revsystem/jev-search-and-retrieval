@@ -4,17 +4,23 @@
 
 ## 公式ユースケースとの対応
 
-| 公式ユースケース | 実装 | パイプライン名 | テスト |
-|---|---|---|---|
-| Replace or supplement embeddings in RAG pipelines with semantic search, scoring, and ranking | `jev/retrieval.py` の `JevRetriever` / `HybridRetriever` | `jev_only` / `jev_hybrid` | `tests/test_uc1_jev_retrieval.py` |
-| Score query-to-candidate relevance | `jev/rerank.py` の `noul_rerank` | `jev_noul` | `tests/test_uc2_relevance_scoring.py` |
-| Rerank results with pairwise comparisons | `jev/pairwise.py` の `PairwiseReranker` | `jev_pairwise` | `tests/test_uc3_pairwise.py` |
-| Cross-encode queries and candidates for higher precision | `jev/crossencode.py` の `CrossEncoder` | `jev_crossencode` | `tests/test_uc4_cross_encode.py` |
-| Select useful context for downstream AI workflows | `jev/context.py` の `ContextSelector` | `jev-rag ask --context-budget` | `tests/test_uc5_context_selection.py` |
+公式ドキュメントの Search and retrieval は次の5項目で、すべてに実装とテストを対応させています。決定の型は同ページの Example task categories 表の区分です。
 
-比較対象として、ベクトル検索のみの `baseline` と、Bedrock Rerank API の Cohere Rerank v3.5 を使う `classic_rerank` を置いています。これに加えて、索引時エンリッチとクエリ計画を重ねた `jev_full` があります。
+| 公式ユースケース | 決定の型 | 実装 | 実行方法 | テスト |
+|---|---|---|---|---|
+| Replace or supplement embeddings in RAG pipelines with semantic search, scoring, and ranking. | Search, Retrieval, Ranking | `jev_rag.jev.retrieval` | `jev_only, jev_hybrid` | `tests/test_uc1_jev_retrieval.py` |
+| Score query-to-candidate relevance. | Scoring, Ranking | `jev_rag.jev.rerank` | `jev_noul` | `tests/test_uc2_relevance_scoring.py` |
+| Rerank results with pairwise comparisons. | Ranking | `jev_rag.jev.pairwise` | `jev_pairwise` | `tests/test_uc3_pairwise.py` |
+| Cross-encode queries and candidates for higher precision. | Scoring, Ranking | `jev_rag.jev.crossencode` | `jev_crossencode` | `tests/test_uc4_cross_encode.py` |
+| Select useful context for downstream AI workflows. | Retrieval | `jev_rag.jev.context` | `jev-rag ask --context-budget` | `tests/test_uc5_context_selection.py` |
 
-それぞれの設計の違いは次のとおりです。`jev_only` は埋め込みモデルを経路から完全に外し、コーパスを32問ずつのNoulで走査して確率で順位を付けます。インデックス規模ではなくコストで頭打ちになるので、1文書やメタデータで絞った範囲のように既に狭まったコーパス向けです。`jev_hybrid` は埋め込みを再現率の段、Jevを適合率の段として融合します。`jev_noul` は候補一覧を共有stateに置いて候補ごとにNoulを1問ずつ立てます。`jev_pairwise` は絶対尺度を避け、2候補のどちらが良いかというChoiceだけで順位を決めます。比較数が増える代わりに、リクエスト内の質問は並列評価されるため1ラウンドの実時間は1問とほぼ変わりません。`jev_crossencode` はペアごとにリクエストを分け、stateに他の候補を一切入れないことで隣接候補による汚染を避けます。
+この対応表は README だけでなく `src/jev_rag/usecases.py` にレジストリとして持たせてあり、`uv run jev-rag usecases` で出力できます。モジュール名やパイプライン名を変えたりテストを消したりすると `tests/test_usecases_registry.py` が落ちるので、表と実装がずれたまま放置されることはありません。
+
+それぞれの設計の違いは次のとおりです。`jev_only` は埋め込みモデルを経路から完全に外し、コーパスを32問ずつのNoulで走査して確率で順位を付けます。インデックス規模ではなくコストで頭打ちになるので、1文書やメタデータで絞った範囲のように既に狭まったコーパス向けです。`jev_hybrid` は埋め込みを再現率の段、Jevを適合率の段として融合します。`jev_noul` は候補一覧を共有stateに置いて候補ごとにNoulを1問ずつ立てます。`jev_pairwise` は絶対尺度を避け、2候補のどちらが良いかというChoiceだけで順位を決めます。比較数が増える代わりに、リクエスト内の質問は並列評価されるため1ラウンドの実時間は1問とほぼ変わりません。`jev_crossencode` はペアごとにリクエストを分け、stateに他の候補を一切入れないことで隣接候補による汚染を避けます。文脈選択は順位ではなく採否を決める段で、有用性と重複を判定してから予算内に貪欲に詰めます。
+
+比較対象として、ベクトル検索のみの `baseline` と、Bedrock Rerank API の Cohere Rerank v3.5 を使う `classic_rerank` を置いています。これに加えて、索引時エンリッチとクエリ計画を重ねた `jev_full` があります。この2つは公式マップの項目ではなく、Jevを挟んだ効果を測るための対照群と拡張です。
+
+なお同ページには Universal Verification（引用誤り・ハルシネーションの検出）や LLM guardrails（検索した文章に混入したプロンプトインジェクションの検出）といった隣接カテゴリもあり、RAGにそのまま足せる内容ですが、今回の依頼範囲である Search and retrieval の外なので実装していません。
 
 ## 期待された成果物への回答
 
@@ -126,9 +132,9 @@ uv run jev-rag ask "生成AIの利用率は前年と比べてどう変化した�
 
 この環境からは `docs.typesafe.ai`、`vercel.com`、`soumu.go.jp`、`docs.aws.amazon.com` のいずれにも到達できません（組織のegressポリシーによるプロキシ側の403で、迂回はしていません）。Jev の API キーも AWS の認証情報もありません。したがって次は未検証です。Jev への実リクエストは一度も送っていません。対象PDFの取り込みも行っていないため、チャンク分割の妥当性と評価クエリのキーワードルールは実データで確認できていません。Bedrock と S3 Vectors の呼び出しも実行していません。
 
-ユースケースの一覧は利用者から提供された公式ドキュメントの記述に基づいています。一方でリクエスト・レスポンス形式は公式ドキュメントに到達できなかったため、下記の二次資料から組み立てています。特に次の2点は実際に叩いて確認してください。AI Gateway の TypeSafe 互換エンドポイントで受け付けられる model id が `typesafe-ai/jev` か `jev-latest` か（`JEV_GATEWAY_MODEL` で切り替えられるようにしてあります）。もう1点は S3 Vectors のインデックス作成 API の boto3 メソッド名で、資料によって `create_index` と `create_vector_index` が混在していたため、両方を試す実装にしています。
+ユースケースの一覧と決定の型は、利用者から提供された公式ドキュメント本文に基づいています。一方でリクエスト・レスポンス形式は公式ドキュメントに到達できなかったため、下記の二次資料から組み立てています。特に次の2点は実際に叩いて確認してください。AI Gateway の TypeSafe 互換エンドポイントで受け付けられる model id が `typesafe-ai/jev` か `jev-latest` か（`JEV_GATEWAY_MODEL` で切り替えられるようにしてあります）。もう1点は S3 Vectors のインデックス作成 API の boto3 メソッド名で、資料によって `create_index` と `create_vector_index` が混在していたため、両方を試す実装にしています。公式ドキュメントの目次は `https://docs.typesafe.ai/llms.txt` にありますが、これも当環境からは到達できません。
 
-テストは151件が通り、ruff も通ります。ただしこれらはすべて、ネットワークに出ない範囲の純粋なロジックと配線に対するテストです。
+テストは181件が通り、ruff も通ります。ただしこれらはすべて、ネットワークに出ない範囲の純粋なロジックと配線に対するテストです。
 
 ## 出典
 

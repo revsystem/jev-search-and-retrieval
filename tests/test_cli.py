@@ -53,3 +53,17 @@ def test_evaluate_without_an_ingested_corpus_fails_with_a_hint():
 def test_an_unknown_subcommand_is_rejected():
     with pytest.raises(SystemExit):
         main(["frobnicate"])
+
+
+def test_usecases_lists_every_published_use_case(capsys):
+    from jev_rag.usecases import USE_CASES
+
+    assert main(["usecases"]) == 0
+    out = capsys.readouterr().out
+    for use_case in USE_CASES:
+        assert use_case.bullet in out
+
+
+def test_usecases_verbose_adds_the_design_notes(capsys):
+    main(["usecases", "--verbose"])
+    assert "埋め込みを経路から外し" in capsys.readouterr().out
