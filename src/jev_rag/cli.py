@@ -52,12 +52,44 @@ def _build_retriever(settings: Settings):
     return EmbeddingRetriever(CohereEmbedder(settings.bedrock), S3VectorStore(settings.store))
 
 
+# One entry per use case on TypeSafe's search and retrieval map, plus the two
+# non-Jev baselines they are measured against.
+PIPELINE_NAMES = [
+    "baseline",
+    "classic_rerank",
+    "jev_only",
+    "jev_hybrid",
+    "jev_noul",
+    "jev_pairwise",
+    "jev_crossencode",
+    "jev_full",
+]
+
+
 def _build_pipelines(names: list[str], settings: Settings) -> dict:
     from jev_rag.bedrock import BedrockReranker
-    from jev_rag.pipelines import BaselinePipeline, ClassicRerankPipeline, JevPipeline
+    from jev_rag.jev.crossencode import CrossEncoder
+    from jev_rag.jev.pairwise import PairwiseReranker
+    from jev_rag.jev.rerank import JevReranker
+    from jev_rag.jev.retrieval import HybridRetriever, JevRetriever
+    from jev_rag.pipelines import (
+        BaselinePipeline,
+        ClassicRerankPipeline,
+        JevPipeline,
+        RerankPipeline,
+    )
+
+    unknown = set(names) - set(PIPELINE_NAMES)
+    if unknown:
+        raise SystemExit(f"未知のパイプライン: {sorted(unknown)}（利用可能: {PIPELINE_NAMES}）")
 
     retriever = _build_retriever(settings)
     client = settings.jev.build_client() if any(n.startswith("jev") for n in names) else None
+
+    def staged(name, rerank):
+        return RerankPipeline(
+            name, retriever, rerank, top_k=settings.top_k, candidate_k=settings.candidate_k
+        )
 
     available = {
         "baseline": lambda: BaselinePipeline(retriever, top_k=settings.top_k),
@@ -67,8 +99,18 @@ def _build_pipelines(names: list[str], settings: Settings) -> dict:
             top_k=settings.top_k,
             candidate_k=settings.candidate_k,
         ),
-        "jev_rerank": lambda: JevPipeline(
-            retriever, client, top_k=settings.top_k, candidate_k=settings.candidate_k
+        "jev_only": lambda: BaselinePipeline(
+            JevRetriever(client, _load_chunks()), top_k=settings.top_k, name="jev_only"
+        ),
+        "jev_hybrid": lambda: BaselinePipeline(
+            HybridRetriever(retriever, client, candidate_k=settings.candidate_k),
+            top_k=settings.top_k,
+            name="jev_hybrid",
+        ),
+        "jev_noul": lambda: staged("jev_noul", JevReranker(client).noul_rerank),
+        "jev_pairwise": lambda: staged("jev_pairwise", PairwiseReranker(client).rerank),
+        "jev_crossencode": lambda: staged(
+            "jev_crossencode", CrossEncoder(client, with_grade=True).rerank
         ),
         "jev_full": lambda: JevPipeline(
             retriever,
@@ -78,9 +120,6 @@ def _build_pipelines(names: list[str], settings: Settings) -> dict:
             plan_query=True,
         ),
     }
-    unknown = set(names) - set(available)
-    if unknown:
-        raise SystemExit(f"未知のパイプライン: {sorted(unknown)}")
     return {name: available[name]() for name in names}
 
 
@@ -174,6 +213,17 @@ def cmd_ask(args: argparse.Namespace) -> int:
     settings = Settings()
     pipeline = _build_pipelines([args.pipeline], settings)[args.pipeline]
     docs = pipeline.retrieve(args.question)
+
+    if args.context_budget:
+        from jev_rag.jev.context import ContextSelector
+
+        selection = ContextSelector(
+            settings.jev.build_client(), budget_chars=args.context_budget
+        ).select(args.question, docs)
+        for chunk_id, reason in sorted(selection.reasons.items()):
+            print(f"[{chunk_id}] 除外: {reason}")
+        docs = selection.selected
+
     for doc in docs:
         print(
             f"[{doc.chunk_id}] score={doc.score:.3f} jev={doc.jev_score} Δrank={doc.rank_delta:+d}"
@@ -216,7 +266,11 @@ def main(argv: list[str] | None = None) -> int:
 
     evaluate = sub.add_parser("evaluate", help="各パイプラインを評価して比較表を出す")
     evaluate.add_argument("--queries", default="data/eval/queries.yaml")
-    evaluate.add_argument("--pipelines", default="baseline,classic_rerank,jev_rerank,jev_full")
+    evaluate.add_argument(
+        "--pipelines",
+        default="baseline,classic_rerank,jev_noul,jev_pairwise,jev_crossencode,jev_full",
+        help=f"カンマ区切り。利用可能: {','.join(PIPELINE_NAMES)}",
+    )
     evaluate.add_argument("--baseline", default="baseline")
     evaluate.add_argument("--top-k", type=int, default=5)
     evaluate.set_defaults(func=cmd_evaluate)
@@ -227,7 +281,13 @@ def main(argv: list[str] | None = None) -> int:
 
     ask = sub.add_parser("ask", help="検索して GPT-5.6 Luna で回答を生成する")
     ask.add_argument("question")
-    ask.add_argument("--pipeline", default="jev_rerank")
+    ask.add_argument("--pipeline", default="jev_noul", choices=PIPELINE_NAMES)
+    ask.add_argument(
+        "--context-budget",
+        type=int,
+        default=0,
+        help="Jevで文脈を選別してから生成する（0で無効）",
+    )
     ask.set_defaults(func=cmd_ask)
 
     check = sub.add_parser("check", help="Jevの疎通確認")

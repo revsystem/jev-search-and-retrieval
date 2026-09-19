@@ -120,3 +120,32 @@ def test_pipelines_expose_a_stable_name_for_reporting():
     assert BaselinePipeline(StubRetriever([]), top_k=1).name == "baseline"
     jev = JevPipeline(StubRetriever([]), JevClient(FakeTransport()), top_k=1)
     assert jev.name == "jev"
+
+
+def test_a_named_pipeline_reports_its_own_name():
+    assert BaselinePipeline(StubRetriever([]), top_k=1, name="jev_only").name == "jev_only"
+
+
+def test_rerank_pipeline_overfetches_then_delegates():
+    from jev_rag.pipelines import RerankPipeline
+
+    retriever = StubRetriever(candidates())
+    seen = {}
+
+    def rerank(query, docs, top_k):
+        seen.update({"query": query, "n": len(docs), "top_k": top_k})
+        return docs[:top_k]
+
+    ranked = RerankPipeline("x", retriever, rerank, top_k=2, candidate_k=3).retrieve("問い")
+    assert retriever.calls[0]["top_k"] == 3
+    assert seen == {"query": "問い", "n": 3, "top_k": 2}
+    assert len(ranked) == 2
+
+
+def test_rerank_pipeline_skips_the_reranker_when_nothing_was_retrieved():
+    from jev_rag.pipelines import RerankPipeline
+
+    def rerank(query, docs, top_k):
+        raise AssertionError("must not be called")
+
+    assert RerankPipeline("x", StubRetriever([]), rerank, top_k=2).retrieve("問い") == []

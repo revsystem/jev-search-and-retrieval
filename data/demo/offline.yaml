@@ -19,6 +19,11 @@ corpus:
     section: 第1節　生成AIの動向
     topic: ai
     text: 我が国の個人における生成AIの利用経験は26.7%であり、前年の9.1%から17.6ポイント上昇した。
+  - chunk_id: c13
+    page: 12
+    section: 参考　主要指標の推移
+    topic: ai
+    text: 生成AIの個人利用経験率は26.7%（前年9.1%、17.6ポイント増）。
   - chunk_id: c03
     page: 3
     section: 第1節　生成AIの動向
@@ -74,10 +79,11 @@ queries:
   - query_id: d1
     topic: ai
     question: 生成AIの利用率は前年と比べてどう変化したか
-    qrels: {c02: 3, c04: 2, c01: 1, c03: 1, c05: 1}
+    qrels: {c02: 3, c13: 3, c04: 2, c01: 1, c03: 1, c05: 1}
     jev:
-      relevance: {c02: 0.97, c04: 0.71, c01: 0.06, c03: 0.04, c05: 0.09, c06: 0.12}
-      score: {c02: 3.0, c04: 2.2, c01: 0.5, c03: 0.3, c05: 0.6, c06: 0.7}
+      relevance: {c02: 0.97, c13: 0.93, c04: 0.71, c01: 0.06, c03: 0.04, c05: 0.09, c06: 0.12}
+      score: {c02: 3.0, c13: 2.9, c04: 2.2, c01: 0.5, c03: 0.3, c05: 0.6, c06: 0.7}
+      redundant: {c13: 0.94}
   - query_id: d2
     topic: economy
     question: 企業が生成AIを導入する際の課題は何か

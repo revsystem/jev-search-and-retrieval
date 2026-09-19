@@ -8,6 +8,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import Any, Protocol
 
 from jev_rag.evaluation import RetrievedDoc
@@ -27,14 +28,44 @@ class CrossEncoder(Protocol):
 
 
 class BaselinePipeline:
-    name = "baseline"
+    """Whatever the retriever returns, untouched.
 
-    def __init__(self, retriever: Retriever, top_k: int = 5) -> None:
+    The retriever decides which use case this is: the embedding store for the
+    classic baseline, ``JevRetriever`` for retrieval with no embeddings, or
+    ``HybridRetriever`` for embeddings supplemented by Jev.
+    """
+
+    def __init__(self, retriever: Retriever, top_k: int = 5, name: str = "baseline") -> None:
         self.retriever = retriever
         self.top_k = top_k
+        self.name = name
 
     def retrieve(self, query: str) -> list[RetrievedDoc]:
         return self.retriever.search(query, top_k=self.top_k)
+
+
+class RerankPipeline:
+    """Overfetch from the retriever, then hand the shortlist to one reranker."""
+
+    def __init__(
+        self,
+        name: str,
+        retriever: Retriever,
+        rerank: Callable[[str, list[RetrievedDoc], int], list[RetrievedDoc]],
+        top_k: int = 5,
+        candidate_k: int = 30,
+    ) -> None:
+        self.name = name
+        self.retriever = retriever
+        self._rerank = rerank
+        self.top_k = top_k
+        self.candidate_k = candidate_k
+
+    def retrieve(self, query: str) -> list[RetrievedDoc]:
+        candidates = self.retriever.search(query, top_k=self.candidate_k)
+        if not candidates:
+            return []
+        return self._rerank(query, candidates, self.top_k)
 
 
 class ClassicRerankPipeline:

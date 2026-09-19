@@ -25,8 +25,13 @@ from jev_rag.evaluation import (
     score_ranking,
 )
 from jev_rag.jev.client import JevClient
+from jev_rag.jev.context import ContextSelector
+from jev_rag.jev.crossencode import CrossEncoder
 from jev_rag.jev.enrich import ChunkEnricher
-from jev_rag.pipelines import BaselinePipeline, JevPipeline
+from jev_rag.jev.pairwise import PairwiseReranker
+from jev_rag.jev.rerank import JevReranker
+from jev_rag.jev.retrieval import HybridRetriever, JevRetriever
+from jev_rag.pipelines import BaselinePipeline, JevPipeline, RerankPipeline
 from jev_rag.vector_store import EmbeddingRetriever, InMemoryVectorStore
 
 FIXTURE = Path(__file__).resolve().parents[2] / "data" / "demo" / "offline.yaml"
@@ -84,6 +89,12 @@ class FixtureTransport:
             answers = self._enrichment(state, questions)
         elif "single_topic" in questions:
             answers = self._plan(state, questions)
+        elif "candidate" in state:
+            answers = self._cross_encode(state, questions)
+        elif any(key.endswith(("__usefulness", "__redundant")) for key in questions):
+            answers = self._context(state, questions)
+        elif all(q["type"] == "choice" for q in questions.values()):
+            answers = self._pairwise(state, questions)
         else:
             answers = self._relevance(state, questions)
         return {"model": self.model, "answers": answers, "usage": {"input_tokens": 0}}
@@ -125,6 +136,50 @@ class FixtureTransport:
             "single_topic": {"type": "noul", "noul": 0.9},
         }
 
+    def _cross_encode(self, state: dict, questions: dict) -> dict[str, Any]:
+        entry = self._query_entry(state["query"])["jev"]
+        chunk = self._chunk_entry(state["candidate"])["chunk_id"]
+        answers: dict[str, Any] = {}
+        if "relevance" in questions:
+            answers["relevance"] = {
+                "type": "noul",
+                "noul": entry["relevance"].get(chunk, 0.05),
+            }
+        if "grade" in questions:
+            answers["grade"] = _score(
+                entry["score"].get(chunk, 0.2), questions["grade"]["criteria"], 0.8
+            )
+        return answers
+
+    def _context(self, state: dict, questions: dict) -> dict[str, Any]:
+        entry = self._query_entry(state["query"])["jev"]
+        redundant = entry.get("redundant") or {}
+        answers: dict[str, Any] = {}
+        for key, question in questions.items():
+            chunk, _, kind = key.rpartition("__")
+            if kind == "usefulness":
+                answers[key] = _score(entry["score"].get(chunk, 0.2), question["criteria"], 0.8)
+            else:
+                answers[key] = {"type": "noul", "noul": redundant.get(chunk, 0.05)}
+        return answers
+
+    def _pairwise(self, state: dict, questions: dict) -> dict[str, Any]:
+        entry = self._query_entry(state["query"])["jev"]
+        answers: dict[str, Any] = {}
+        for key, question in questions.items():
+            left, right = list(question["criteria"])
+            left_p, right_p = _pair_probabilities(
+                entry["relevance"].get(left, 0.05), entry["relevance"].get(right, 0.05)
+            )
+            winner, confidence = (left, left_p) if left_p >= right_p else (right, right_p)
+            answers[key] = {
+                "type": "choice",
+                "choice": winner,
+                "probabilities": {left: left_p, right: right_p},
+                "confidence": confidence,
+            }
+        return answers
+
     def _relevance(self, state: dict, questions: dict) -> dict[str, Any]:
         entry = self._query_entry(state["query"])["jev"]
         answers: dict[str, Any] = {}
@@ -134,6 +189,14 @@ class FixtureTransport:
             else:
                 answers[key] = _score(entry["score"].get(key, 0.2), question["criteria"], 0.8)
         return answers
+
+
+def _pair_probabilities(left_value: float, right_value: float) -> tuple[float, float]:
+    """Turn two pointwise relevance values into a calibrated pairwise split."""
+    total = left_value + right_value
+    if total <= 0:
+        return 0.5, 0.5
+    return left_value / total, right_value / total
 
 
 def _choice(winner: str, options: dict[str, Any], confidence: float) -> dict[str, Any]:
@@ -166,7 +229,65 @@ def _build_store(embedder: LexicalEmbedder, keys, texts, metadata) -> InMemoryVe
     return store
 
 
-def run(path: str | Path = FIXTURE, top_k: int = 5) -> str:
+def _pipelines(chunks, client, plain, enriched_retriever, top_k):
+    """One pipeline per use case on the official search and retrieval map."""
+    candidate_k = len(chunks)
+    reranker = JevReranker(client)
+    pairwise = PairwiseReranker(client)
+    cross = CrossEncoder(client, with_grade=True)
+
+    def staged(name, rerank):
+        return RerankPipeline(name, plain, rerank, top_k=top_k, candidate_k=candidate_k)
+
+    return {
+        # the classic pipeline the others are measured against
+        "baseline": BaselinePipeline(plain, top_k=top_k),
+        # replace embeddings
+        "jev_only": BaselinePipeline(JevRetriever(client, chunks), top_k=top_k, name="jev_only"),
+        # supplement embeddings
+        "jev_hybrid": BaselinePipeline(
+            HybridRetriever(plain, client, candidate_k=candidate_k),
+            top_k=top_k,
+            name="jev_hybrid",
+        ),
+        # score query-to-candidate relevance
+        "jev_noul": staged("jev_noul", reranker.noul_rerank),
+        # rerank with pairwise comparisons
+        "jev_pairwise": staged("jev_pairwise", pairwise.rerank),
+        # cross-encode query and candidate
+        "jev_crossencode": staged("jev_crossencode", cross.rerank),
+        # enriched embeddings, planned metadata filter, filter then score fusion
+        "jev_full": JevPipeline(
+            enriched_retriever,
+            client,
+            top_k=top_k,
+            candidate_k=candidate_k,
+            plan_query=True,
+        ),
+    }
+
+
+def _context_report(client, pipeline, queries, budget_chars: int) -> list[str]:
+    """Use case: select useful context for downstream AI workflows."""
+    selector = ContextSelector(client, budget_chars=budget_chars)
+    lines = [
+        f"文脈選択（予算 {budget_chars} 文字、入力は jev_noul の上位6件）:",
+        "| query | 候補 | 採用 | 文字数 | 除外理由 |",
+        "|---|---|---|---|---|",
+    ]
+    for query in queries:
+        candidates = pipeline.retrieve(query.question)[:6]
+        selection = selector.select(query.question, candidates)
+        dropped = ", ".join(f"{cid}:{why}" for cid, why in sorted(selection.reasons.items()))
+        before = sum(len(doc.text) for doc in candidates)
+        lines.append(
+            f"| {query.query_id} | {len(candidates)} | "
+            f"{len(selection.selected)} | {before} -> {selection.used_chars} | {dropped or '-'} |"
+        )
+    return lines
+
+
+def run(path: str | Path = FIXTURE, top_k: int = 5, budget_chars: int = 200) -> str:
     fixture = load_fixture(path)
     chunks = [
         Chunk(chunk_id=e["chunk_id"], page=e["page"], section=e["section"], text=e["text"])
@@ -183,43 +304,36 @@ def run(path: str | Path = FIXTURE, top_k: int = 5) -> str:
     embedder = LexicalEmbedder(
         [c.embedding_text() for c in chunks] + [e.embedding_text() for e in enriched]
     )
-    plain_store = _build_store(
+    plain = EmbeddingRetriever(
         embedder,
-        [c.chunk_id for c in chunks],
-        [c.embedding_text() for c in chunks],
-        [{**c.metadata(), "text": c.text} for c in chunks],
-    )
-    enriched_store = _build_store(
-        embedder,
-        [e.chunk.chunk_id for e in enriched],
-        [e.embedding_text() for e in enriched],
-        [{**e.metadata(), "text": e.chunk.text} for e in enriched],
-    )
-
-    plain = EmbeddingRetriever(embedder, plain_store)
-    enriched_retriever = EmbeddingRetriever(embedder, enriched_store)
-    candidate_k = len(chunks)
-
-    pipelines = {
-        "baseline": BaselinePipeline(plain, top_k=top_k),
-        "baseline_enriched": BaselinePipeline(enriched_retriever, top_k=top_k),
-        "jev_rerank": JevPipeline(plain, client, top_k=top_k, candidate_k=candidate_k),
-        "jev_full": JevPipeline(
-            enriched_retriever, client, top_k=top_k, candidate_k=candidate_k, plan_query=True
+        _build_store(
+            embedder,
+            [c.chunk_id for c in chunks],
+            [c.embedding_text() for c in chunks],
+            [{**c.metadata(), "text": c.text} for c in chunks],
         ),
-    }
+    )
+    enriched_retriever = EmbeddingRetriever(
+        embedder,
+        _build_store(
+            embedder,
+            [e.chunk.chunk_id for e in enriched],
+            [e.embedding_text() for e in enriched],
+            [{**e.metadata(), "text": e.chunk.text} for e in enriched],
+        ),
+    )
 
+    pipelines = _pipelines(chunks, client, plain, enriched_retriever, top_k)
     results: dict[str, dict[str, float]] = {}
     traces: list[str] = []
     for name, pipeline in pipelines.items():
         per_query = []
         for query in queries:
             ranked = pipeline.retrieve(query.question)
-            qrels = build_qrels(query, chunks)
-            per_query.append(score_ranking(ranked, qrels, k=top_k))
-            if name in ("baseline", "jev_full"):
+            per_query.append(score_ranking(ranked, build_qrels(query, chunks), k=top_k))
+            if name in ("baseline", "jev_noul"):
                 order = " > ".join(doc.chunk_id for doc in ranked[:3])
-                traces.append(f"  {query.query_id} {name:<18} {order}")
+                traces.append(f"  {query.query_id} {name:<16} {order}")
         results[name] = mean_metrics(per_query)
 
     metrics = [
@@ -229,15 +343,16 @@ def run(path: str | Path = FIXTURE, top_k: int = 5) -> str:
         f"precision@{top_k}",
         "mrr",
     ]
-    table = format_table(compare(results, baseline="baseline"), metrics)
     return "\n".join(
         [
-            "オフラインデモ（合成コーパス12件 / クエリ4件）",
+            f"オフラインデモ（合成コーパス{len(chunks)}件 / クエリ{len(queries)}件）",
             "Jevの回答は台本化したフィクスチャ。ハーネスの動作確認であり、Jevの性能評価ではない。",
             "",
-            table,
+            format_table(compare(results, baseline="baseline"), metrics),
             "",
             "上位3件の並び:",
             *sorted(traces),
+            "",
+            *_context_report(client, pipelines["jev_noul"], queries, budget_chars),
         ]
     )
