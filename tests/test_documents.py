@@ -3,7 +3,7 @@ from jev_rag.documents import Chunk, chunk_pages, normalise_japanese_text
 
 def test_normalise_collapses_pdf_layout_noise():
     raw = "第 1 節　 生成 AI の\n動向\n\n\n　ここでは、"
-    assert normalise_japanese_text(raw) == "第 1 節 生成 AI の動向\n\nここでは、"
+    assert normalise_japanese_text(raw) == "第1節生成AIの動向\n\nここでは、"
 
 
 def test_normalise_joins_japanese_lines_without_inserting_spaces():
@@ -43,7 +43,7 @@ def test_blank_pages_are_skipped():
 def test_section_heading_is_carried_forward_into_later_chunks():
     pages = {1: "第2節　データ流通\n" + "本" * 900}
     chunks = chunk_pages(pages, chunk_size=400, overlap=50)
-    assert all(c.section == "第2節　データ流通" for c in chunks)
+    assert all(c.section == "第2節データ流通" for c in chunks)
 
 
 def test_embedding_text_prefixes_provenance_for_retrievability():
@@ -72,7 +72,12 @@ def test_normalisation_leaves_ordinary_japanese_untouched():
     )
 
 
-def test_the_raw_section_heading_is_kept_verbatim():
-    # the heading is read before normalisation, so it keeps its ideographic space
-    chunks = chunk_pages({1: "第2節　データ流通\n" + "本" * 200}, chunk_size=400, overlap=50)
-    assert chunks[0].section == "第2節　データ流通"
+def test_the_section_heading_is_normalised_like_the_body():
+    # a section that kept its ideographic space could never be compared with
+    # the body text or used as a metadata filter value
+    chunks = chunk_pages({1: "第2節\u3000データ流通\n" + "本" * 200}, chunk_size=400, overlap=50)
+    assert chunks[0].section == "第2節データ流通"
+
+
+def test_a_page_of_one_repeated_character_is_not_halved_as_doubled_text():
+    assert len(normalise_japanese_text("あ" * 1200)) == 1200
