@@ -67,7 +67,30 @@ PIPELINE_NAMES = [
 ]
 
 
-def _build_pipelines(names: list[str], settings: Settings) -> dict:
+OFFLINE_PIPELINES = {"baseline"}
+
+
+def _offline_retriever(chunks):
+    """Lexical stand-in for Cohere Embed v4, for calibrating the eval set.
+
+    It shares the weakness the comparison is about — wording overlap beats
+    answering the question — so a baseline measured with it is indicative of
+    the label quality, not of the embedding model.
+    """
+    from jev_rag.demo import LexicalEmbedder
+    from jev_rag.vector_store import EmbeddingRetriever, InMemoryVectorStore
+
+    embedder = LexicalEmbedder([c.embedding_text() for c in chunks])
+    store = InMemoryVectorStore()
+    store.put(
+        [c.chunk_id for c in chunks],
+        embedder.embed_documents([c.embedding_text() for c in chunks]),
+        [{**c.metadata(), "text": c.text} for c in chunks],
+    )
+    return EmbeddingRetriever(embedder, store)
+
+
+def _build_pipelines(names: list[str], settings: Settings, offline: bool = False) -> dict:
     from jev_rag.bedrock import BedrockReranker
     from jev_rag.jev.crossencode import CrossEncoder
     from jev_rag.jev.pairwise import PairwiseReranker
@@ -84,8 +107,18 @@ def _build_pipelines(names: list[str], settings: Settings) -> dict:
     if unknown:
         raise SystemExit(f"未知のパイプライン: {sorted(unknown)}（利用可能: {PIPELINE_NAMES}）")
 
-    retriever = _build_retriever(settings)
-    client = settings.jev.build_client() if any(n.startswith("jev") for n in names) else None
+    if offline:
+        unsupported = set(names) - OFFLINE_PIPELINES
+        if unsupported:
+            raise SystemExit(
+                f"--offline-embeddings で実行できるのは {sorted(OFFLINE_PIPELINES)} のみ。"
+                f"{sorted(unsupported)} は Bedrock か Jev の認証情報が要る。"
+            )
+        retriever = _offline_retriever(_load_chunks())
+        client = None
+    else:
+        retriever = _build_retriever(settings)
+        client = settings.jev.build_client() if any(n.startswith("jev") for n in names) else None
 
     def staged(name, rerank):
         return RerankPipeline(
@@ -174,7 +207,10 @@ def cmd_evaluate(args: argparse.Namespace) -> int:
     settings.top_k = args.top_k
     corpus = _load_chunks()
     queries = load_queries(args.queries)
-    pipelines = _build_pipelines(args.pipelines.split(","), settings)
+    names = args.pipelines.split(",")
+    if args.offline_embeddings and args.pipelines == evaluate_default():
+        names = sorted(OFFLINE_PIPELINES)
+    pipelines = _build_pipelines(names, settings, offline=args.offline_embeddings)
 
     results = {}
     for name, pipeline in pipelines.items():
@@ -193,6 +229,10 @@ def cmd_evaluate(args: argparse.Namespace) -> int:
     ]
     print(format_table(compare(results, baseline=args.baseline), metrics))
     return 0
+
+
+def evaluate_default() -> str:
+    return "baseline,classic_rerank,jev_noul,jev_pairwise,jev_crossencode,jev_full"
 
 
 def cmd_labels(args: argparse.Namespace) -> int:
@@ -305,8 +345,15 @@ def main(argv: list[str] | None = None) -> int:
     evaluate.add_argument("--queries", default="data/eval/queries.yaml")
     evaluate.add_argument(
         "--pipelines",
-        default="baseline,classic_rerank,jev_noul,jev_pairwise,jev_crossencode,jev_full",
+        default=evaluate_default(),
         help=f"カンマ区切り。利用可能: {','.join(PIPELINE_NAMES)}",
+    )
+    evaluate.add_argument(
+        "--offline-embeddings",
+        action="store_true",
+        help=(
+            "Bedrockの代わりに字句ベースの代用埋め込みで baseline だけを測る（正解ラベルの較正用）"
+        ),
     )
     evaluate.add_argument("--baseline", default="baseline")
     evaluate.add_argument("--top-k", type=int, default=5)

@@ -43,11 +43,12 @@ def test_unknown_pipeline_name_is_rejected():
         _build_pipelines(["nope"], Settings())
 
 
-def test_evaluate_without_an_ingested_corpus_fails_with_a_hint():
-    from jev_rag.cli import _load_chunks
+def test_evaluate_without_an_ingested_corpus_fails_with_a_hint(tmp_path, monkeypatch):
+    from jev_rag import cli
 
+    monkeypatch.setattr(cli, "CHUNK_CACHE", tmp_path / "missing.jsonl")
     with pytest.raises(SystemExit, match="ingest"):
-        _load_chunks()
+        cli._load_chunks()
 
 
 def test_an_unknown_subcommand_is_rejected():
@@ -148,3 +149,44 @@ def test_labels_is_quiet_about_a_well_calibrated_query(tmp_path, capsys, monkeyp
     main(["labels", "--queries", str(queries)])
     out = capsys.readouterr().out
     assert "要調整" not in out and "過剰マッチ" not in out
+
+
+def test_offline_evaluation_runs_the_baseline_without_credentials(tmp_path, capsys, monkeypatch):
+    from jev_rag import cli
+
+    corpus = [
+        "生成AIの利用経験は58.8%であった。前年から上昇した。",
+        "トラヒックの話であって関係がない。",
+    ]
+    monkeypatch.setattr(cli, "CHUNK_CACHE", _write_corpus(tmp_path, corpus))
+    queries = _write_queries(
+        tmp_path,
+        "queries:\n  - query_id: q1\n    question: 生成AIの利用経験率は\n    rules:\n"
+        '      - {all: ["生成AI", "利用経験"], min_sentences: 2, grade: 3}\n',
+    )
+    argv = ["evaluate", "--offline-embeddings", "--queries", str(queries), "--top-k", "1"]
+    assert main(argv) == 0
+    out = capsys.readouterr().out
+    assert "baseline" in out and "ndcg@1" in out
+
+
+def test_offline_evaluation_refuses_a_pipeline_that_needs_jev(tmp_path, monkeypatch):
+    from jev_rag import cli
+
+    monkeypatch.setattr(cli, "CHUNK_CACHE", _write_corpus(tmp_path, ["本文"]))
+    queries = _write_queries(
+        tmp_path,
+        "queries:\n  - query_id: q1\n    question: q\n    rules:\n"
+        '      - {all: ["本文"], grade: 3}\n',
+    )
+    with pytest.raises(SystemExit, match="offline"):
+        main(
+            [
+                "evaluate",
+                "--offline-embeddings",
+                "--pipelines",
+                "jev_noul",
+                "--queries",
+                str(queries),
+            ]
+        )

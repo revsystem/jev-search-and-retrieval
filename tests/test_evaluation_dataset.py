@@ -141,3 +141,39 @@ def test_the_rules_list_and_the_shorthand_fields_can_be_combined():
 def test_a_rules_list_alone_satisfies_the_labelling_requirement():
     query = EvalQuery(query_id="q", question="q", rules=[{"all": ["生成AI"], "grade": 2}])
     assert build_qrels(query, CORPUS) == {"c1": 2, "c2": 2}
+
+
+def test_min_sentences_separates_prose_from_a_chart_dump():
+    # a chart dump carries figures but no sentences, so it cannot be quoted as
+    # evidence even though it contains the numbers
+    corpus = [
+        chunk("prose", "利用頻度について調査した。ほぼ毎日が39.2%であった。"),
+        chunk("chart", "図表 利用頻度 39.2 31.9 36.6 37.4 18.5 17.2"),
+    ]
+    query = EvalQuery(
+        query_id="q",
+        question="q",
+        rules=[{"all": ["利用頻度"], "min_sentences": 2, "grade": 3}],
+    )
+    assert build_qrels(query, corpus) == {"prose": 3}
+
+
+def test_min_sentences_counts_japanese_full_stops():
+    corpus = [chunk("one", "一文だけである。"), chunk("two", "一文目。二文目。")]
+    query = EvalQuery(query_id="q", question="q", rules=[{"min_sentences": 2, "grade": 3}])
+    assert build_qrels(query, corpus) == {"two": 3}
+
+
+def test_min_sentences_combines_with_the_other_conditions():
+    corpus = [chunk("hit", "生成AIの利用は26.7%だった。前年から上昇した。")]
+    query = EvalQuery(
+        query_id="q",
+        question="q",
+        rules=[{"all": ["生成AI"], "regex": r"[0-9]+\.[0-9]+", "min_sentences": 2, "grade": 3}],
+    )
+    assert build_qrels(query, corpus) == {"hit": 3}
+
+
+def test_min_sentences_alone_counts_as_a_labelling_rule():
+    query = EvalQuery(query_id="q", question="q", rules=[{"min_sentences": 1, "grade": 1}])
+    assert build_qrels(query, CORPUS)

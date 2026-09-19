@@ -98,7 +98,14 @@ class EvalQuery:
         return [rule for rule in (self.relevant, self.partial) if rule] + list(self.rules)
 
 
+# Chart data extracted from this kind of PDF carries the figures but no
+# sentences, so it cannot be quoted as evidence however relevant its numbers.
+SENTENCE_END = "。"
+
+
 def _matches(rule: dict[str, Any], text: str, pattern: re.Pattern | None) -> bool:
+    if text.count(SENTENCE_END) < int(rule.get("min_sentences", 0)):
+        return False
     required = rule.get("all") or []
     optional = rule.get("any") or []
     forbidden = rule.get("none") or []
