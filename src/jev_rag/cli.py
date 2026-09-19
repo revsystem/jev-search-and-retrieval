@@ -10,6 +10,7 @@ from pathlib import Path
 from jev_rag.config import Settings
 from jev_rag.documents import Chunk, chunk_pages, download_pdf, load_pdf
 from jev_rag.evaluation import (
+    EVIDENCE_GRADE,
     build_qrels,
     compare,
     format_table,
@@ -195,15 +196,38 @@ def cmd_evaluate(args: argparse.Namespace) -> int:
 
 
 def cmd_labels(args: argparse.Namespace) -> int:
-    """Report how many chunks each keyword rule matches, to calibrate the eval set."""
+    """Report how many chunks each rule matches, to calibrate the eval set.
+
+    Both directions matter. A rule matching nothing makes a query useless, and a
+    rule matching most of the corpus is worse than useless: it inflates the
+    grade-3 set that strict_ndcg is computed over, so the metric stops
+    distinguishing anything.
+    """
     corpus = _load_chunks()
     print(f"corpus: {len(corpus)} チャンク\n")
+
+    seen_partial = False
     for query in load_queries(args.queries):
         qrels = build_qrels(query, corpus)
-        grades = sorted({grade for grade in qrels.values()}, reverse=True)
+        grades = sorted(set(qrels.values()), reverse=True)
         counts = ", ".join(f"grade{g}={sum(1 for v in qrels.values() if v == g)}" for g in grades)
-        flag = "  <-- 要調整" if not qrels or max(qrels.values(), default=0) < 2 else ""
-        print(f"{query.query_id}  {counts or '該当なし'}{flag}  {query.question}")
+        top = sum(1 for grade in qrels.values() if grade >= 3)
+        seen_partial = seen_partial or any(grade == 2 for grade in qrels.values())
+
+        flags = []
+        if not qrels or max(qrels.values(), default=0) < EVIDENCE_GRADE:
+            flags.append("要調整（根拠となるチャンクなし）")
+        if corpus and top / len(corpus) > args.max_share:
+            flags.append(f"過剰マッチ（grade3がコーパスの{top / len(corpus):.0%}）")
+        suffix = "  <-- " + " / ".join(flags) if flags else ""
+        print(f"{query.query_id}  {counts or '該当なし'}{suffix}  {query.question}")
+
+    if not seen_partial:
+        print(
+            f"\n注意: grade 2 のラベルがどのクエリにも無い。recall / precision / mrr は"
+            f" grade {EVIDENCE_GRADE} 以上をしきい値にしているため、"
+            "これらは実質 grade 3 のみで決まっている。"
+        )
     return 0
 
 
@@ -290,6 +314,12 @@ def main(argv: list[str] | None = None) -> int:
 
     labels = sub.add_parser("labels", help="キーワードルールのマッチ件数を確認する")
     labels.add_argument("--queries", default="data/eval/queries.yaml")
+    labels.add_argument(
+        "--max-share",
+        type=float,
+        default=0.10,
+        help="grade3がコーパスのこの割合を超えたら過剰マッチとして警告する",
+    )
     labels.set_defaults(func=cmd_labels)
 
     ask = sub.add_parser("ask", help="検索して GPT-5.6 Luna で回答を生成する")

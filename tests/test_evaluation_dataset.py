@@ -69,3 +69,75 @@ def test_binary_metrics_ignore_merely_topical_chunks():
     assert scores["precision@1"] == 0.0
     # ... but nDCG still credits its small graded gain
     assert scores["ndcg@1"] > 0.0
+
+
+def test_a_regex_rule_can_demand_a_number_next_to_a_unit():
+    # a bare "%" matches almost every page of a statistics whitepaper; requiring
+    # a number in front of it is what actually identifies a reported figure
+    corpus = [
+        chunk("hit", "利用率は26.7%であった。"),
+        chunk("miss", "割合(%)を示す図表である。"),
+    ]
+    query = EvalQuery(
+        query_id="q",
+        question="q",
+        relevant={"regex": r"\d+(\.\d+)?\s*%", "grade": 3},
+    )
+    assert build_qrels(query, corpus) == {"hit": 3}
+
+
+def test_a_regex_rule_combines_with_keyword_conditions():
+    corpus = [
+        chunk("both", "生成AIの利用率は26.7%であった。"),
+        chunk("number_only", "契約数は38.0%増加した。"),
+    ]
+    query = EvalQuery(
+        query_id="q",
+        question="q",
+        relevant={"all": ["生成AI"], "regex": r"\d+(\.\d+)?\s*%", "grade": 3},
+    )
+    assert build_qrels(query, corpus) == {"both": 3}
+
+
+def test_an_invalid_regex_is_reported_against_its_query():
+    query = EvalQuery(query_id="q07", question="q", relevant={"regex": "(", "grade": 3})
+    with pytest.raises(ValueError, match="q07"):
+        build_qrels(query, CORPUS)
+
+
+def test_a_regex_only_rule_counts_as_a_labelling_rule():
+    query = EvalQuery(query_id="q", question="q", relevant={"regex": "生成AI", "grade": 2})
+    assert build_qrels(query, CORPUS)
+
+
+def test_a_query_can_declare_more_than_two_grades():
+    corpus = [
+        chunk("direct", "生成AIの利用率は26.7%であった。"),
+        chunk("partial_evidence", "生成AIの利用は拡大している。"),
+        chunk("topical", "生成AIとは何かを説明する。"),
+    ]
+    query = EvalQuery(
+        query_id="q",
+        question="q",
+        rules=[
+            {"all": ["生成AI", "利用"], "regex": r"\d+(\.\d+)?\s*%", "grade": 3},
+            {"all": ["生成AI", "利用"], "grade": 2},
+            {"all": ["生成AI"], "grade": 1},
+        ],
+    )
+    assert build_qrels(query, corpus) == {"direct": 3, "partial_evidence": 2, "topical": 1}
+
+
+def test_the_rules_list_and_the_shorthand_fields_can_be_combined():
+    query = EvalQuery(
+        query_id="q",
+        question="q",
+        relevant={"all": ["生成AI", "利用率"], "grade": 3},
+        rules=[{"all": ["生成AI"], "grade": 1}],
+    )
+    assert build_qrels(query, CORPUS) == {"c1": 3, "c2": 1}
+
+
+def test_a_rules_list_alone_satisfies_the_labelling_requirement():
+    query = EvalQuery(query_id="q", question="q", rules=[{"all": ["生成AI"], "grade": 2}])
+    assert build_qrels(query, CORPUS) == {"c1": 2, "c2": 2}

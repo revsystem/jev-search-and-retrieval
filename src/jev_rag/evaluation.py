@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -88,11 +89,16 @@ class EvalQuery:
     question: str
     relevant: dict[str, Any] | None = None
     partial: dict[str, Any] | None = None
+    rules: list[dict[str, Any]] = field(default_factory=list)
     qrels: Qrels | None = None
     note: str = ""
 
+    def grading_rules(self) -> list[dict[str, Any]]:
+        """Every labelling rule, shorthand fields first then the explicit list."""
+        return [rule for rule in (self.relevant, self.partial) if rule] + list(self.rules)
 
-def _matches(rule: dict[str, Any], text: str) -> bool:
+
+def _matches(rule: dict[str, Any], text: str, pattern: re.Pattern | None) -> bool:
     required = rule.get("all") or []
     optional = rule.get("any") or []
     forbidden = rule.get("none") or []
@@ -100,7 +106,26 @@ def _matches(rule: dict[str, Any], text: str) -> bool:
         return False
     if not all(word in text for word in required):
         return False
+    if pattern is not None and not pattern.search(text):
+        return False
     return bool(any(word in text for word in optional)) if optional else True
+
+
+def _compile(rule: dict[str, Any], query_id: str) -> re.Pattern | None:
+    """A rule may demand a pattern as well as keywords.
+
+    A bare "%" matches nearly every page of a statistics whitepaper, so a rule
+    that means "reports a figure" needs to ask for a number beside the unit.
+    """
+    expression = rule.get("regex")
+    if not expression:
+        return None
+    try:
+        return re.compile(expression)
+    except re.error as error:
+        raise ValueError(
+            f"query {query_id!r} has an invalid regex {expression!r}: {error}"
+        ) from error
 
 
 def build_qrels(query: EvalQuery, corpus: list[Chunk]) -> Qrels:
@@ -108,13 +133,18 @@ def build_qrels(query: EvalQuery, corpus: list[Chunk]) -> Qrels:
     if query.qrels:
         return dict(query.qrels)
 
-    rules = [rule for rule in (query.relevant, query.partial) if rule]
+    rules = query.grading_rules()
     if not rules:
         raise ValueError(f"query {query.query_id!r} has neither explicit qrels nor keyword rules")
 
+    compiled = [(rule, _compile(rule, query.query_id)) for rule in rules]
     graded: Qrels = {}
     for chunk in corpus:
-        grades = [int(rule.get("grade", 1)) for rule in rules if _matches(rule, chunk.text)]
+        grades = [
+            int(rule.get("grade", 1))
+            for rule, pattern in compiled
+            if _matches(rule, chunk.text, pattern)
+        ]
         if grades:
             graded[chunk.chunk_id] = max(grades)
     return graded
