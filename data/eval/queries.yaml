@@ -1,0 +1,87 @@
+# 評価クエリと関連度ラベル。
+#
+# qrels をキーワードルールで表現しているのは、対象PDFのチャンク分割結果が
+# chunk_size / overlap の設定で変わるため、chunk_id を直接書くと再現できないから。
+# grade は 3=直接の根拠 / 2=部分的な根拠 / 1=話題は重なるが根拠にならない。
+#
+# 注意: 以下のルールは白書の一般的な語彙を前提に書いた初期値。実際のPDFを
+# 取り込んだあと `jev-rag labels` でマッチ件数を確認し、0件や過剰マッチの
+# ルールは対象文書に合わせて調整すること。LLMジャッジで作り直す場合は
+# `jev-rag label` を使う。
+queries:
+  - query_id: q01
+    question: 生成AIの利用率は前年と比べてどう変化したか
+    relevant:
+      all: ["生成AI"]
+      any: ["利用率", "利用状況", "％", "%"]
+      grade: 3
+    partial:
+      all: ["生成AI"]
+      grade: 1
+
+  - query_id: q02
+    question: 企業が生成AIを導入する際の課題として何が挙げられているか
+    relevant:
+      all: ["生成AI"]
+      any: ["課題", "懸念", "阻害", "リスク"]
+      grade: 3
+    partial:
+      any: ["企業", "導入"]
+      grade: 1
+
+  - query_id: q03
+    question: 個人のインターネット利用率は何％か
+    relevant:
+      all: ["インターネット"]
+      any: ["利用率", "％", "%"]
+      grade: 3
+    partial:
+      all: ["インターネット"]
+      grade: 1
+
+  - query_id: q04
+    question: 情報通信産業の市場規模はどの程度か
+    relevant:
+      any: ["市場規模", "名目国内生産額", "産業規模"]
+      grade: 3
+    partial:
+      all: ["情報通信産業"]
+      grade: 1
+
+  - query_id: q05
+    question: 偽・誤情報への対応として何が示されているか
+    relevant:
+      any: ["偽情報", "誤情報", "偽・誤情報"]
+      grade: 3
+    partial:
+      any: ["信頼性", "リテラシー"]
+      grade: 1
+
+  - query_id: q06
+    question: データ流通量やトラヒックはどれくらい増加しているか
+    relevant:
+      any: ["トラヒック", "通信量", "データ流通量"]
+      grade: 3
+    partial:
+      any: ["ブロードバンド", "回線"]
+      grade: 1
+
+  - query_id: q07
+    question: AI人材の不足について何が書かれているか
+    relevant:
+      all: ["人材"]
+      any: ["不足", "確保", "育成"]
+      grade: 3
+    partial:
+      all: ["人材"]
+      grade: 1
+
+  - query_id: q08
+    question: 諸外国と比較した日本の生成AI利用状況の特徴は
+    relevant:
+      all: ["生成AI"]
+      any: ["諸外国", "国際比較", "米国", "中国", "ドイツ"]
+      grade: 3
+    partial:
+      all: ["生成AI"]
+      grade: 1

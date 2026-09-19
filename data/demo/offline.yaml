@@ -1,0 +1,101 @@
+# オフラインデモ用の合成コーパスと、台本化したJevの判定値。
+#
+# 重要: ここに書かれた jev.relevance / jev.score は Jev が実際に返した値では
+# なく、「System One が正しく判定した場合に返るであろう値」を手で書いたもの。
+# したがってこのデモが示すのは比較ハーネスの配線が正しく動くことだけで、
+# Jev の実力を示す証拠ではない。実測は AI Gateway か TypeSafe API を繋いで
+# `jev-rag evaluate` で行うこと。
+#
+# コーパスは「語彙は重なるが根拠にならない断片」が語彙一致で上位に来る、
+# 実運用でよくある失敗形を再現するように作ってある。
+corpus:
+  - chunk_id: c01
+    page: 2
+    section: 第1節　生成AIの動向
+    topic: ai
+    text: 本節では生成AIの動向について整理する。生成AIの利用率や生成AIの活用状況を、生成AIに関する各種調査をもとに概観する。
+  - chunk_id: c02
+    page: 3
+    section: 第1節　生成AIの動向
+    topic: ai
+    text: 我が国の個人における生成AIの利用経験は26.7%であり、前年の9.1%から17.6ポイント上昇した。
+  - chunk_id: c03
+    page: 3
+    section: 第1節　生成AIの動向
+    topic: ai
+    text: 生成AIという用語は、文章や画像などのコンテンツを生成する人工知能の総称として用いられる。
+  - chunk_id: c04
+    page: 4
+    section: 第1節　生成AIの動向
+    topic: policy
+    text: 諸外国の個人の生成AI利用経験率は米国68.8%、中国81.2%、ドイツ59.2%であり、我が国は主要国の中で最も低い水準にとどまる。
+  - chunk_id: c05
+    page: 5
+    section: 第2節　企業におけるICT利活用
+    topic: economy
+    text: 企業における生成AIの活用方針について、方針を定めている企業の割合を業種別に示す。
+  - chunk_id: c06
+    page: 5
+    section: 第2節　企業におけるICT利活用
+    topic: economy
+    text: 企業が生成AIを導入する際の課題としては、社内のノウハウ不足を挙げる企業が48.2%と最も多く、次いで情報漏えいへの不安が41.5%であった。
+  - chunk_id: c07
+    page: 6
+    section: 第2節　企業におけるICT利活用
+    topic: economy
+    text: 情報通信産業の名目国内生産額は56.1兆円であり、全産業の5.2%を占める。
+  - chunk_id: c08
+    page: 7
+    section: 第3節　デジタル空間の信頼性
+    topic: security
+    text: デジタル空間における偽・誤情報の流通は、社会の分断を招くおそれがあると指摘されている。
+  - chunk_id: c09
+    page: 7
+    section: 第3節　デジタル空間の信頼性
+    topic: security
+    text: 偽・誤情報への対応として、プラットフォーム事業者による削除等の対応の透明化と、利用者の情報リテラシー向上の 両輪が求められる。
+  - chunk_id: c10
+    page: 8
+    section: 第4節　通信インフラ
+    topic: network
+    text: 我が国の固定系ブロードバンド契約者の総ダウンロードトラヒックは約38.0Tbpsに達し、前年同月比で12.4%増加した。
+  - chunk_id: c11
+    page: 8
+    section: 第4節　通信インフラ
+    topic: network
+    text: 本節ではトラヒックの動向を示す。トラヒックの増加要因やトラヒックの計測方法についても併せて述べる。
+  - chunk_id: c12
+    page: 9
+    section: 第5節　デジタル人材
+    topic: society
+    text: デジタル人材の不足感は依然として強く、AI人材が不足していると回答した企業は73.4%にのぼる。
+
+queries:
+  - query_id: d1
+    topic: ai
+    question: 生成AIの利用率は前年と比べてどう変化したか
+    qrels: {c02: 3, c04: 2, c01: 1, c03: 1, c05: 1}
+    jev:
+      relevance: {c02: 0.97, c04: 0.71, c01: 0.06, c03: 0.04, c05: 0.09, c06: 0.12}
+      score: {c02: 3.0, c04: 2.2, c01: 0.5, c03: 0.3, c05: 0.6, c06: 0.7}
+  - query_id: d2
+    topic: economy
+    question: 企業が生成AIを導入する際の課題は何か
+    qrels: {c06: 3, c05: 1, c01: 1, c03: 1}
+    jev:
+      relevance: {c06: 0.96, c05: 0.18, c01: 0.05, c03: 0.03, c02: 0.07, c12: 0.22}
+      score: {c06: 3.0, c05: 0.9, c01: 0.3, c03: 0.2, c02: 0.4, c12: 1.1}
+  - query_id: d3
+    topic: network
+    question: トラヒックはどれくらい増加しているか
+    qrels: {c10: 3, c11: 1}
+    jev:
+      relevance: {c10: 0.98, c11: 0.07, c07: 0.05, c08: 0.02}
+      score: {c10: 3.0, c11: 0.4, c07: 0.2, c08: 0.1}
+  - query_id: d4
+    topic: security
+    question: 偽・誤情報への対応として何が示されているか
+    qrels: {c09: 3, c08: 2}
+    jev:
+      relevance: {c09: 0.95, c08: 0.58, c10: 0.02, c12: 0.03}
+      score: {c09: 3.0, c08: 1.9, c10: 0.1, c12: 0.2}
