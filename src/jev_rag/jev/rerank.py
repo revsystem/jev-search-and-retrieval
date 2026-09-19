@@ -20,28 +20,13 @@ from dataclasses import replace
 
 from jev_rag.evaluation import RetrievedDoc
 from jev_rag.jev.client import JevClient
+from jev_rag.jev.prompts import (
+    NOUL_INSTRUCTION,
+    RELEVANCE_CRITERIA,
+    RELEVANCE_LEVELS,
+    SCORE_INSTRUCTION,
+)
 from jev_rag.jev.questions import Noul, NoulAnswer, Score, ScoreAnswer
-
-RELEVANCE_LEVELS = [
-    "無関係。クエリの主題とも参照先とも一致しない。",
-    "話題は重なるが、クエリへの回答根拠にはならない。",
-    "部分的な根拠を含む。回答の一部を裏づけるが単独では不十分。",
-    "直接的な根拠を含む。この記述だけでクエリに答えられる。",
-]
-
-SCORE_INSTRUCTION = (
-    'state.query に答えるための根拠として、state.candidates["{key}"] の有用性を判定してください。'
-    "話題が重なるだけの文章は低く、クエリが指す対象そのものを扱い数値・定義・事実を示す文章を高く評価します。"
-)
-
-NOUL_INSTRUCTION = (
-    'state.candidates["{key}"] は state.query に答えるための根拠として役に立ちますか。'
-)
-
-NOUL_CRITERIA = {
-    "true": "クエリが指す対象そのものを扱い、回答を裏づける事実・数値・定義を含む。",
-    "false": "話題が重なるだけ、参照先が異なる、または根拠となる情報を含まない。",
-}
 
 
 def min_max_normalise(values: list[float]) -> list[float]:
@@ -114,6 +99,42 @@ class JevReranker:
             doc.rank_delta = original_rank[doc.chunk_id] - new_rank
         return scored[:top_k] if top_k else scored
 
+    def noul_rerank(
+        self, query: str, docs: list[RetrievedDoc], top_k: int | None = None
+    ) -> list[RetrievedDoc]:
+        """Score query-to-candidate relevance and sort on the probability itself.
+
+        The documented pattern: a shortlist from embeddings or BM25, one Noul
+        per query-candidate pair, and a sort on the returned value. No
+        generative model is asked to invent a scale, and the vector score is
+        deliberately not fused in — use ``rerank`` when you want that.
+        """
+        if not docs:
+            return []
+
+        questions = {
+            doc.chunk_id: Noul(
+                NOUL_INSTRUCTION.format(key=doc.chunk_id), criteria=RELEVANCE_CRITERIA
+            )
+            for doc in docs
+        }
+        answers = self.client.evaluate(self._state(query, docs), questions)
+
+        original = {doc.chunk_id: position for position, doc in enumerate(docs)}
+        ranked = [
+            replace(
+                doc,
+                score=_as_noul(answers.get(doc.chunk_id)),
+                vector_score=doc.score,
+                jev_relevance=_as_noul(answers.get(doc.chunk_id)),
+            )
+            for doc in docs
+        ]
+        ranked.sort(key=lambda doc: doc.score, reverse=True)
+        for position, doc in enumerate(ranked):
+            doc.rank_delta = original[doc.chunk_id] - position
+        return ranked[:top_k] if top_k else ranked
+
     def relevance_filter(
         self, query: str, docs: list[RetrievedDoc], threshold: float = 0.2, keep_min: int = 1
     ) -> list[RetrievedDoc]:
@@ -122,7 +143,9 @@ class JevReranker:
             return []
 
         questions = {
-            doc.chunk_id: Noul(NOUL_INSTRUCTION.format(key=doc.chunk_id), criteria=NOUL_CRITERIA)
+            doc.chunk_id: Noul(
+                NOUL_INSTRUCTION.format(key=doc.chunk_id), criteria=RELEVANCE_CRITERIA
+            )
             for doc in docs
         }
         answers = self.client.evaluate(self._state(query, docs), questions)
