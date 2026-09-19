@@ -1,36 +1,51 @@
 # 従来RAG / rerank と Jev の比較
 
-総務省『情報通信白書』のPDFを対象に、Amazon Bedrock と S3 Vectors で組んだRAGに対して、TypeSafe の System One モデル Jev を検索・再ランキングに挟んだ場合との差を測るための実験リポジトリです。
+総務省『情報通信白書』のPDFを対象に、Amazon Bedrock と S3 Vectors で組んだRAGに対して、TypeSafe の System One モデル Jev を検索・再ランキングに挟んだ場合との差を測るための実験リポジトリです。実装は公式ドキュメントの Search and retrieval ユースケース5項目に1対1で対応させています。
+
+## 公式ユースケースとの対応
+
+| 公式ユースケース | 実装 | パイプライン名 | テスト |
+|---|---|---|---|
+| Replace or supplement embeddings in RAG pipelines with semantic search, scoring, and ranking | `jev/retrieval.py` の `JevRetriever` / `HybridRetriever` | `jev_only` / `jev_hybrid` | `tests/test_uc1_jev_retrieval.py` |
+| Score query-to-candidate relevance | `jev/rerank.py` の `noul_rerank` | `jev_noul` | `tests/test_uc2_relevance_scoring.py` |
+| Rerank results with pairwise comparisons | `jev/pairwise.py` の `PairwiseReranker` | `jev_pairwise` | `tests/test_uc3_pairwise.py` |
+| Cross-encode queries and candidates for higher precision | `jev/crossencode.py` の `CrossEncoder` | `jev_crossencode` | `tests/test_uc4_cross_encode.py` |
+| Select useful context for downstream AI workflows | `jev/context.py` の `ContextSelector` | `jev-rag ask --context-budget` | `tests/test_uc5_context_selection.py` |
+
+比較対象として、ベクトル検索のみの `baseline` と、Bedrock Rerank API の Cohere Rerank v3.5 を使う `classic_rerank` を置いています。これに加えて、索引時エンリッチとクエリ計画を重ねた `jev_full` があります。
+
+それぞれの設計の違いは次のとおりです。`jev_only` は埋め込みモデルを経路から完全に外し、コーパスを32問ずつのNoulで走査して確率で順位を付けます。インデックス規模ではなくコストで頭打ちになるので、1文書やメタデータで絞った範囲のように既に狭まったコーパス向けです。`jev_hybrid` は埋め込みを再現率の段、Jevを適合率の段として融合します。`jev_noul` は候補一覧を共有stateに置いて候補ごとにNoulを1問ずつ立てます。`jev_pairwise` は絶対尺度を避け、2候補のどちらが良いかというChoiceだけで順位を決めます。比較数が増える代わりに、リクエスト内の質問は並列評価されるため1ラウンドの実時間は1問とほぼ変わりません。`jev_crossencode` はペアごとにリクエストを分け、stateに他の候補を一切入れないことで隣接候補による汚染を避けます。
 
 ## 期待された成果物への回答
 
-3点の期待のうち、2点はそのまま実装でき、1点は前提が成り立ちません。先に書いておきます。
+クエリに対する関連度判定は Noul で実装しました。候補ごとに「この文書はクエリの根拠になるか」を独立した確率として返させ、閾値未満を捨てます。話題が重なるだけの断片が生成モデルに渡るのを防ぐのが目的です。`jev/rerank.py` の `relevance_filter` と `noul_rerank` です。
 
-クエリに対する関連度判定は Noul で実装しました。候補ごとに「この文書はクエリの根拠になるか」を独立した確率として返させ、閾値未満を捨てます。話題が重なるだけの断片が生成モデルに渡るのを防ぐのが目的です。`src/jev_rag/jev/rerank.py` の `relevance_filter` です。
+下位に沈んだ結果の引き上げは Score と Choice の両方で実装しました。`rerank` は4段階の証拠スケール（無関係 / 話題は重なるが根拠にならない / 部分的な根拠 / 直接の根拠）に候補を配置させ、小数点付きのスコアをベクトルスコアと重み付き融合します。`PairwiseReranker` は絶対尺度を使わず、勝率で並べ替えます。
 
-下位に沈んだ結果の引き上げは Score で実装しました。4段階の証拠スケール（無関係 / 話題は重なるが根拠にならない / 部分的な根拠 / 直接の根拠）に候補を配置させ、小数点付きのスコアで細かく順序を付け、ベクトルスコアと重み付き融合します。同ファイルの `rerank` です。融合する設計にしたのは、Jev を単独のリランカーとして使うより、意味検索の候補の上に重ねたほうが効く、という公開実験の報告に沿わせたためです。
-
-埋め込み精度の改善については、率直に言って Jev では実現できません。Jev は埋め込みモデルではなく、ベクトルそのものを出力しないので、Cohere Embed v4 が特定の文字列に対して返すベクトルを Jev が変えることはありません。このリポジトリで実装したのは、その代わりに成立する二つの間接的な改善です。索引時に Jev が各チャンクへ分野・記述種別・自己完結性・情報密度のラベルを付け、文脈依存の断片には節見出しを補ってから埋め込みに渡します（いわゆる contextual retrieval）。同じラベルは S3 Vectors のフィルタ可能メタデータになり、クエリ側でも Jev が分野を判定して、絞り込みが安全なときだけメタデータフィルタを掛けます。埋め込みモデルの精度ではなく、埋め込む文字列と検索範囲を変えることで検索精度を上げるアプローチです。`src/jev_rag/jev/enrich.py` にあります。
+埋め込みについては、公式ドキュメントが挙げているのは replace or supplement、つまり埋め込みによる検索段そのものをJevで置き換えるか補うかであって、埋め込みベクトルの生成ではありません。Jev はベクトルを出力しないので、Cohere Embed v4 が特定の文字列に対して返すベクトルをJevが変えることはできません。このリポジトリではその区別に沿って3通りを用意しています。`jev_only` は埋め込みを使わずJevだけで検索します。`jev_hybrid` は埋め込みの候補にJevの判定を重ねます。そして索引時エンリッチ（`jev/enrich.py`）では、Jevが各チャンクへ分野・記述種別・自己完結性・情報密度のラベルを付け、文脈依存の断片には節見出しを補ってから埋め込みに渡します。同じラベルは S3 Vectors のフィルタ可能メタデータになり、クエリ側でもJevが分野を判定して絞り込みが安全なときだけフィルタを掛けます。埋め込みモデルの精度ではなく、埋め込む文字列と検索範囲を変えることで検索精度を上げるアプローチです。
 
 ## 構成
 
-取り込みは PDF をページ単位で読み、日本語向けに正規化してから重なり付きのウィンドウに分割します。PDFの行折り返しは日本語では余計な空白になるため、前後がともに日本語文字なら空白を入れずに連結し、全角スペースと連続空行を畳んでいます。埋め込みは Bedrock 経由の Cohere Embed v4、ベクトルストアは S3 Vectors、回答生成は Bedrock Converse API 経由の GPT-5.6 Luna です。従来型リランカーの比較対象として Bedrock Rerank API の Cohere Rerank v3.5 を使います。
-
-比較するパイプラインは4本です。`baseline` はベクトル検索のみ、`classic_rerank` は候補30件を Cohere Rerank で並べ替え、`jev_rerank` は候補30件を Jev の Noul で絞り Score で並べ替え、`jev_full` はさらに索引時エンリッチとクエリ計画によるメタデータ絞り込みを加えます。
+取り込みは PDF をページ単位で読み、日本語向けに正規化してから重なり付きのウィンドウに分割します。PDFの行折り返しは日本語では余計な空白になるため、前後がともに日本語文字なら空白を入れずに連結し、全角スペースと連続空行を畳んでいます。埋め込みは Bedrock 経由の Cohere Embed v4、ベクトルストアは S3 Vectors、回答生成は Bedrock Converse API 経由の GPT-5.6 Luna です。
 
 ```
 src/jev_rag/
   documents.py     PDF読み込み、日本語正規化、チャンク分割
   bedrock.py       Cohere Embed v4 / Cohere Rerank v3.5 / GPT-5.6 Luna
   vector_store.py  S3 Vectors とオフライン用のインメモリ実装
-  pipelines.py     比較対象4本
+  pipelines.py     比較対象パイプライン
   evaluation.py    nDCG / Recall / Precision / MRR とキーワードルールによる正解付け
   demo.py          認証情報なしで動くオフラインデモ
   jev/
     questions.py   Noul / Choice / Score の型とレスポンス解析
     transport.py   AI Gateway 経路、TypeSafe 直接経路、オフライン用の偽経路
     client.py      32問ごとの分割と並列送信
-    rerank.py      関連度フィルタとスコアリング
+    prompts.py     判定の指示文と4段階スケール
+    retrieval.py   埋め込みの置き換えと併用
+    rerank.py      関連度スコアリングとスコア融合
+    pairwise.py    ペアワイズ比較
+    crossencode.py クエリと候補のクロスエンコード
+    context.py     下流ワークフローへ渡す文脈の選別
     enrich.py      索引時エンリッチとクエリ計画
 ```
 
@@ -50,7 +65,7 @@ uv pip install -e ".[dev]"
 cp .env.example .env   # 鍵とモデルIDを設定する
 ```
 
-認証情報なしで比較ハーネスの動作だけ確認するなら次のコマンドです。
+認証情報なしで全ユースケースの動作を確認するなら次のコマンドです。
 
 ```bash
 uv run jev-rag demo
@@ -61,8 +76,10 @@ uv run jev-rag demo
 ```bash
 uv run jev-rag ingest --enrich
 uv run jev-rag labels                   # 正解ルールのマッチ件数を確認する
-uv run jev-rag evaluate --top-k 5
-uv run jev-rag ask "生成AIの利用率は前年と比べてどう変化したか"
+uv run jev-rag evaluate --top-k 5 \
+  --pipelines baseline,classic_rerank,jev_only,jev_hybrid,jev_noul,jev_pairwise,jev_crossencode,jev_full
+uv run jev-rag ask "生成AIの利用率は前年と比べてどう変化したか" \
+  --pipeline jev_crossencode --context-budget 4000
 ```
 
 ## 評価設計
@@ -75,33 +92,47 @@ uv run jev-rag ask "生成AIの利用率は前年と比べてどう変化した�
 
 ## オフラインデモの結果
 
-`uv run jev-rag demo` は合成コーパス12件とクエリ4件で全パイプラインを動かします。
+`uv run jev-rag demo` は合成コーパス13件とクエリ4件で全ユースケースを動かします。
 
 ```
 | pipeline | ndcg@5 | strict_ndcg@5 | recall@5 | precision@5 | mrr |
 |---|---|---|---|---|---|
-| baseline | 0.862 | 0.815 | 1.000 | 0.300 | 0.750 |
-| baseline_enriched | 0.862 | 0.815 | 1.000 | 0.300 | 0.750 |
-| jev_rerank | 0.901 (+0.039) | 1.000 (+0.185) | 1.000 | 0.300 | 1.000 (+0.250) |
-| jev_full | 0.855 (-0.007) | 1.000 (+0.185) | 0.875 (-0.125) | 0.250 (-0.050) | 1.000 (+0.250) |
+| baseline | 0.867 | 0.831 | 1.000 | 0.350 | 0.750 |
+| jev_only | 0.972 (+0.105) | 1.000 (+0.169) | 1.000 | 0.350 | 1.000 (+0.250) |
+| jev_hybrid | 0.999 (+0.131) | 1.000 (+0.169) | 1.000 | 0.350 | 1.000 (+0.250) |
+| jev_noul | 0.972 (+0.105) | 1.000 (+0.169) | 1.000 | 0.350 | 1.000 (+0.250) |
+| jev_pairwise | 0.948 (+0.080) | 1.000 (+0.169) | 1.000 | 0.350 | 1.000 (+0.250) |
+| jev_crossencode | 0.972 (+0.105) | 1.000 (+0.169) | 1.000 | 0.350 | 1.000 (+0.250) |
+| jev_full | 0.892 (+0.024) | 1.000 (+0.169) | 0.917 (-0.083) | 0.300 (-0.050) | 1.000 (+0.250) |
+
+文脈選択（予算 200 文字、入力は jev_noul の上位6件）:
+| query | 候補 | 採用 | 文字数 | 除外理由 |
+|---|---|---|---|---|
+| d1 | 5 | 2 | 267 -> 118 | c05:not_useful, c06:not_useful, c13:redundant |
+| d2 | 5 | 2 | 272 -> 119 | c01:not_useful, c02:not_useful, c05:not_useful |
+| d3 | 5 | 1 | 243 -> 60 | c03:not_useful, c05:not_useful, c11:not_useful, c12:not_useful |
+| d4 | 5 | 2 | 263 -> 106 | c03:not_useful, c05:not_useful, c06:not_useful |
 ```
 
-ここで Jev が返す値は実際のモデル出力ではなく、`data/demo/offline.yaml` に手で書いた台本です。したがってこの表が示しているのは比較ハーネスの配線が正しいことだけで、Jev の実力の証拠ではありません。循環を隠さないためにフィクスチャは外出しにしてあります。
+ここで Jev が返す値は実際のモデル出力ではなく、`data/demo/offline.yaml` に手で書いた台本です。したがってこの表が示しているのは比較ハーネスの配線が正しいことだけで、Jev の実力の証拠ではありません。循環を隠さないためにフィクスチャは外出しにしてあります。台本は候補ごとの関連度を1か所に書き、ペアワイズの勝敗はそこから確率として導出しているので、5つの経路に別々の都合の良い数字を置くことはできない構造にしています。
 
-それでも読み取れることが3つあります。ベースラインは「本節では生成AIの動向について整理する。生成AIの利用率や生成AIの活用状況を…」のような、クエリ語を繰り返すだけで答えを含まない断片を1位に置き、実際の数値を含む断片を2位に沈めます。狙った失敗形が再現できています。Jev のスコアリングはそれを引き上げ、MRR が 0.750 から 1.000 に、直接の根拠だけを見る strict_nDCG が 0.815 から 1.000 になります。そして `jev_full` のメタデータ絞り込みは nDCG をわずかに下げます。分野フィルタが、別分野に分類された部分的な根拠（諸外国比較のチャンク）を候補から外してしまうためで、絞り込みには再現率を削るリスクがあることをハーネスが検出できています。
+それでも読み取れることがいくつかあります。ベースラインは「本節では生成AIの動向について整理する。生成AIの利用率や生成AIの活用状況を…」のような、クエリ語を繰り返すだけで答えを含まない断片を1位に置き、実際の数値を含む断片を沈めます。狙った失敗形が再現できています。Jevを挟んだ5経路はいずれもこれを引き上げ、直接の根拠だけを見る strict_nDCG が 0.831 から 1.000 に、MRR が 0.750 から 1.000 になります。
 
-オフラインの埋め込みは文字バイグラムの語彙一致に置き換えてあるため、索引時エンリッチの効果は `baseline_enriched` に現れていません。ヘッダを足しても同一分野の全チャンクに同じバイグラムが乗るだけで順序が変わらないからです。エンリッチの効果を測るには実際の埋め込みモデルが要ります。
+経路ごとの差も出ています。`jev_hybrid` が最も高いのは、ベクトル順位とJev判定が互いの誤りを打ち消すためで、Jev単独をリランカーとして使うより意味検索の候補に重ねたほうが効くという公開実験の報告と方向が一致します。`jev_pairwise` がやや低いのは、候補13件では総当たりが1リクエストの32問上限を超え、各候補3対戦のサンプリングに落ちるためで、対戦数と精度のトレードオフがそのまま出ています。`jev_full` のメタデータ絞り込みは再現率を下げます。分野フィルタが、別分野に分類された部分的な根拠（諸外国比較のチャンク）を候補から外してしまうためで、絞り込みには再現率を削るリスクがあることをハーネスが検出できています。
+
+文脈選択は、d1で近重複チャンク c13 を redundant として落としています。同じ統計を2回渡すのは予算の無駄であるだけでなく、生成モデルに誤った裏付け感を与えるため、順位付けとは別に落とす価値があります。
 
 ## 検証できていないこと
 
-この環境からは `docs.typesafe.ai`、`vercel.com`、`soumu.go.jp` のいずれにも到達できず、Jev の API キーも AWS の認証情報もありません。したがって次は未検証です。Jev への実リクエストは一度も送っていません。対象PDFの取り込みも行っていないため、チャンク分割の妥当性と評価クエリのキーワードルールは実データで確認できていません。Bedrock と S3 Vectors の呼び出しも実行していません。
+この環境からは `docs.typesafe.ai`、`vercel.com`、`soumu.go.jp`、`docs.aws.amazon.com` のいずれにも到達できません（組織のegressポリシーによるプロキシ側の403で、迂回はしていません）。Jev の API キーも AWS の認証情報もありません。したがって次は未検証です。Jev への実リクエストは一度も送っていません。対象PDFの取り込みも行っていないため、チャンク分割の妥当性と評価クエリのキーワードルールは実データで確認できていません。Bedrock と S3 Vectors の呼び出しも実行していません。
 
-Jev のリクエスト・レスポンス形式は公式ドキュメントに到達できなかったため、下記の二次資料から組み立てています。特に次の2点は実際に叩いて確認してください。AI Gateway の TypeSafe 互換エンドポイントで受け付けられる model id が `typesafe-ai/jev` か `jev-latest` か（`JEV_GATEWAY_MODEL` で切り替えられるようにしてあります）。もう1点は S3 Vectors のインデックス作成 API の boto3 メソッド名で、資料によって `create_index` と `create_vector_index` が混在していたため、両方を試す実装にしています。
+ユースケースの一覧は利用者から提供された公式ドキュメントの記述に基づいています。一方でリクエスト・レスポンス形式は公式ドキュメントに到達できなかったため、下記の二次資料から組み立てています。特に次の2点は実際に叩いて確認してください。AI Gateway の TypeSafe 互換エンドポイントで受け付けられる model id が `typesafe-ai/jev` か `jev-latest` か（`JEV_GATEWAY_MODEL` で切り替えられるようにしてあります）。もう1点は S3 Vectors のインデックス作成 API の boto3 メソッド名で、資料によって `create_index` と `create_vector_index` が混在していたため、両方を試す実装にしています。
 
-テストは101件が通り、ruff も通ります。ただしこれらはすべて、ネットワークに出ない範囲の純粋なロジックと配線に対するテストです。
+テストは151件が通り、ruff も通ります。ただしこれらはすべて、ネットワークに出ない範囲の純粋なロジックと配線に対するテストです。
 
 ## 出典
 
+- [Example use cases — TypeSafe AI](https://docs.typesafe.ai/concepts/use-case-map#search-and-retrieval) — Search and retrieval の5項目（本文は利用者提供、当環境からは未到達）
 - [Jev exploration: API schema and examples](https://github.com/SamuelSacco/jev-exploration) — `/v1/systemone` のリクエスト・レスポンス形状、価格、入力上限
 - [Vessel issue #113: TypeSafe System One format adapter](https://github.com/spenceclark/Vessel/issues/113) — Noul / Choice / Score の criteria と answers スキーマ
 - [TypeSafe Jev project reference](https://gist.github.com/pjburnhill/adf8d28efcad9df037bfdece178ef965) — 3プリミティブの設計思想、選択肢255件の上限
