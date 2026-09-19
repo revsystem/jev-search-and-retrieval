@@ -50,3 +50,29 @@ def test_embedding_text_prefixes_provenance_for_retrievability():
     chunk = Chunk(chunk_id="p3-c0", page=3, section="第1節　AI動向", text="本文")
     assert chunk.embedding_text().startswith("第1節　AI動向")
     assert "本文" in chunk.embedding_text()
+
+
+def test_full_width_latin_is_normalised_so_keyword_rules_can_match():
+    # PDF text extraction routinely yields full-width ASCII; without NFKC a rule
+    # requiring "生成AI" silently matches nothing in a document that uses 生成ＡＩ.
+    assert normalise_japanese_text("生成ＡＩの利用") == "生成AIの利用"
+
+
+def test_full_width_digits_and_percent_are_normalised():
+    assert normalise_japanese_text("２６．７％") == "26.7%"
+
+
+def test_half_width_katakana_is_widened():
+    assert normalise_japanese_text("ﾄﾗﾋｯｸ") == "トラヒック"
+
+
+def test_normalisation_leaves_ordinary_japanese_untouched():
+    assert normalise_japanese_text("生成AIの利用経験は26.7%であった。") == (
+        "生成AIの利用経験は26.7%であった。"
+    )
+
+
+def test_the_raw_section_heading_is_kept_verbatim():
+    # the heading is read before normalisation, so it keeps its ideographic space
+    chunks = chunk_pages({1: "第2節　データ流通\n" + "本" * 200}, chunk_size=400, overlap=50)
+    assert chunks[0].section == "第2節　データ流通"

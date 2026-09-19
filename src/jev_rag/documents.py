@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -33,7 +34,16 @@ def _is_cjk(char: str) -> bool:
 
 
 def normalise_japanese_text(raw: str) -> str:
-    """Undo PDF layout artefacts: ideographic spaces, hard-wrapped lines, blank runs."""
+    """Undo PDF layout artefacts: width variants, hard-wrapped lines, blank runs.
+
+    NFKC first, because PDF text extraction routinely yields full-width ASCII
+    and half-width katakana. Without it a keyword rule asking for "生成AI"
+    silently matches nothing in a document that renders it 生成ＡＩ, and every
+    figure written ２６．７％ is invisible to a rule looking for a percentage.
+    Section headings are read before this runs, so they keep their original
+    characters.
+    """
+    raw = unicodedata.normalize("NFKC", raw)
     lines = [re.sub(r"[ \t　]+", " ", line).strip() for line in raw.replace("　", " ").splitlines()]
 
     paragraphs: list[list[str]] = [[]]
