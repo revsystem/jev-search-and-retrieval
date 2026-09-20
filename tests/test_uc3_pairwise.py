@@ -4,7 +4,7 @@ import pytest
 
 from jev_rag.evaluation import RetrievedDoc
 from jev_rag.jev.client import JevClient
-from jev_rag.jev.pairwise import PairwiseReranker, pair_schedule
+from jev_rag.jev.pairwise import DEFAULT_COMPARISON_BUDGET, PairwiseReranker, pair_schedule
 from jev_rag.jev.transport import FakeTransport
 
 
@@ -13,7 +13,7 @@ def docs(*ids: str) -> list[RetrievedDoc]:
 
 
 def test_a_small_shortlist_is_compared_round_robin():
-    assert pair_schedule(["a", "b", "c"], opponents=2, limit=32) == [
+    assert pair_schedule(["a", "b", "c"], opponents=2, limit=64) == [
         ("a", "b"),
         ("a", "c"),
         ("b", "c"),
@@ -21,21 +21,21 @@ def test_a_small_shortlist_is_compared_round_robin():
 
 
 def test_a_large_shortlist_falls_back_to_sampled_opponents():
-    ids = [f"c{i}" for i in range(20)]
-    schedule = pair_schedule(ids, opponents=3, limit=32)
-    assert len(schedule) <= 32
+    ids = [f"c{i}" for i in range(60)]
+    schedule = pair_schedule(ids, opponents=3, limit=DEFAULT_COMPARISON_BUDGET)
+    assert len(schedule) <= DEFAULT_COMPARISON_BUDGET
     # every candidate still gets compared at least once
     assert {c for pair in schedule for c in pair} == set(ids)
 
 
 def test_the_schedule_never_pairs_a_candidate_with_itself():
-    schedule = pair_schedule([f"c{i}" for i in range(10)], opponents=3, limit=32)
+    schedule = pair_schedule([f"c{i}" for i in range(10)], opponents=3, limit=8)
     assert all(left != right for left, right in schedule)
 
 
 def test_the_schedule_is_deterministic():
     ids = [f"c{i}" for i in range(15)]
-    assert pair_schedule(ids, opponents=3, limit=32) == pair_schedule(ids, opponents=3, limit=32)
+    assert pair_schedule(ids, opponents=3, limit=20) == pair_schedule(ids, opponents=3, limit=20)
 
 
 def test_each_comparison_is_a_two_option_choice():

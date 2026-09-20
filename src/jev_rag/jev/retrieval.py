@@ -18,7 +18,8 @@ from typing import Any
 
 from jev_rag.documents import Chunk
 from jev_rag.evaluation import RetrievedDoc
-from jev_rag.jev.client import MAX_QUESTIONS_PER_REQUEST, JevClient
+from jev_rag.jev.budget import TOTAL_TOKEN_BUDGET, estimate_tokens
+from jev_rag.jev.client import JevClient
 from jev_rag.jev.prompts import NOUL_INSTRUCTION, RELEVANCE_CRITERIA
 from jev_rag.jev.questions import Noul, NoulAnswer
 from jev_rag.jev.rerank import fuse_scores, min_max_normalise
@@ -46,13 +47,15 @@ class JevRetriever:
         client: JevClient,
         corpus: list[Chunk],
         metadata: dict[str, dict[str, Any]] | None = None,
-        batch_size: int = MAX_QUESTIONS_PER_REQUEST,
+        batch_tokens: int = TOTAL_TOKEN_BUDGET // 3,
         max_workers: int = 8,
     ) -> None:
         self.client = client
         self.corpus = corpus
         self.metadata = metadata or {}
-        self.batch_size = min(batch_size, MAX_QUESTIONS_PER_REQUEST)
+        # Each batch carries its own candidates in the state as well as in the
+        # questions, so the sweep is sized well inside the request budget.
+        self.batch_tokens = batch_tokens
         self.max_workers = max_workers
 
     def search(
@@ -67,7 +70,15 @@ class JevRetriever:
             return []
 
         items = [(chunk.chunk_id, chunk.text) for chunk in pool]
-        batches = [items[i : i + self.batch_size] for i in range(0, len(items), self.batch_size)]
+        batches: list[list[tuple[str, str]]] = [[]]
+        used = 0
+        for item in items:
+            cost = estimate_tokens(item[1]) * 2  # counted in the state and the question
+            if batches[-1] and used + cost > self.batch_tokens:
+                batches.append([])
+                used = 0
+            batches[-1].append(item)
+            used += cost
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
             judged: dict[str, float] = {}
             for result in executor.map(lambda b: _judge(self.client, query, b), batches):

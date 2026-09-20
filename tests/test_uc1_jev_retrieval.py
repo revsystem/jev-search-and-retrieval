@@ -42,12 +42,36 @@ def test_the_whole_corpus_is_judged_one_noul_per_chunk():
     assert asked == {"c1", "c2", "c3"}
 
 
-def test_a_corpus_larger_than_one_request_is_swept_in_batches():
-    big = [Chunk(chunk_id=f"c{i}", page=1, section="", text="本文") for i in range(70)]
+def test_a_small_corpus_is_swept_in_one_request():
+    # sizing follows the token budget, so many short chunks still fit in one call
+    small = [Chunk(chunk_id=f"c{i}", page=1, section="", text="本文") for i in range(70)]
+    transport = FakeTransport(noul=0.5)
+    JevRetriever(JevClient(transport), small).search("問い", top_k=5)
+    assert len(transport.requests) == 1
+
+
+def test_a_corpus_too_heavy_for_one_request_is_swept_in_batches():
+    big = [Chunk(chunk_id=f"c{i}", page=1, section="", text="あ" * 3_000) for i in range(30)]
+    transport = FakeTransport(noul=0.5)
+    hits = JevRetriever(JevClient(transport), big).search("問い", top_k=5)
+    assert len(transport.requests) > 1
+    assert len(hits) == 5
+
+
+def test_every_chunk_is_judged_exactly_once_across_the_batches():
+    big = [Chunk(chunk_id=f"c{i}", page=1, section="", text="あ" * 3_000) for i in range(30)]
+    transport = FakeTransport(noul=0.5)
+    JevRetriever(JevClient(transport), big).search("問い", top_k=30)
+    asked = [key for request in transport.requests for key in request["questions"]]
+    assert sorted(asked) == sorted(c.chunk_id for c in big)
+
+
+def test_a_batch_carries_only_its_own_candidates_in_the_state():
+    big = [Chunk(chunk_id=f"c{i}", page=1, section="", text="あ" * 3_000) for i in range(30)]
     transport = FakeTransport(noul=0.5)
     JevRetriever(JevClient(transport), big).search("問い", top_k=5)
-    assert len(transport.requests) == 3
-    assert all(len(r["questions"]) <= 32 for r in transport.requests)
+    for request in transport.requests:
+        assert set(request["state"]["candidates"]) == set(request["questions"])
 
 
 def test_a_metadata_filter_narrows_the_sweep_before_jev_is_asked():

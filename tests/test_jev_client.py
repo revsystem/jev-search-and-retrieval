@@ -1,6 +1,6 @@
 import pytest
 
-from jev_rag.jev.client import MAX_QUESTIONS_PER_REQUEST, JevClient
+from jev_rag.jev.client import JevClient
 from jev_rag.jev.questions import Noul, Score
 from jev_rag.jev.transport import DirectTransport, FakeTransport, GatewayTransport, build_transport
 
@@ -49,21 +49,33 @@ def test_client_sends_a_single_request_for_a_small_question_set():
     assert set(answers) == {"a", "b"}
 
 
-def test_client_splits_question_sets_above_the_gateway_limit():
+def test_many_small_questions_still_travel_in_one_request():
+    # TypeSafe caps a request by tokens, not by question count
     transport = FakeTransport(noul=0.5)
-    client = JevClient(transport)
-    questions = {f"q{i}": Noul("?") for i in range(MAX_QUESTIONS_PER_REQUEST + 5)}
-    answers = client.evaluate("state", questions)
+    answers = JevClient(transport).evaluate("state", {f"q{i}": Noul("?") for i in range(200)})
+    assert len(transport.requests) == 1
+    assert len(answers) == 200
 
-    assert len(transport.requests) == 2
-    assert all(len(r["questions"]) <= MAX_QUESTIONS_PER_REQUEST for r in transport.requests)
+
+def test_a_question_set_over_the_token_budget_is_split():
+    transport = FakeTransport(noul=0.5)
+    questions = {f"q{i}": Noul("あ" * 4_000) for i in range(30)}
+    answers = JevClient(transport).evaluate("state", questions)
+
+    assert len(transport.requests) > 1
     assert set(answers) == set(questions)
+
+
+def test_an_explicit_count_cap_is_honoured_when_given():
+    transport = FakeTransport(noul=0.5)
+    JevClient(transport, max_questions=10).evaluate("s", {f"q{i}": Noul("?") for i in range(25)})
+    assert len(transport.requests) == 3
 
 
 def test_client_keeps_the_state_identical_across_split_requests():
     transport = FakeTransport(noul=0.5)
     client = JevClient(transport)
-    client.evaluate({"query": "q"}, {f"q{i}": Noul("?") for i in range(40)})
+    client.evaluate({"query": "q"}, {f"q{i}": Noul("あ" * 4_000) for i in range(30)})
     assert {r["state"]["query"] for r in transport.requests} == {"q"}
 
 

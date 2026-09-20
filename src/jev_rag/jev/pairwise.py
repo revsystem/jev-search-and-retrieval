@@ -13,8 +13,14 @@ from __future__ import annotations
 from dataclasses import replace
 
 from jev_rag.evaluation import RetrievedDoc
-from jev_rag.jev.client import MAX_QUESTIONS_PER_REQUEST, JevClient
+from jev_rag.jev.client import JevClient
 from jev_rag.jev.questions import Choice, ChoiceAnswer
+
+# How many comparisons one reranking is willing to pay for. This is a cost
+# decision, not an API limit: TypeSafe caps a request by tokens, not by
+# question count. Comparisons grow quadratically, so the schedule stops here
+# and gives every candidate a fixed number of opponents instead.
+DEFAULT_COMPARISON_BUDGET = 64
 
 INSTRUCTION = (
     "state.query により良く答えるのはどちらの候補ですか。"
@@ -22,7 +28,7 @@ INSTRUCTION = (
 )
 
 
-def pair_schedule(ids: list[str], opponents: int = 3, limit: int = MAX_QUESTIONS_PER_REQUEST):
+def pair_schedule(ids: list[str], opponents: int = 3, limit: int = DEFAULT_COMPARISON_BUDGET):
     """Comparisons to run, as ordered (left, right) pairs."""
     count = len(ids)
     if count < 2:
@@ -48,9 +54,15 @@ def pair_schedule(ids: list[str], opponents: int = 3, limit: int = MAX_QUESTIONS
 
 
 class PairwiseReranker:
-    def __init__(self, client: JevClient, opponents: int = 3) -> None:
+    def __init__(
+        self,
+        client: JevClient,
+        opponents: int = 3,
+        comparison_budget: int = DEFAULT_COMPARISON_BUDGET,
+    ) -> None:
         self.client = client
         self.opponents = opponents
+        self.comparison_budget = comparison_budget
 
     def rerank(
         self, query: str, docs: list[RetrievedDoc], top_k: int | None = None
@@ -59,7 +71,7 @@ class PairwiseReranker:
             return list(docs[:top_k]) if top_k else list(docs)
 
         texts = {doc.chunk_id: doc.text for doc in docs}
-        schedule = pair_schedule(list(texts), self.opponents)
+        schedule = pair_schedule(list(texts), self.opponents, self.comparison_budget)
         questions = {
             f"p{index}": Choice(
                 INSTRUCTION.format(left=left, right=right),
