@@ -34,6 +34,10 @@ pythonpath = ["src"]
 [tool.ruff]
 line-length = 100
 src = ["src", "tests"]
+# Mirrored upstream documentation is kept verbatim; ruff reformats the Python
+# code blocks inside Markdown, which would silently rewrite the source we are
+# checking the implementation against.
+extend-exclude = [".claude/docs/research"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
