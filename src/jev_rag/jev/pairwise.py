@@ -12,9 +12,9 @@ from __future__ import annotations
 
 from dataclasses import replace
 
-from jev_rag.evaluation import RetrievedDoc
 from jev_rag.jev.client import JevClient
 from jev_rag.jev.questions import Choice, ChoiceAnswer
+from jev_rag.types import RetrievedDoc
 
 # How many comparisons one reranking is willing to pay for. This is a cost
 # decision, not an API limit: TypeSafe caps a request by tokens, not by

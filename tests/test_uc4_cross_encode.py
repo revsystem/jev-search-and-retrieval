@@ -1,15 +1,15 @@
 """Use case: cross-encode queries and candidates for higher precision."""
 
-from jev_rag.evaluation import RetrievedDoc
 from jev_rag.jev.client import JevClient
 from jev_rag.jev.crossencode import CrossEncoder
 from jev_rag.jev.transport import FakeTransport
+from jev_rag.types import RetrievedDoc
 
 
 def docs() -> list[RetrievedDoc]:
     return [
-        RetrievedDoc(chunk_id="a", text="話題は近い", score=0.9),
-        RetrievedDoc(chunk_id="b", text="直接の根拠", score=0.4),
+        RetrievedDoc(doc_id="a", text="話題は近い", score=0.9),
+        RetrievedDoc(doc_id="b", text="直接の根拠", score=0.4),
     ]
 
 

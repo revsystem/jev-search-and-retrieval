@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from jev_rag.cli import PIPELINE_NAMES
+from jev_rag.rankers import ALL_RANKERS
 from jev_rag.usecases import DECISION_SHAPES, USE_CASES
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -35,7 +35,7 @@ def test_every_use_case_names_an_importable_module(use_case):
 
 @pytest.mark.parametrize("use_case", USE_CASES, ids=lambda uc: uc.key)
 def test_every_named_pipeline_is_runnable(use_case):
-    assert set(use_case.pipelines) <= set(PIPELINE_NAMES)
+    assert set(use_case.pipelines) <= set(ALL_RANKERS)
 
 
 @pytest.mark.parametrize("use_case", USE_CASES, ids=lambda uc: uc.key)

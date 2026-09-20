@@ -1,14 +1,14 @@
-from jev_rag.evaluation import RetrievedDoc
 from jev_rag.jev.client import JevClient
 from jev_rag.jev.rerank import JevReranker, fuse_scores, min_max_normalise
 from jev_rag.jev.transport import FakeTransport
+from jev_rag.types import RetrievedDoc
 
 
 def candidates() -> list[RetrievedDoc]:
     return [
-        RetrievedDoc(chunk_id="top", text="話題は近いが根拠にならない文章", score=0.81),
-        RetrievedDoc(chunk_id="middle", text="部分的な根拠", score=0.77),
-        RetrievedDoc(chunk_id="buried", text="直接の根拠となる決定的な記述", score=0.61),
+        RetrievedDoc(doc_id="top", text="話題は近いが根拠にならない文章", score=0.81),
+        RetrievedDoc(doc_id="middle", text="部分的な根拠", score=0.77),
+        RetrievedDoc(doc_id="buried", text="直接の根拠となる決定的な記述", score=0.61),
     ]
 
 

@@ -4,16 +4,16 @@ A shortlist from embeddings, one Noul per query-candidate pair, and a sort on
 the returned probability — no generative model asked to invent a scale.
 """
 
-from jev_rag.evaluation import RetrievedDoc
 from jev_rag.jev.client import JevClient
 from jev_rag.jev.rerank import JevReranker
 from jev_rag.jev.transport import FakeTransport
+from jev_rag.types import RetrievedDoc
 
 
 def shortlist() -> list[RetrievedDoc]:
     return [
-        RetrievedDoc(chunk_id="topical", text="話題は近い", score=0.81),
-        RetrievedDoc(chunk_id="evidence", text="直接の根拠", score=0.61),
+        RetrievedDoc(doc_id="topical", text="話題は近い", score=0.81),
+        RetrievedDoc(doc_id="evidence", text="直接の根拠", score=0.61),
     ]
 
 

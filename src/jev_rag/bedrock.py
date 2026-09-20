@@ -6,7 +6,7 @@ import json
 from typing import Any
 
 from jev_rag.config import BedrockSettings
-from jev_rag.evaluation import RetrievedDoc
+from jev_rag.types import RetrievedDoc
 
 # Cohere's embedding endpoint accepts at most 96 texts per call.
 EMBED_BATCH_SIZE = 96

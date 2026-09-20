@@ -11,10 +11,10 @@ from __future__ import annotations
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
 
-from jev_rag.evaluation import RetrievedDoc
 from jev_rag.jev.client import JevClient
 from jev_rag.jev.prompts import RELEVANCE_CRITERIA, RELEVANCE_LEVELS
 from jev_rag.jev.questions import Noul, NoulAnswer, Score, ScoreAnswer
+from jev_rag.types import RetrievedDoc
 
 RELEVANCE = "state.candidate は state.query に答えるための根拠として役に立ちますか。"
 GRADE = "state.candidate が state.query の根拠としてどの程度有用かを判定してください。"

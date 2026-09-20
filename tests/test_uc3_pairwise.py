@@ -2,14 +2,14 @@
 
 import pytest
 
-from jev_rag.evaluation import RetrievedDoc
 from jev_rag.jev.client import JevClient
 from jev_rag.jev.pairwise import DEFAULT_COMPARISON_BUDGET, PairwiseReranker, pair_schedule
 from jev_rag.jev.transport import FakeTransport
+from jev_rag.types import RetrievedDoc
 
 
 def docs(*ids: str) -> list[RetrievedDoc]:
-    return [RetrievedDoc(chunk_id=i, text=f"文書{i}", score=0.5) for i in ids]
+    return [RetrievedDoc(doc_id=i, text=f"文書{i}", score=0.5) for i in ids]
 
 
 def test_a_small_shortlist_is_compared_round_robin():

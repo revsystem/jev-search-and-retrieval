@@ -18,7 +18,6 @@ from __future__ import annotations
 
 from dataclasses import replace
 
-from jev_rag.evaluation import RetrievedDoc
 from jev_rag.jev.client import JevClient
 from jev_rag.jev.prompts import (
     NOUL_INSTRUCTION,
@@ -27,6 +26,7 @@ from jev_rag.jev.prompts import (
     SCORE_INSTRUCTION,
 )
 from jev_rag.jev.questions import Noul, NoulAnswer, Score, ScoreAnswer
+from jev_rag.types import RetrievedDoc
 
 
 def min_max_normalise(values: list[float]) -> list[float]:

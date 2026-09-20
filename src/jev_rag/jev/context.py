@@ -11,10 +11,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field, replace
 
-from jev_rag.evaluation import RetrievedDoc
 from jev_rag.jev.client import JevClient
 from jev_rag.jev.prompts import RELEVANCE_LEVELS
 from jev_rag.jev.questions import Noul, NoulAnswer, Score, ScoreAnswer
+from jev_rag.types import RetrievedDoc
 
 USEFULNESS = (
     'state.query に答える文脈として state.candidates["{key}"] がどれだけ有用かを判定してください。'

@@ -46,12 +46,12 @@ USE_CASES: list[UseCase] = [
             "scoring, and ranking."
         ),
         shapes=["Search", "Retrieval", "Ranking"],
-        module="jev_rag.jev.retrieval",
-        tests="tests/test_uc1_jev_retrieval.py",
-        pipelines=["jev_only", "jev_hybrid"],
+        module="jev_rag.rankers",
+        tests="tests/test_rankers.py",
+        pipelines=["jev_hybrid", "jev_crossencode"],
         note=(
-            "jev_only は埋め込みを経路から外し、コーパスをNoulで走査する。"
-            "jev_hybrid は埋め込みを再現率の段、Jevを適合率の段として融合する。"
+            "jev_hybrid は埋め込みの順位とJevの判定を融合する(supplement)。"
+            "jev_crossencode は埋め込みを一切使わないので、そのまま replace にあたる。"
         ),
     ),
     UseCase(
@@ -60,7 +60,7 @@ USE_CASES: list[UseCase] = [
         shapes=["Scoring", "Ranking"],
         module="jev_rag.jev.rerank",
         tests="tests/test_uc2_relevance_scoring.py",
-        pipelines=["jev_noul"],
+        pipelines=["jev_pointwise"],
         note="候補ごとにNoulを1問立て、返った確率そのもので並べ替える。",
     ),
     UseCase(
@@ -87,7 +87,7 @@ USE_CASES: list[UseCase] = [
         shapes=["Retrieval"],
         module="jev_rag.jev.context",
         tests="tests/test_uc5_context_selection.py",
-        entrypoint="jev-rag ask --context-budget",
+        entrypoint="jev-rag context",
         note="有用性と重複を判定し、予算内に貪欲に詰める。順位ではなく採否を決める段。",
     ),
 ]

@@ -1,16 +1,16 @@
 """Use case: select useful context for downstream AI workflows."""
 
-from jev_rag.evaluation import RetrievedDoc
 from jev_rag.jev.client import JevClient
 from jev_rag.jev.context import ContextSelector
 from jev_rag.jev.transport import FakeTransport
+from jev_rag.types import RetrievedDoc
 
 
 def candidates() -> list[RetrievedDoc]:
     return [
-        RetrievedDoc(chunk_id="useful", text="あ" * 100, score=0.9),
-        RetrievedDoc(chunk_id="duplicate", text="い" * 100, score=0.85),
-        RetrievedDoc(chunk_id="filler", text="う" * 100, score=0.80),
+        RetrievedDoc(doc_id="useful", text="あ" * 100, score=0.9),
+        RetrievedDoc(doc_id="duplicate", text="い" * 100, score=0.85),
+        RetrievedDoc(doc_id="filler", text="う" * 100, score=0.80),
     ]
 
 
