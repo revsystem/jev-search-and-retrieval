@@ -95,9 +95,8 @@ class S3VectorStore:
         self._ignore_conflict(
             self.client.create_vector_bucket, vectorBucketName=self.settings.bucket
         )
-        create_index = getattr(self.client, "create_index", None) or self.client.create_vector_index
         self._ignore_conflict(
-            create_index,
+            self.client.create_index,
             vectorBucketName=self.settings.bucket,
             indexName=self.settings.index,
             dataType="float32",
@@ -106,13 +105,12 @@ class S3VectorStore:
             metadataConfiguration={"nonFilterableMetadataKeys": NON_FILTERABLE_KEYS},
         )
 
-    @staticmethod
-    def _ignore_conflict(operation, **kwargs) -> None:
+    def _ignore_conflict(self, operation, **kwargs) -> None:
+        """Creating a bucket or index that already exists is the expected path."""
         try:
             operation(**kwargs)
-        except Exception as error:  # noqa: BLE001 - the SDK raises a per-service exception class
-            if type(error).__name__ not in {"ConflictException", "ConflictExceptionpy"}:
-                raise
+        except self.client.exceptions.ConflictException:
+            return
 
     def put(self, keys: list[str], vectors: list[list[float]], metadata: list[dict]) -> None:
         records = [

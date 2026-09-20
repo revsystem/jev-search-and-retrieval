@@ -150,9 +150,9 @@ uv run jev-rag ask "生成AIの利用率は前年と比べてどう変化した�
 
 Jev のリクエスト・レスポンス形式とユースケースは、公式ドキュメントを取得して照合済みです（`.claude/docs/research/typesafe/` に逐語で保存）。当初あった2点の不確実性は解消しました。AI Gateway の model id は `typesafe-ai/jev` で、ベースURLは `https://ai-gateway.vercel.sh/typesafe`、エンドポイントは `POST /typesafe/v1/systemone`、鍵は `AI_GATEWAY_API_KEY` です。二次資料から取り込んでいた「1リクエスト32問」という上限は公式には存在せず、制限はトークン予算だけだったため、件数ではなく予算で分割するよう直しました。
 
-未解決なのは S3 Vectors のインデックス作成 API の boto3 メソッド名で、資料によって `create_index` と `create_vector_index` が混在していたため、両方を試す実装にしています。
+S3 Vectors の呼び出しも、インストール済み botocore のサービス定義（`s3vectors`、API version 2025-07-15）と照合済みです。インデックス作成の操作は `CreateIndex`（`client.create_index`）で、`create_vector_index` という操作は存在しません。二次資料に両方の表記が混在していたため両方を試す実装にしていましたが、後者は死んだ分岐だったので削除しました。バケットやインデックスが既にある場合の分岐も、例外クラス名の文字列比較をやめて `client.exceptions.ConflictException` を捕捉する形にしています。`put_vectors` / `query_vectors` に渡す引数と、`query_vectors` が返す `vectors[].{key, distance, metadata}` の形も定義どおりです。
 
-テストは237件が通り、ruff も通ります。ただしこれらはすべて、ネットワークに出ない範囲の純粋なロジックと配線に対するテストです。
+テストは245件が通り、ruff も通ります。ただしこれらはすべて、ネットワークに出ない範囲の純粋なロジックと配線に対するテストです。
 
 ## 出典
 
