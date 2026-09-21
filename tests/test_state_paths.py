@@ -146,3 +146,28 @@ def test_pairwise_maps_the_winning_label_back_to_the_right_document():
         winners.add(texts[index])
     top = next(d for d in ranked if d.score == max(r.score for r in ranked))
     assert top.text in winners
+
+
+def test_no_module_writes_the_old_state_prefixed_reference():
+    """Guard the class of bug, not just the sites that had it.
+
+    The first fix missed cli.py because the search was scoped to the jev
+    package. This walks the syntax tree of every source file, so the next
+    module that grows a question cannot reintroduce the form, and comments
+    and prose about "the state" cannot raise a false alarm.
+    """
+    import ast as ast_module
+    import pathlib
+
+    src = pathlib.Path(__file__).resolve().parents[1] / "src"
+    offenders = []
+    for path in sorted(src.rglob("*.py")):
+        if path.name == "state.py":
+            continue
+        tree = ast_module.parse(path.read_text(encoding="utf-8"))
+        for node in ast_module.walk(tree):
+            if not isinstance(node, ast_module.Constant) or not isinstance(node.value, str):
+                continue
+            if re.search(r"\bstate\.[a-z_]+", node.value):
+                offenders.append(f"{path.name}:{node.lineno}: {node.value[:60]}")
+    assert offenders == [], "state-prefixed reference in a string literal:\n" + "\n".join(offenders)

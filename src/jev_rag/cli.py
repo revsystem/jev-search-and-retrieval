@@ -129,11 +129,24 @@ def cmd_check(args: argparse.Namespace) -> int:
         settings.jev.transport = args.transport
     client = settings.jev.build_client()
     print(f"transport={settings.jev.transport} model={client.transport.model}")
+    # exercises the documented backticked indexed path, so a passing check
+    # confirms the reference syntax the whole comparison depends on
     answer = client.evaluate(
-        {"query": "火星について", "document": "火星は赤い惑星と呼ばれる。"},
-        {"relevant": Noul("state.document は state.query の根拠になりますか。")},
+        {
+            "query": "赤い惑星と呼ばれるのはどれか",
+            "candidates": [
+                {"text": "金星は分厚い大気に覆われている。"},
+                {"text": "火星は赤い惑星と呼ばれる。"},
+            ],
+        },
+        {
+            "wrong": Noul("`candidates[0].text` は `query` に答える根拠になりますか。"),
+            "right": Noul("`candidates[1].text` は `query` に答える根拠になりますか。"),
+        },
     )
-    print(f"noul={answer['relevant'].value}")
+    print(f"noul(無関係)={answer['wrong'].value}  noul(正解)={answer['right'].value}")
+    if answer["right"].value <= answer["wrong"].value:
+        print("警告: 正解側が高くならなかった。state パスの参照が効いていない可能性がある。")
     return 0
 
 

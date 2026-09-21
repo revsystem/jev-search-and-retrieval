@@ -35,6 +35,10 @@ S3 Vectors。当初の前提に入っていたが、JQaRA は候補が最初か�
 
 候補のシャッフル（`dataset.py`）。候補を絞るとき正解を優先して残すので、シャッフルしないと入力順に正解が偏り、何もしない経路でも満点が出る。実装当初これが起きて nDCG が 1.000 になった。テストで固定してある。
 
+state の参照記法（`src/jev_rag/jev/state.py`）。質問の instructions から候補を指すときは、バックティック付きのドット・インデックス記法を state ルートからの相対パスで書く（例: `` `candidates[3].text` ``）。`state.` 接頭辞は付けない。質問IDはモデルに送られないので、どの候補についての判定かを伝えられるのは instructions だけ。候補は配列で渡し、位置で参照する。質問キー（doc_id）とパス（位置）が別物になるため、両者がズレると全候補が静かに誤採点され「日本語が苦手」に見える。`tests/test_state_paths.py` がこの対応を固定しており、AST を歩いて古い書き方の再発も検出する。Choice の選択肢キーはモデルに見えるので、doc_id ではなく中立なラベル（a / b）を使い、説明文でパスを示す。
+
+パッセージの作り方（`dataset.py` の `passage_text`）。JQaRA 公式の評価スクリプトは既定で `f"{title} {text}"` を連結してからモデルに渡す。README が並べている公開スコアはその形で出た数字なので、本文だけを採点すると同じ土俵に乗らない。
+
 `.claude/docs/research/typesafe/` は公式ドキュメントの逐語コピー。実装の照合基準なので整形しない。ruff の対象外にしてある（`pyproject.toml` の `extend-exclude`）。
 
 `src/jev_rag/usecases.py` は公式ユースケースと実装の対応をコードに固定したもの。モジュール名や経路名を変えると `tests/test_usecases_registry.py` が落ちる。落ちたら表のほうも直す。

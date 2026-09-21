@@ -112,3 +112,23 @@ def test_shuffling_keeps_every_candidate():
     query = to_queries(padded, max_candidates=20)[0]
     assert len(query.candidates) == 20
     assert query.total_relevant == 1
+
+
+def test_the_passage_carries_its_title_like_the_published_evaluation():
+    # JQaRA's evaluator concatenates "{title} {text}" by default, and the
+    # published nDCG@10 figures come from that form
+    from jev_rag.dataset import passage_text
+
+    assert passage_text("絶対零度", "摂氏マイナス273.15度。") == "絶対零度 摂氏マイナス273.15度。"
+
+
+def test_a_passage_without_a_title_is_left_alone():
+    from jev_rag.dataset import passage_text
+
+    assert passage_text("", "本文のみ。") == "本文のみ。"
+
+
+def test_candidates_are_built_from_the_concatenated_passage():
+    candidate = to_queries(rows())[0].candidates[0]
+    assert candidate.text == "A あ"
+    assert candidate.title == "A"

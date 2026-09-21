@@ -44,6 +44,18 @@ class EvalQuery:
         ]
 
 
+def passage_text(title: str, text: str) -> str:
+    """The passage string every ranker scores.
+
+    JQaRA's own evaluator concatenates the Wikipedia title with the passage
+    (``f"{title} {text}"`` in evaluator/evaluator/runner.py, the default path)
+    before handing it to a model. The published nDCG@10 figures this project
+    compares against were produced that way, so scoring the text alone would
+    put our baseline on a different axis from those numbers.
+    """
+    return f"{title} {text}".strip() if title else text
+
+
 def to_queries(rows: list[dict[str, Any]], max_candidates: int | None = None) -> list[EvalQuery]:
     """Group flat dataset rows into one query per question.
 
@@ -73,7 +85,7 @@ def to_queries(rows: list[dict[str, Any]], max_candidates: int | None = None) ->
         candidates = [
             RetrievedDoc(
                 doc_id=str(row["passage_row_id"]),
-                text=row["text"],
+                text=passage_text(row.get("title", ""), row["text"]),
                 score=0.0,
                 label=int(row["label"]),
                 title=row.get("title", ""),
