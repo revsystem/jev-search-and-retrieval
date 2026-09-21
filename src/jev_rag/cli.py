@@ -9,7 +9,9 @@ from jev_rag.dataset import DEFAULT_PATH, load_jqara, sample_queries
 from jev_rag.rankers import ALL_RANKERS, build_rankers
 from jev_rag.report import format_comparison, format_movers
 from jev_rag.runner import evaluate_rankers, load, save
+from jev_rag.settings_file import DEFAULT_ENV_FILE, load_env_file
 
+ENV_FILE = DEFAULT_ENV_FILE
 RESULTS_PATH = "out/results.json"
 METRICS = ["ndcg@10", "mrr@10", "recall@10"]
 
@@ -194,6 +196,8 @@ def main(argv: list[str] | None = None) -> int:
     check.set_defaults(func=cmd_check)
 
     args = parser.parse_args(argv)
+    # before any command builds Settings, which reads os.environ
+    load_env_file(ENV_FILE)
     return args.func(args)
 
 

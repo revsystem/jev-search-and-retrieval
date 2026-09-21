@@ -40,14 +40,17 @@ TypeSafe の System One モデル Jev を検索・再ランキングに挟むと
 ```bash
 uv venv
 uv pip install -e ".[dev]"
-cp .env.example .env   # 鍵を設定する
+cp .env.example .env
 
+aws sso login --profile production      # Bedrock 用。鍵ではなくSSO
 uv run jev-rag prepare                  # JQaRA を取得する（60MB）
 uv run jev-rag check                    # Jev の疎通確認
 uv run jev-rag evaluate --queries 100 --candidates 30
 uv run jev-rag report --movers jev_crossencode
 uv run jev-rag context                  # 文脈選択の効果を測る
 ```
+
+`.env` に書く秘密情報は Vercel AI Gateway の `AI_GATEWAY_API_KEY` ひとつだけです。残りは接続先とモデルIDの指定で、秘密ではありません。TypeSafe のアカウントが開通したら `JEV_TRANSPORT=direct` と `TYPESAFE_API_KEY` に切り替えます。Bedrock の認証情報は `.env` には書きません。boto3 の既定のチェーンが `AWS_PROFILE` を見るので、プロファイル名だけ指定して `aws sso login` で認証します。`jev-rag` は起動時に `.env` を読みますが、既に export されている環境変数のほうが優先されます。
 
 `evaluate` は結果を `out/results.json` に保存します。`report` はそこから表を出し直すので、測り直さずに見せ方だけ変えられます。`--movers` を付けると、従来手法で沈んでいた正解をどの質問で引き上げたかが一覧で出ます。数字だけでは伝わらない部分なので、記事にはこちらが効きます。
 
