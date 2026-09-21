@@ -94,7 +94,7 @@ def test_the_cross_encoder_sends_one_request_per_candidate():
 
 def test_the_pairwise_ranker_compares_candidates_against_each_other():
     # the single pair is (decoy, answer), so option "b" is the answer
-    transport = FakeTransport(choices={"p0": "b"}, confidence=0.9)
+    transport = FakeTransport(choices={"winner": "b"}, confidence=0.9)
     ranked = JevPairwiseRanker(JevClient(transport)).rank("問い", docs())
     assert [d.doc_id for d in ranked] == ["answer", "decoy"]
 

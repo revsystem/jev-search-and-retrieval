@@ -50,3 +50,22 @@ def mean_metrics(rows: list[dict[str, float]]) -> dict[str, float]:
     if not rows:
         return {}
     return {key: sum(row[key] for row in rows) / len(rows) for key in rows[0]}
+
+
+def standard_errors(rows: list[dict[str, float]]) -> dict[str, float]:
+    """Standard error of each mean.
+
+    A ranking difference is only worth reporting against the spread it was
+    measured over; a margin of 0.13 on ten queries is not the same claim as
+    the same margin on three hundred.
+    """
+    if len(rows) < 2:
+        return dict.fromkeys(rows[0], 0.0) if rows else {}
+    count = len(rows)
+    errors = {}
+    for key in rows[0]:
+        values = [row[key] for row in rows]
+        mean = sum(values) / count
+        variance = sum((value - mean) ** 2 for value in values) / (count - 1)
+        errors[key] = math.sqrt(variance / count)
+    return errors

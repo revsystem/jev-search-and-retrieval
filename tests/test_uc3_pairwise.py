@@ -41,31 +41,49 @@ def test_the_schedule_is_deterministic():
 def test_each_comparison_is_a_two_option_choice():
     transport = FakeTransport(choices={}, confidence=0.9)
     PairwiseReranker(JevClient(transport)).rerank("問い", docs("a", "b"))
-    question = transport.requests[0]["questions"]["p0"]
+    question = transport.requests[0]["questions"]["winner"]
     assert question["type"] == "choice"
     assert set(question["criteria"]) == {"a", "b"}
 
 
 def test_the_candidate_that_wins_its_comparisons_ranks_first():
     # the only pair is (a, b), so option "b" is the second document
-    transport = FakeTransport(choices={"p0": "b"}, confidence=0.9)
+    transport = FakeTransport(choices={"winner": "b"}, confidence=0.9)
     ranked = PairwiseReranker(JevClient(transport)).rerank("問い", docs("a", "b"))
     assert [d.chunk_id for d in ranked] == ["b", "a"]
 
 
 def test_wins_are_weighted_by_the_returned_probability():
-    # pairs are (a,b), (a,c), (b,c); "a"/"b" are the option labels, so c wins
-    # its two comparisons as the second side of each
-    transport = FakeTransport(choices={"p0": "a", "p1": "b", "p2": "b"}, confidence=0.55)
-    reranker = PairwiseReranker(JevClient(transport))
-    ranked = reranker.rerank("問い", docs("a", "b", "c"))
+    """c beats both opponents narrowly, a beats b, so c leads on win rate."""
+
+    class Scripted(FakeTransport):
+        def send(self, body):
+            self.requests.append(body)
+            texts = [entry["text"] for entry in body["state"]["candidates"]]
+            # "文書c" wins whenever it takes part, otherwise the first side wins
+            winner = "b" if texts[1] == "文書c" else "a"
+            loser = "a" if winner == "b" else "b"
+            return {
+                "answers": {
+                    "winner": {
+                        "type": "choice",
+                        "choice": winner,
+                        "probabilities": {winner: 0.55, loser: 0.45},
+                        "confidence": 0.55,
+                    }
+                }
+            }
+
+    ranked = PairwiseReranker(JevClient(Scripted())).rerank("問い", docs("a", "b", "c"))
     assert ranked[0].chunk_id == "c"
 
 
-def test_comparisons_are_sent_in_one_request_when_they_fit():
+def test_each_comparison_is_its_own_request():
+    # a shared state would leave every comparison reading the whole shortlist
     transport = FakeTransport(confidence=0.9)
     PairwiseReranker(JevClient(transport)).rerank("問い", docs("a", "b", "c"))
-    assert len(transport.requests) == 1
+    assert len(transport.requests) == 3
+    assert all(len(r["state"]["candidates"]) == 2 for r in transport.requests)
 
 
 def test_the_win_rate_becomes_the_new_score():

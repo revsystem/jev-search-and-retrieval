@@ -50,12 +50,24 @@ class EmbeddingRanker:
 
     def __init__(self, embedder) -> None:
         self.embedder = embedder
+        # A run evaluates several routes over the same queries, and the hybrid
+        # route needs the same vectors the embedding route already paid for.
+        self._cache: dict[str, list[float]] = {}
+
+    def _vectors(self, docs: list[RetrievedDoc]) -> list[list[float]]:
+        missing = [doc for doc in docs if doc.doc_id not in self._cache]
+        if missing:
+            fresh = self.embedder.embed_documents([doc.text for doc in missing])
+            self._cache.update(
+                {doc.doc_id: vector for doc, vector in zip(missing, fresh, strict=True)}
+            )
+        return [self._cache[doc.doc_id] for doc in docs]
 
     def rank(self, question: str, docs: list[RetrievedDoc]) -> list[RetrievedDoc]:
         if not docs:
             return []
         query = self.embedder.embed_query(question)
-        vectors = self.embedder.embed_documents([doc.text for doc in docs])
+        vectors = self._vectors(docs)
         scored = [
             replace(doc, score=_cosine(query, vector), vector_score=_cosine(query, vector))
             for doc, vector in zip(docs, vectors, strict=True)
@@ -78,18 +90,23 @@ class CohereRerankRanker:
 
 
 class JevPointwiseRanker:
-    """Score query-to-candidate relevance: one Noul per candidate, shared state.
+    """Score query-to-candidate relevance: one Noul per candidate.
 
     Also the "replace embeddings" shape: no embedding model is in this path.
+    ``batch_size`` sets how many candidates share one request, and so how many
+    distractors each question is read against; a batch of one is
+    cross-encoding.
     """
 
-    name = "jev_pointwise"
-
-    def __init__(self, client: JevClient) -> None:
+    def __init__(self, client: JevClient, batch_size: int | None = None) -> None:
         self.reranker = JevReranker(client)
+        self.batch_size = batch_size
+        self.name = "jev_pointwise" if batch_size is None else f"jev_pointwise@{batch_size}"
 
     def rank(self, question: str, docs: list[RetrievedDoc]) -> list[RetrievedDoc]:
-        return self.reranker.noul_rerank(question, docs) if docs else []
+        if not docs:
+            return []
+        return self.reranker.noul_rerank(question, docs, batch_size=self.batch_size)
 
 
 class JevCrossEncodeRanker:
@@ -156,10 +173,14 @@ class HybridRanker:
 def build_rankers(names: list[str], client: JevClient | None = None, settings=None) -> dict:
     """Instantiate the named rankers, creating only the clients they need."""
 
+    shared: dict[str, Ranker] = {}
+
     def embedding():
         from jev_rag.bedrock import CohereEmbedder
 
-        return EmbeddingRanker(CohereEmbedder(settings))
+        if "embedding" not in shared:
+            shared["embedding"] = EmbeddingRanker(CohereEmbedder(settings))
+        return shared["embedding"]
 
     def cohere_rerank():
         from jev_rag.bedrock import BedrockReranker

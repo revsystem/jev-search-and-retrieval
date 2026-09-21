@@ -102,7 +102,11 @@ class JevReranker:
         return scored[:top_k] if top_k else scored
 
     def noul_rerank(
-        self, query: str, docs: list[RetrievedDoc], top_k: int | None = None
+        self,
+        query: str,
+        docs: list[RetrievedDoc],
+        top_k: int | None = None,
+        batch_size: int | None = None,
     ) -> list[RetrievedDoc]:
         """Score query-to-candidate relevance and sort on the probability itself.
 
@@ -114,15 +118,27 @@ class JevReranker:
         if not docs:
             return []
 
-        state, position = candidate_state(query, docs)
-        questions = {
-            doc.chunk_id: Noul(
-                NOUL_INSTRUCTION.format(path=candidate_path(position[doc.doc_id])),
-                criteria=RELEVANCE_CRITERIA,
-            )
-            for doc in docs
-        }
-        answers = self.client.evaluate(state, questions)
+        # Every question in a request carries the rest of the batch as
+        # distractors, and TypeSafe documents accuracy falling as the state
+        # grows with detail unrelated to the decision. batch_size is therefore
+        # a knob on that trade-off, not an implementation detail: a batch of
+        # one is cross-encoding, and the whole shortlist is one shared state.
+        groups = (
+            [docs]
+            if batch_size is None
+            else [docs[i : i + batch_size] for i in range(0, len(docs), batch_size)]
+        )
+        answers: dict = {}
+        for group in groups:
+            state, position = candidate_state(query, group)
+            questions = {
+                doc.chunk_id: Noul(
+                    NOUL_INSTRUCTION.format(path=candidate_path(position[doc.doc_id])),
+                    criteria=RELEVANCE_CRITERIA,
+                )
+                for doc in group
+            }
+            answers.update(self.client.evaluate(state, questions))
 
         original = {doc.chunk_id: position for position, doc in enumerate(docs)}
         ranked = [

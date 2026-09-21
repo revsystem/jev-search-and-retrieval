@@ -70,6 +70,41 @@ def cmd_evaluate(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_sweep(args: argparse.Namespace) -> int:
+    """How accuracy moves with the number of candidates sharing one request.
+
+    TypeSafe documents accuracy falling as the state fills with detail
+    unrelated to the decision. In a reranking request that detail is the other
+    candidates, so this sweeps the batch size from cross-encoding (1) up to the
+    whole shortlist and reports the curve.
+    """
+    from jev_rag.config import Settings
+    from jev_rag.rankers import JevPointwiseRanker
+
+    settings = Settings()
+    client = settings.jev.build_client()
+    queries = sample_queries(
+        load_jqara(args.data, max_candidates=args.candidates), args.queries, seed=args.seed
+    )
+    sizes = [int(size) for size in args.batches.split(",")]
+    rankers = {f"batch={size}": JevPointwiseRanker(client, batch_size=size) for size in sizes}
+
+    def progress(name, done, total):
+        if done % 10 == 0 or done == total:
+            print(f"\r  {name}: {done}/{total}", end="", flush=True)
+            if done == total:
+                print()
+
+    results = evaluate_rankers(rankers, queries, k=args.k, progress=progress)
+    print(f"\n{save(results, args.out)} に保存しました\n")
+    print(
+        f"候補{args.candidates}件を何件ずつ1リクエストに載せるかの比較"
+        "（batch=1 はクロスエンコード）"
+    )
+    print(format_comparison(results, baseline=f"batch={sizes[0]}", metrics=METRICS))
+    return 0
+
+
 def cmd_report(args: argparse.Namespace) -> int:
     results = {k: v for k, v in load(args.results).items() if k != "_run"}
     print(format_comparison(results, baseline=args.baseline, metrics=METRICS, published=True))
@@ -170,6 +205,16 @@ def main(argv: list[str] | None = None) -> int:
     evaluate.add_argument("--baseline", default="embedding")
     evaluate.add_argument("--out", default=RESULTS_PATH)
     evaluate.set_defaults(func=cmd_evaluate)
+
+    sweep = sub.add_parser("sweep", help="1リクエストに載せる候補数と精度の関係を測る")
+    sweep.add_argument("--data", default=str(DEFAULT_PATH))
+    sweep.add_argument("--batches", default="1,5,10,25,100")
+    sweep.add_argument("--queries", type=int, default=30)
+    sweep.add_argument("--candidates", type=int, default=100)
+    sweep.add_argument("--k", type=int, default=10)
+    sweep.add_argument("--seed", type=int, default=0)
+    sweep.add_argument("--out", default="out/sweep.json")
+    sweep.set_defaults(func=cmd_sweep)
 
     report = sub.add_parser("report", help="保存済みの結果から表を出し直す")
     report.add_argument("--results", default=RESULTS_PATH)

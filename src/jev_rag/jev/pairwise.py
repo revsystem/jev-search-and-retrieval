@@ -10,6 +10,7 @@ question in a request in parallel, a whole round costs about one question.
 
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
 
 from jev_rag.jev.client import JevClient
@@ -63,10 +64,30 @@ class PairwiseReranker:
         client: JevClient,
         opponents: int = 3,
         comparison_budget: int = DEFAULT_COMPARISON_BUDGET,
+        max_workers: int = 8,
     ) -> None:
         self.client = client
         self.opponents = opponents
         self.comparison_budget = comparison_budget
+        self.max_workers = max_workers
+
+    def _compare(self, query: str, pair: tuple[RetrievedDoc, RetrievedDoc]):
+        """One comparison, with only the two candidates in the state.
+
+        Sharing one state across every comparison would leave each question
+        reading past the whole shortlist, and TypeSafe documents accuracy
+        falling as the state fills with detail unrelated to the decision. The
+        pair is the only thing this judgement needs.
+        """
+        state, _ = candidate_state(query, list(pair))
+        question = Choice(
+            INSTRUCTION,
+            criteria={
+                option: OPTION_DESCRIPTION.format(path=candidate_path(index))
+                for index, option in enumerate(OPTIONS)
+            },
+        )
+        return self.client.evaluate(state, {"winner": question}).get("winner")
 
     def rerank(
         self, query: str, docs: list[RetrievedDoc], top_k: int | None = None
@@ -74,31 +95,22 @@ class PairwiseReranker:
         if len(docs) < 2:
             return list(docs[:top_k]) if top_k else list(docs)
 
-        state, position = candidate_state(query, docs)
+        by_id = {doc.doc_id: doc for doc in docs}
         schedule = pair_schedule(
             [doc.doc_id for doc in docs], self.opponents, self.comparison_budget
         )
-        questions = {
-            f"p{index}": Choice(
-                INSTRUCTION,
-                criteria={
-                    option: OPTION_DESCRIPTION.format(path=candidate_path(position[side]))
-                    for option, side in zip(OPTIONS, (left, right), strict=True)
-                },
-            )
-            for index, (left, right) in enumerate(schedule)
-        }
-        answers = self.client.evaluate(state, questions)
+        pairs = [(by_id[left], by_id[right]) for left, right in schedule]
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            verdicts = list(executor.map(lambda pair: self._compare(query, pair), pairs))
 
         # A win counts by its probability, so a narrow call moves the ranking
         # less than a decisive one.
         totals = {doc.doc_id: 0.0 for doc in docs}
         matches = {doc.doc_id: 0 for doc in docs}
-        for index, (left, right) in enumerate(schedule):
-            answer = answers.get(f"p{index}")
+        for (left, right), answer in zip(schedule, verdicts, strict=True):
             if not isinstance(answer, ChoiceAnswer):
                 continue
-            # the neutral labels map back to documents by their position in the pair
+            # the neutral labels map back by position within the pair
             for option, side in zip(OPTIONS, (left, right), strict=True):
                 totals[side] += answer.probabilities.get(option, 0.0)
                 matches[side] += 1

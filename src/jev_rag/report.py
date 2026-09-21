@@ -19,7 +19,7 @@ def format_comparison(
     results: dict[str, Any], baseline: str, metrics: list[str], published: bool = False
 ) -> str:
     reference = (results.get(baseline) or {}).get("metrics", {})
-    header = ["ranker", *metrics, "秒"]
+    header = ["ranker", *metrics, "n", "秒"]
     lines = ["| " + " | ".join(header) + " |", "|" + "---|" * len(header)]
 
     for name, result in results.items():
@@ -30,11 +30,16 @@ def format_comparison(
         cells = []
         for metric in metrics:
             value = result["metrics"].get(metric)
-            cell = "-" if value is None else f"{value:.3f}"
-            if name != baseline and metric in reference and value is not None:
+            if value is None:
+                cells.append("-")
+                continue
+            error = (result.get("stderr") or {}).get(metric)
+            cell = f"{value:.3f}" if error is None else f"{value:.3f}±{error:.3f}"
+            if name != baseline and metric in reference:
                 cell += f" ({value - reference[metric]:+.3f})"
             cells.append(cell)
-        lines.append(f"| {name} | " + " | ".join(cells) + f" | {result.get('seconds', '-')} |")
+        run = f"{result.get('queries', '-')} | {result.get('seconds', '-')}"
+        lines.append(f"| {name} | " + " | ".join(cells) + f" | {run} |")
 
     if published:
         lines.append("")

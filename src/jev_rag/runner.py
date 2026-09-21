@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from jev_rag.dataset import EvalQuery
-from jev_rag.metrics import mean_metrics, score_ranking
+from jev_rag.metrics import mean_metrics, score_ranking, standard_errors
 
 
 def _first_relevant(ranked) -> int | None:
@@ -48,8 +48,11 @@ def evaluate_rankers(
         except Exception as error:  # noqa: BLE001 - reported per ranker, run continues
             results[name] = {"error": f"{type(error).__name__}: {error}"}
             continue
+        scores = [{m: r[m] for m in r if "@" in m} for r in rows]
         results[name] = {
-            "metrics": mean_metrics([{m: r[m] for m in r if "@" in m} for r in rows]),
+            "metrics": mean_metrics(scores),
+            "stderr": standard_errors(scores),
+            "queries": len(rows),
             "per_query": rows,
             "seconds": round(time.monotonic() - started, 1),
         }
