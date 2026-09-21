@@ -26,6 +26,7 @@ from jev_rag.jev.prompts import (
     SCORE_INSTRUCTION,
 )
 from jev_rag.jev.questions import Noul, NoulAnswer, Score, ScoreAnswer
+from jev_rag.jev.state import candidate_path, candidate_state
 from jev_rag.types import RetrievedDoc
 
 
@@ -54,9 +55,6 @@ class JevReranker:
         self.vector_weight = vector_weight
         self.levels = levels or RELEVANCE_LEVELS
 
-    def _state(self, query: str, docs: list[RetrievedDoc]) -> dict[str, object]:
-        return {"query": query, "candidates": {doc.chunk_id: doc.text for doc in docs}}
-
     def rerank(
         self,
         query: str,
@@ -74,11 +72,15 @@ class JevReranker:
         if not docs:
             return []
 
+        state, position = candidate_state(query, docs)
         questions = {
-            doc.chunk_id: Score(SCORE_INSTRUCTION.format(key=doc.chunk_id), criteria=self.levels)
+            doc.chunk_id: Score(
+                SCORE_INSTRUCTION.format(path=candidate_path(position[doc.doc_id])),
+                criteria=self.levels,
+            )
             for doc in docs
         }
-        answers = self.client.evaluate(self._state(query, docs), questions)
+        answers = self.client.evaluate(state, questions)
 
         raw = [_as_score(answers.get(doc.chunk_id)) for doc in docs]
         jev_norm = [value / (len(self.levels) - 1) for value in raw]
@@ -112,13 +114,15 @@ class JevReranker:
         if not docs:
             return []
 
+        state, position = candidate_state(query, docs)
         questions = {
             doc.chunk_id: Noul(
-                NOUL_INSTRUCTION.format(key=doc.chunk_id), criteria=RELEVANCE_CRITERIA
+                NOUL_INSTRUCTION.format(path=candidate_path(position[doc.doc_id])),
+                criteria=RELEVANCE_CRITERIA,
             )
             for doc in docs
         }
-        answers = self.client.evaluate(self._state(query, docs), questions)
+        answers = self.client.evaluate(state, questions)
 
         original = {doc.chunk_id: position for position, doc in enumerate(docs)}
         ranked = [
@@ -142,13 +146,15 @@ class JevReranker:
         if not docs:
             return []
 
+        state, position = candidate_state(query, docs)
         questions = {
             doc.chunk_id: Noul(
-                NOUL_INSTRUCTION.format(key=doc.chunk_id), criteria=RELEVANCE_CRITERIA
+                NOUL_INSTRUCTION.format(path=candidate_path(position[doc.doc_id])),
+                criteria=RELEVANCE_CRITERIA,
             )
             for doc in docs
         }
-        answers = self.client.evaluate(self._state(query, docs), questions)
+        answers = self.client.evaluate(state, questions)
 
         judged = [
             replace(doc, jev_relevance=_as_noul(answers.get(doc.chunk_id)), vector_score=doc.score)

@@ -14,12 +14,11 @@ from dataclasses import dataclass, field, replace
 from jev_rag.jev.client import JevClient
 from jev_rag.jev.prompts import RELEVANCE_LEVELS
 from jev_rag.jev.questions import Noul, NoulAnswer, Score, ScoreAnswer
+from jev_rag.jev.state import candidate_path, candidate_state
 from jev_rag.types import RetrievedDoc
 
-USEFULNESS = (
-    'state.query に答える文脈として state.candidates["{key}"] がどれだけ有用かを判定してください。'
-)
-REDUNDANT = 'state.candidates["{key}"] の情報は、他の候補がすでに伝えている内容と重複していますか。'
+USEFULNESS = "`query` に答える文脈として {path} がどれだけ有用かを判定してください。"
+REDUNDANT = "{path} の情報は、`candidates` の他の要素がすでに伝えている内容と重複していますか。"
 REDUNDANT_CRITERIA = {
     "true": "同じ事実・数値を他の候補が既に述べており、追加しても新しい情報がない。",
     "false": "他の候補にはない事実・数値・観点を含む。",
@@ -55,14 +54,15 @@ class ContextSelector:
         if not docs:
             return ContextSelection()
 
-        state = {"query": query, "candidates": {doc.chunk_id: doc.text for doc in docs}}
+        state, position = candidate_state(query, docs)
         questions = {}
         for doc in docs:
+            path = candidate_path(position[doc.doc_id])
             questions[f"{doc.chunk_id}__usefulness"] = Score(
-                USEFULNESS.format(key=doc.chunk_id), criteria=RELEVANCE_LEVELS
+                USEFULNESS.format(path=path), criteria=RELEVANCE_LEVELS
             )
             questions[f"{doc.chunk_id}__redundant"] = Noul(
-                REDUNDANT.format(key=doc.chunk_id), criteria=REDUNDANT_CRITERIA
+                REDUNDANT.format(path=path), criteria=REDUNDANT_CRITERIA
             )
         answers = self.client.evaluate(state, questions)
 

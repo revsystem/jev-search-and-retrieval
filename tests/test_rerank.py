@@ -33,7 +33,8 @@ def test_rerank_asks_one_question_per_candidate_against_shared_state():
     request = transport.requests[0]
     assert len(request["questions"]) == 3
     assert request["state"]["query"] == "問い"
-    assert set(request["state"]["candidates"]) == {"top", "middle", "buried"}
+    texts = [entry["text"] for entry in request["state"]["candidates"]]
+    assert texts == [doc.text for doc in candidates()]
 
 
 def test_relevance_filter_drops_candidates_below_the_threshold():

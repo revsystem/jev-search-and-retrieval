@@ -16,8 +16,8 @@ from jev_rag.jev.prompts import RELEVANCE_CRITERIA, RELEVANCE_LEVELS
 from jev_rag.jev.questions import Noul, NoulAnswer, Score, ScoreAnswer
 from jev_rag.types import RetrievedDoc
 
-RELEVANCE = "state.candidate は state.query に答えるための根拠として役に立ちますか。"
-GRADE = "state.candidate が state.query の根拠としてどの程度有用かを判定してください。"
+RELEVANCE = "`candidate` は `query` に答えるための根拠として役に立ちますか。"
+GRADE = "`candidate` が `query` の根拠としてどの程度有用かを判定してください。"
 
 
 class CrossEncoder:

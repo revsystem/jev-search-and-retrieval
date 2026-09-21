@@ -79,8 +79,10 @@ def test_the_pointwise_jev_ranker_sorts_on_the_returned_probability():
 
 def test_the_pointwise_ranker_puts_every_candidate_in_one_shared_state():
     transport = FakeTransport(nouls={"decoy": 0.1, "answer": 0.9})
-    JevPointwiseRanker(JevClient(transport)).rank("問い", docs())
-    assert set(transport.requests[0]["state"]["candidates"]) == {"decoy", "answer"}
+    candidates = docs()
+    JevPointwiseRanker(JevClient(transport)).rank("問い", candidates)
+    state = transport.requests[0]["state"]["candidates"]
+    assert [entry["text"] for entry in state] == [doc.text for doc in candidates]
 
 
 def test_the_cross_encoder_sends_one_request_per_candidate():
@@ -91,7 +93,8 @@ def test_the_cross_encoder_sends_one_request_per_candidate():
 
 
 def test_the_pairwise_ranker_compares_candidates_against_each_other():
-    transport = FakeTransport(choices={"p0": "answer"}, confidence=0.9)
+    # the single pair is (decoy, answer), so option "b" is the answer
+    transport = FakeTransport(choices={"p0": "b"}, confidence=0.9)
     ranked = JevPairwiseRanker(JevClient(transport)).rank("問い", docs())
     assert [d.doc_id for d in ranked] == ["answer", "decoy"]
 

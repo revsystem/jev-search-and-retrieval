@@ -47,14 +47,16 @@ def test_each_comparison_is_a_two_option_choice():
 
 
 def test_the_candidate_that_wins_its_comparisons_ranks_first():
+    # the only pair is (a, b), so option "b" is the second document
     transport = FakeTransport(choices={"p0": "b"}, confidence=0.9)
     ranked = PairwiseReranker(JevClient(transport)).rerank("問い", docs("a", "b"))
     assert [d.chunk_id for d in ranked] == ["b", "a"]
 
 
 def test_wins_are_weighted_by_the_returned_probability():
-    # a beats b narrowly, c beats a decisively -> c first
-    transport = FakeTransport(choices={"p0": "a", "p1": "c", "p2": "c"}, confidence=0.55)
+    # pairs are (a,b), (a,c), (b,c); "a"/"b" are the option labels, so c wins
+    # its two comparisons as the second side of each
+    transport = FakeTransport(choices={"p0": "a", "p1": "b", "p2": "b"}, confidence=0.55)
     reranker = PairwiseReranker(JevClient(transport))
     ranked = reranker.rerank("問い", docs("a", "b", "c"))
     assert ranked[0].chunk_id == "c"

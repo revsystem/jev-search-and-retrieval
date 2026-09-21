@@ -14,6 +14,7 @@ from dataclasses import replace
 
 from jev_rag.jev.client import JevClient
 from jev_rag.jev.questions import Choice, ChoiceAnswer
+from jev_rag.jev.state import candidate_path, candidate_state
 from jev_rag.types import RetrievedDoc
 
 # How many comparisons one reranking is willing to pay for. This is a cost
@@ -22,10 +23,13 @@ from jev_rag.types import RetrievedDoc
 # and gives every candidate a fixed number of opponents instead.
 DEFAULT_COMPARISON_BUDGET = 64
 
-INSTRUCTION = (
-    "state.query により良く答えるのはどちらの候補ですか。"
-    'state.candidates["{left}"] と state.candidates["{right}"] を比較してください。'
-)
+INSTRUCTION = "`query` により良く答えるのはどちらの候補ですか。"
+
+# Choice option keys are shown to the model, unlike question ids, so they are
+# neutral labels rather than document ids; each one is described by the path
+# of the candidate it stands for.
+OPTIONS = ("a", "b")
+OPTION_DESCRIPTION = "{path} のほうが良い根拠になる。"
 
 
 def pair_schedule(ids: list[str], opponents: int = 3, limit: int = DEFAULT_COMPARISON_BUDGET):
@@ -70,30 +74,33 @@ class PairwiseReranker:
         if len(docs) < 2:
             return list(docs[:top_k]) if top_k else list(docs)
 
-        texts = {doc.chunk_id: doc.text for doc in docs}
-        schedule = pair_schedule(list(texts), self.opponents, self.comparison_budget)
+        state, position = candidate_state(query, docs)
+        schedule = pair_schedule(
+            [doc.doc_id for doc in docs], self.opponents, self.comparison_budget
+        )
         questions = {
             f"p{index}": Choice(
-                INSTRUCTION.format(left=left, right=right),
+                INSTRUCTION,
                 criteria={
-                    left: "こちらの方が良い根拠になる。",
-                    right: "こちらの方が良い根拠になる。",
+                    option: OPTION_DESCRIPTION.format(path=candidate_path(position[side]))
+                    for option, side in zip(OPTIONS, (left, right), strict=True)
                 },
             )
             for index, (left, right) in enumerate(schedule)
         }
-        answers = self.client.evaluate({"query": query, "candidates": texts}, questions)
+        answers = self.client.evaluate(state, questions)
 
         # A win counts by its probability, so a narrow call moves the ranking
         # less than a decisive one.
-        totals = dict.fromkeys(texts, 0.0)
-        matches = dict.fromkeys(texts, 0)
+        totals = {doc.doc_id: 0.0 for doc in docs}
+        matches = {doc.doc_id: 0 for doc in docs}
         for index, (left, right) in enumerate(schedule):
             answer = answers.get(f"p{index}")
             if not isinstance(answer, ChoiceAnswer):
                 continue
-            for side in (left, right):
-                totals[side] += answer.probabilities.get(side, 0.0)
+            # the neutral labels map back to documents by their position in the pair
+            for option, side in zip(OPTIONS, (left, right), strict=True):
+                totals[side] += answer.probabilities.get(option, 0.0)
                 matches[side] += 1
 
         original = {doc.chunk_id: position for position, doc in enumerate(docs)}

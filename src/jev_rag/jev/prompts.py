@@ -12,11 +12,11 @@ RELEVANCE_CRITERIA = {
     "false": "話題が重なるだけ、参照先が異なる、または根拠となる情報を含まない。",
 }
 
-NOUL_INSTRUCTION = (
-    'state.candidates["{key}"] は state.query に答えるための根拠として役に立ちますか。'
-)
+# {path} is filled with a backticked path such as `candidates[3].text`; see
+# jev_rag.jev.state for why candidates are addressed by position.
+NOUL_INSTRUCTION = "{path} は `query` に答えるための根拠として役に立ちますか。"
 
 SCORE_INSTRUCTION = (
-    'state.query に答えるための根拠として、state.candidates["{key}"] の有用性を判定してください。'
+    "`query` に答えるための根拠として、{path} の有用性を判定してください。"
     "話題が重なるだけの文章は低く、クエリが指す対象そのものを扱い数値・定義・事実を示す文章を高く評価します。"
 )
