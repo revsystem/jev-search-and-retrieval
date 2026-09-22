@@ -16,6 +16,7 @@ nDCG@10) rather than beating a dedicated cross-encoder on its own.
 
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
 
 from jev_rag.jev.budget import estimate_tokens, fitting_batch_size
@@ -51,10 +52,12 @@ class JevReranker:
         client: JevClient,
         vector_weight: float = 0.3,
         levels: list[str] | None = None,
+        max_workers: int = 8,
     ) -> None:
         self.client = client
         self.vector_weight = vector_weight
         self.levels = levels or RELEVANCE_LEVELS
+        self.max_workers = max_workers
 
     def rerank(
         self,
@@ -136,8 +139,7 @@ class JevReranker:
         fits = fitting_batch_size(query, docs, question_tokens=longest)
         size = fits if batch_size is None else min(batch_size, fits)
         groups = [docs[i : i + size] for i in range(0, len(docs), size)]
-        answers: dict = {}
-        for group in groups:
+        def judge(group):
             state, position = candidate_state(query, group)
             questions = {
                 doc.chunk_id: Noul(
@@ -146,7 +148,17 @@ class JevReranker:
                 )
                 for doc in group
             }
-            answers.update(self.client.evaluate(state, questions))
+            return self.client.evaluate(state, questions)
+
+        answers: dict = {}
+        if len(groups) == 1:
+            answers.update(judge(groups[0]))
+        else:
+            # The batches are independent, so sending them one after another
+            # would time the implementation rather than the request shape.
+            with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+                for result in executor.map(judge, groups):
+                    answers.update(result)
 
         original = {doc.chunk_id: position for position, doc in enumerate(docs)}
         ranked = [
