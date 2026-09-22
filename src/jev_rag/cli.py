@@ -138,33 +138,51 @@ def cmd_report(args: argparse.Namespace) -> int:
 
 
 def cmd_context(args: argparse.Namespace) -> int:
-    """Use case: select useful context. Reports what the selection costs and saves."""
+    """Use case: select useful context. Reports what the selection costs and saves.
+
+    The candidates are ranked first. Selecting from the raw shortlist would
+    measure the selector against a near-random slice and count evidence a real
+    pipeline would never have handed it.
+    """
     from jev_rag.config import Settings
     from jev_rag.jev.context import ContextSelector
+    from jev_rag.rankers import JevPointwiseRanker
 
     settings = Settings()
     client = settings.jev.build_client()
     queries = sample_queries(
         load_jqara(args.data, max_candidates=args.candidates), args.queries, seed=args.seed
     )
+    ranker = JevPointwiseRanker(client)
     selector = ContextSelector(client, budget_chars=args.budget)
 
     kept_chars = total_chars = kept_relevant = total_relevant = kept_docs = 0
+    answerable = still_answerable = 0
     for query in queries:
-        docs = query.as_documents()[: args.top_k]
+        docs = ranker.rank(query.question, query.as_documents())[: args.top_k]
+        relevant = sum(1 for d in docs if d.label)
+        if relevant:
+            answerable += 1
         selection = selector.select(query.question, docs)
         total_chars += sum(len(d.text) for d in docs)
         kept_chars += selection.used_chars
         kept_docs += len(selection.selected)
-        total_relevant += sum(1 for d in docs if d.label)
-        kept_relevant += sum(1 for d in selection.selected if d.label)
+        total_relevant += relevant
+        survivors = sum(1 for d in selection.selected if d.label)
+        kept_relevant += survivors
+        # what a RAG prompt actually needs is one good passage, not all of them
+        if relevant and survivors:
+            still_answerable += 1
 
-    print(f"{len(queries)} 問、各上位{args.top_k}件を入力、予算{args.budget}文字")
+    print(f"{len(queries)} 問、並べ替え後の上位{args.top_k}件を入力、予算{args.budget}文字")
     saved = kept_chars / max(total_chars, 1)
     print(f"  渡す文脈: {total_chars} -> {kept_chars} 文字 ({saved:.0%})")
-    print(f"  採用件数: {kept_docs} / {len(queries) * args.top_k}")
+    per_query = kept_docs / max(len(queries), 1)
+    print(f"  採用件数: {kept_docs} / {len(queries) * args.top_k}（1問あたり {per_query:.1f} 件）")
     retained = kept_relevant / max(total_relevant, 1)
     print(f"  正解の保持: {kept_relevant} / {total_relevant} ({retained:.0%})")
+    print(f"  正解を1件以上残せた問題: {still_answerable} / {answerable}")
+    print(f"  （上位{args.top_k}件に正解を含む問題が {answerable} / {len(queries)}）")
     return 0
 
 

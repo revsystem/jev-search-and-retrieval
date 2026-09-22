@@ -139,6 +139,7 @@ class JevReranker:
         fits = fitting_batch_size(query, docs, question_tokens=longest)
         size = fits if batch_size is None else min(batch_size, fits)
         groups = [docs[i : i + size] for i in range(0, len(docs), size)]
+
         def judge(group):
             state, position = candidate_state(query, group)
             questions = {

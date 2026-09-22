@@ -37,6 +37,8 @@ S3 Vectors。当初の前提に入っていたが、JQaRA は候補が最初か�
 
 state の参照記法（`src/jev_rag/jev/state.py`）。質問の instructions から候補を指すときは、バックティック付きのドット・インデックス記法を state ルートからの相対パスで書く（例: `` `candidates[3].text` ``）。`state.` 接頭辞は付けない。質問IDはモデルに送られないので、どの候補についての判定かを伝えられるのは instructions だけ。候補は配列で渡し、位置で参照する。質問キー（doc_id）とパス（位置）が別物になるため、両者がズレると全候補が静かに誤採点され「日本語が苦手」に見える。`tests/test_state_paths.py` がこの対応を固定しており、AST を歩いて古い書き方の再発も検出する。Choice の選択肢キーはモデルに見えるので、doc_id ではなく中立なラベル（a / b）を使い、説明文でパスを示す。
 
+1リクエストに載せる候補数（`rankers.py` の `JevPointwiseRanker.DEFAULT_BATCH_SIZE = 10`）。実測で決めた値で、全ての結果がこれに依存する。「収まる限り最大」に戻すと nDCG@10 が 0.866 から 0.276 に落ち、hybrid は基準の埋め込みすら下回る。掃引（`jev-rag sweep`）では1〜10件が横ばい、25件で崩れ、50件で 0.307。候補が大きすぎて1リクエストに収まらない場合は `budget.py` の `fitting_batch_size` が自動で分割する（分割しないと 400 max_tokens_exceeded になる）。
+
 パッセージの作り方（`dataset.py` の `passage_text`）。JQaRA 公式の評価スクリプトは既定で `f"{title} {text}"` を連結してからモデルに渡す。README が並べている公開スコアはその形で出た数字なので、本文だけを採点すると同じ土俵に乗らない。
 
 `.claude/docs/research/typesafe/` は公式ドキュメントの逐語コピー。実装の照合基準なので整形しない。ruff の対象外にしてある（`pyproject.toml` の `extend-exclude`）。
