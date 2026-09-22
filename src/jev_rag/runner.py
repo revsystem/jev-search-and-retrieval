@@ -81,3 +81,39 @@ def load(path: str | Path) -> dict[str, Any]:
     if not target.exists():
         raise SystemExit(f"{target} がありません。先に `jev-rag evaluate` を実行してください。")
     return json.loads(target.read_text(encoding="utf-8"))
+
+
+def merge_results(parts: list[dict[str, Any]]) -> dict[str, Any]:
+    """Combine result files, later files winning.
+
+    A run can lose routes to an expired credential or a rejected request, and
+    re-running only those leaves the measurement split. A failed route never
+    replaces a successful one: re-running is how a failure gets fixed, not how
+    a success gets lost.
+    """
+    merged: dict[str, Any] = {}
+    for part in parts:
+        for name, result in part.items():
+            existing = merged.get(name)
+            if existing and "error" in result and "error" not in existing:
+                continue
+            merged[name] = result
+    return merged
+
+
+def inconsistent_query_counts(results: dict[str, Any]) -> dict[str, int]:
+    """Routes measured over different numbers of queries, if they disagree.
+
+    Comparing a route measured on 30 queries with one measured on 100 is not a
+    comparison, and a merged file is where that slips in unnoticed.
+    """
+    counts = {
+        name: result["queries"]
+        for name, result in results.items()
+        if isinstance(result, dict) and "queries" in result
+    }
+    return counts if len(set(counts.values())) > 1 else {}
+
+
+def merge_files(paths) -> dict[str, Any]:
+    return merge_results([json.loads(Path(p).read_text(encoding="utf-8")) for p in paths])

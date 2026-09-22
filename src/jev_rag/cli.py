@@ -118,7 +118,18 @@ def cmd_sweep(args: argparse.Namespace) -> int:
 
 
 def cmd_report(args: argparse.Namespace) -> int:
-    results = {k: v for k, v in load(args.results).items() if k != "_run"}
+    from jev_rag.runner import inconsistent_query_counts, merge_files
+
+    paths = args.results.split(",")
+    merged = merge_files(paths) if len(paths) > 1 else load(args.results)
+    results = {k: v for k, v in merged.items() if k != "_run"}
+
+    mismatched = inconsistent_query_counts(results)
+    if mismatched:
+        print("注意: 経路によって問題数が違う。同じ土俵の比較になっていない。")
+        for name, count in sorted(mismatched.items()):
+            print(f"  {name}: {count} 問")
+        print()
     print(format_comparison(results, baseline=args.baseline, metrics=METRICS, published=True))
     if args.movers and args.movers in results:
         print()
@@ -229,7 +240,9 @@ def main(argv: list[str] | None = None) -> int:
     sweep.set_defaults(func=cmd_sweep)
 
     report = sub.add_parser("report", help="保存済みの結果から表を出し直す")
-    report.add_argument("--results", default=RESULTS_PATH)
+    report.add_argument(
+        "--results", default=RESULTS_PATH, help="カンマ区切りで複数指定すると統合して表示する"
+    )
     report.add_argument("--baseline", default="embedding")
     report.add_argument("--movers", default="jev_crossencode", help="順位が上がった例を出す経路")
     report.add_argument("--limit", type=int, default=10)
