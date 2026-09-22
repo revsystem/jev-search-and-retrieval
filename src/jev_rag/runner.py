@@ -19,12 +19,18 @@ def _first_relevant(ranked) -> int | None:
 
 
 def evaluate_rankers(
-    rankers: dict[str, Any], queries: list[EvalQuery], k: int = 10, progress=None
+    rankers: dict[str, Any],
+    queries: list[EvalQuery],
+    k: int = 10,
+    progress=None,
+    on_result=None,
 ) -> dict[str, Any]:
     """Score each ranker on each query.
 
     A ranker that raises is recorded and the run continues: one missing
-    credential should not throw away the rows that did succeed.
+    credential should not throw away the rows that did succeed. ``on_result``
+    is called with the results so far after each ranker finishes, so a run
+    measured in tens of minutes survives being interrupted.
     """
     results: dict[str, Any] = {}
     for name, ranker in rankers.items():
@@ -47,6 +53,8 @@ def evaluate_rankers(
                     progress(name, len(rows), len(queries))
         except Exception as error:  # noqa: BLE001 - reported per ranker, run continues
             results[name] = {"error": f"{type(error).__name__}: {error}"}
+            if on_result:
+                on_result(results)
             continue
         scores = [{m: r[m] for m in r if "@" in m} for r in rows]
         results[name] = {
@@ -56,6 +64,8 @@ def evaluate_rankers(
             "per_query": rows,
             "seconds": round(time.monotonic() - started, 1),
         }
+        if on_result:
+            on_result(results)
     return results
 
 

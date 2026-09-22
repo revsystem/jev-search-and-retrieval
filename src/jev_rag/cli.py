@@ -51,7 +51,13 @@ def cmd_evaluate(args: argparse.Namespace) -> int:
             if done == total:
                 print()
 
-    results = evaluate_rankers(rankers, queries, k=args.k, progress=progress)
+    results = evaluate_rankers(
+        rankers,
+        queries,
+        k=args.k,
+        progress=progress,
+        on_result=lambda partial: save(partial, args.out),
+    )
     results["_run"] = {
         "queries": len(queries),
         "candidates": args.candidates,
@@ -95,7 +101,13 @@ def cmd_sweep(args: argparse.Namespace) -> int:
             if done == total:
                 print()
 
-    results = evaluate_rankers(rankers, queries, k=args.k, progress=progress)
+    results = evaluate_rankers(
+        rankers,
+        queries,
+        k=args.k,
+        progress=progress,
+        on_result=lambda partial: save(partial, args.out),
+    )
     print(f"\n{save(results, args.out)} に保存しました\n")
     print(
         f"候補{args.candidates}件を何件ずつ1リクエストに載せるかの比較"
