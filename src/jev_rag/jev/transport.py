@@ -75,8 +75,13 @@ class HttpTransport:
             else:
                 if not should_retry(response.status_code):
                     # Raises immediately on 401/403/422 rather than sleeping through
-                    # three attempts on an error no retry can fix.
-                    response.raise_for_status()
+                    # three attempts on an error no retry can fix. The body is
+                    # included because the status alone does not say which
+                    # question or field the service objected to.
+                    if response.status_code >= 400:
+                        raise RuntimeError(
+                            f"Jev {response.status_code} from {self.url}: {response.text[:600]}"
+                        )
                     return response.json()
                 last = RuntimeError(f"retryable status {response.status_code}")
             if attempt < self.max_retries - 1:

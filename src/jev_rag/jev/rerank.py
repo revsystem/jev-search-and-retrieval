@@ -18,6 +18,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 
+from jev_rag.jev.budget import estimate_tokens, fitting_batch_size
 from jev_rag.jev.client import JevClient
 from jev_rag.jev.prompts import (
     NOUL_INSTRUCTION,
@@ -123,11 +124,18 @@ class JevReranker:
         # grows with detail unrelated to the decision. batch_size is therefore
         # a knob on that trade-off, not an implementation detail: a batch of
         # one is cross-encoding, and the whole shortlist is one shared state.
-        groups = (
-            [docs]
-            if batch_size is None
-            else [docs[i : i + batch_size] for i in range(0, len(docs), batch_size)]
+        longest = max(
+            estimate_tokens(
+                Noul(
+                    NOUL_INSTRUCTION.format(path=candidate_path(len(docs))),
+                    criteria=RELEVANCE_CRITERIA,
+                ).payload()
+            ),
+            1,
         )
+        fits = fitting_batch_size(query, docs, question_tokens=longest)
+        size = fits if batch_size is None else min(batch_size, fits)
+        groups = [docs[i : i + size] for i in range(0, len(docs), size)]
         answers: dict = {}
         for group in groups:
             state, position = candidate_state(query, group)

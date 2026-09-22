@@ -17,6 +17,10 @@ TOTAL_TOKEN_BUDGET = 64_000
 STATE_PLUS_QUESTION_BUDGET = 32_000
 # Leaves room for the wrapper JSON and for the estimate being approximate.
 SAFETY_MARGIN = 0.9
+# Measured against a reported usage of 35,356 tokens where this estimate said
+# 32,069: the character count runs about 10% under. The limits are hard and a
+# breach costs the whole request, so the correction is generous.
+UNDERCOUNT_CORRECTION = 1.25
 
 _CJK = re.compile(r"[　-〿぀-ゟ゠-ヿ㐀-鿿＀-￯]")
 
@@ -30,7 +34,32 @@ def estimate_tokens(value: Any) -> int:
     """
     text = value if isinstance(value, str) else json.dumps(value, ensure_ascii=False)
     cjk = len(_CJK.findall(text))
-    return cjk + (len(text) - cjk + 3) // 4
+    raw = cjk + (len(text) - cjk + 3) // 4
+    return int(raw * UNDERCOUNT_CORRECTION)
+
+
+def fitting_batch_size(
+    query: str,
+    docs,
+    question_tokens: int,
+    pair_budget: int = STATE_PLUS_QUESTION_BUDGET,
+) -> int:
+    """How many candidates can share one state.
+
+    The binding limit for a listwise reranking request is the state plus the
+    single longest question, not the total: 100 Japanese passages of a few
+    hundred characters exceed it on their own, and the service answers 400
+    max_tokens_exceeded. Splitting is the caller's only option, so it is done
+    here rather than left to them.
+    """
+    overhead = estimate_tokens({"query": query, "candidates": []}) + question_tokens
+    room = int(pair_budget * SAFETY_MARGIN) - overhead
+    used = 0
+    for count, doc in enumerate(docs):
+        used += estimate_tokens({"text": doc.text})
+        if used > room:
+            return max(count, 1)
+    return max(len(docs), 1)
 
 
 def batch_by_budget(
