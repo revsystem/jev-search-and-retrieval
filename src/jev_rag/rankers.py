@@ -98,10 +98,20 @@ class JevPointwiseRanker:
     cross-encoding.
     """
 
-    def __init__(self, client: JevClient, batch_size: int | None = None) -> None:
+    # Measured on JQaRA (30 queries, 100 candidates): accuracy is flat from 1
+    # to 10 candidates per request (nDCG@10 0.835 / 0.833 / 0.836) and falls
+    # off a cliff after it (0.578 at 25, 0.204 at 100), while the time per
+    # query drops tenfold from 1 to 10. Ten is where both curves are good.
+    DEFAULT_BATCH_SIZE = 10
+
+    def __init__(self, client: JevClient, batch_size: int | None = DEFAULT_BATCH_SIZE) -> None:
         self.reranker = JevReranker(client)
         self.batch_size = batch_size
-        self.name = "jev_pointwise" if batch_size is None else f"jev_pointwise@{batch_size}"
+        self.name = (
+            "jev_pointwise"
+            if batch_size == self.DEFAULT_BATCH_SIZE
+            else ("jev_pointwise@all" if batch_size is None else f"jev_pointwise@{batch_size}")
+        )
 
     def rank(self, question: str, docs: list[RetrievedDoc]) -> list[RetrievedDoc]:
         if not docs:
