@@ -147,6 +147,51 @@ def judge_metrics(
     return result
 
 
+def paired_bootstrap(
+    rows_a: list[dict[str, Any]],
+    rows_b: list[dict[str, Any]],
+    samples: int = 2000,
+    seed: int = 0,
+) -> dict[str, Any]:
+    """95% interval for PR-AUC(a) - PR-AUC(b), resampling whole queries.
+
+    Pairs within a query are not independent — they share the question — so
+    queries, not pairs, are the unit drawn. Both routes are scored on the same
+    draw, which removes the variation that comes from which queries were hard.
+    """
+
+    def grouped(rows):
+        out: dict[str, list[dict[str, Any]]] = defaultdict(list)
+        for row in rows:
+            out[row["query_id"]].append(row)
+        return out
+
+    a, b = grouped(rows_a), grouped(rows_b)
+    queries = sorted(set(a) & set(b))
+
+    def pr_auc(groups, drawn):
+        rows = [row for q in drawn for row in groups[q]]
+        labels = [row["label"] for row in rows]
+        if len(set(labels)) < 2:
+            return None
+        return average_precision_score(labels, [row["score"] for row in rows])
+
+    rng = np.random.default_rng(seed)
+    differences = []
+    for _ in range(samples):
+        drawn = [queries[i] for i in rng.integers(0, len(queries), len(queries))]
+        pa, pb = pr_auc(a, drawn), pr_auc(b, drawn)
+        if pa is not None and pb is not None:
+            differences.append(pa - pb)
+    low, high = np.percentile(differences, [2.5, 97.5])
+    return {
+        "difference": float(pr_auc(a, queries) - pr_auc(b, queries)),
+        "low": float(low),
+        "high": float(high),
+        "queries": len(queries),
+    }
+
+
 def run_judge(rankers: dict[str, Any], queries: list[EvalQuery], out: str | Path) -> dict[str, Any]:
     """Score every route once and save after each, so a rerun resumes.
 

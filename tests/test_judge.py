@@ -16,7 +16,14 @@ Calibration (ECE, Brier) is computed only for routes that emit a probability.
 import pytest
 
 from jev_rag.dataset import EvalQuery
-from jev_rag.judge import calibration_bins, format_judge, judge_metrics, run_judge, score_pairs
+from jev_rag.judge import (
+    calibration_bins,
+    format_judge,
+    judge_metrics,
+    paired_bootstrap,
+    run_judge,
+    score_pairs,
+)
 from jev_rag.types import RetrievedDoc
 
 
@@ -258,3 +265,39 @@ def test_a_route_that_failed_every_query_is_retried(tmp_path):
     retry = Constant()
     run_judge({"cohere_rerank": retry}, two_queries(), out)
     assert retry.calls == 2
+
+
+# --- is a difference more than noise? ----------------------------------------
+
+
+def many_queries(better_margin):
+    rows_a, rows_b = [], []
+    for q in range(30):
+        for i, label in enumerate([1, 0, 0, 0]):
+            base = {"query_id": f"q{q}", "doc_id": f"q{q}-{i}", "label": label}
+            rows_a.append(base | {"score": (0.9 if label else 0.1) + 0.01 * i})
+            # b ranks one negative per query above every positive when the margin is on
+            confused = better_margin and i == 1
+            score = 0.95 if confused else (0.9 if label else 0.1) - 0.01 * i
+            rows_b.append(base | {"score": score})
+    return rows_a, rows_b
+
+
+def test_a_clear_difference_has_an_interval_above_zero():
+    a, b = many_queries(better_margin=True)
+    result = paired_bootstrap(a, b, samples=500, seed=0)
+    assert result["difference"] > 0
+    assert result["low"] > 0
+
+
+def test_identical_routes_have_an_interval_around_zero():
+    a, _ = many_queries(better_margin=False)
+    result = paired_bootstrap(a, a, samples=200, seed=0)
+    assert result["difference"] == pytest.approx(0.0)
+    assert result["low"] <= 0 <= result["high"]
+
+
+def test_the_bootstrap_uses_only_queries_both_routes_scored():
+    a, b = many_queries(better_margin=True)
+    result = paired_bootstrap(a, [r for r in b if r["query_id"] != "q0"], samples=50, seed=0)
+    assert result["queries"] == 29
