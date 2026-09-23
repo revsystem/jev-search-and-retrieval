@@ -93,10 +93,9 @@ class BedrockReranker:
 
 
 SYSTEM_PROMPT = (
-    "あなたは総務省『情報通信白書』の内容に関する質問に答えるアシスタントです。"
-    "与えられた抜粋だけを根拠に、日本語で簡潔に回答してください。"
-    "抜粋に根拠がない場合は、推測せず『提供された資料からは判断できません』と答えてください。"
-    "回答の該当箇所には [p.ページ番号] の形式で出典を付けてください。"
+    "与えられた文章だけを根拠に、クイズの質問へ答えてください。"
+    "答えは名称のみを一つ、余計な説明を付けずに出力します。"
+    "根拠が見当たらない場合は「不明」とだけ答えてください。"
 )
 
 
@@ -107,13 +106,13 @@ class BedrockGenerator:
         self.settings = settings or BedrockSettings()
         self.client = client or _client("bedrock-runtime", self.settings.region)
 
-    def answer(self, query: str, docs: list[RetrievedDoc], max_tokens: int = 800) -> str:
-        context = "\n\n".join(f"[p.{doc.metadata.get('page', '?')}] {doc.text}" for doc in docs)
+    def answer(self, query: str, docs: list[RetrievedDoc], max_tokens: int = 64) -> str:
+        context = "\n\n".join(f"- {doc.text}" for doc in docs)
         response = self.client.converse(
             modelId=self.settings.generation_model_id,
             system=[{"text": SYSTEM_PROMPT}],
             messages=[
-                {"role": "user", "content": [{"text": f"# 抜粋\n{context}\n\n# 質問\n{query}"}]}
+                {"role": "user", "content": [{"text": f"# 文章\n{context}\n\n# 質問\n{query}"}]}
             ],
             inferenceConfig={"maxTokens": max_tokens, "temperature": 0.0},
         )

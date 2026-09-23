@@ -14,7 +14,7 @@ and derivatives share alike.
 from __future__ import annotations
 
 import random
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -31,6 +31,9 @@ class EvalQuery:
     query_id: str
     question: str
     candidates: list[RetrievedDoc]
+    # JQaRA ships the gold answer, which is what lets the end-to-end
+    # comparison be scored without an LLM judge
+    answers: list[str] = field(default_factory=list)
 
     @property
     def total_relevant(self) -> int:
@@ -70,9 +73,11 @@ def to_queries(rows: list[dict[str, Any]], max_candidates: int | None = None) ->
     """
     grouped: dict[str, list[dict[str, Any]]] = {}
     questions: dict[str, str] = {}
+    answers: dict[str, list[str]] = {}
     for row in rows:
         grouped.setdefault(row["q_id"], []).append(row)
         questions[row["q_id"]] = row["question"]
+        answers[row["q_id"]] = [str(a) for a in (row.get("answers") or [])]
 
     queries: list[EvalQuery] = []
     for query_id, group in grouped.items():
@@ -95,7 +100,12 @@ def to_queries(rows: list[dict[str, Any]], max_candidates: int | None = None) ->
         if not any(c.label for c in candidates):
             continue
         queries.append(
-            EvalQuery(query_id=query_id, question=questions[query_id], candidates=candidates)
+            EvalQuery(
+                query_id=query_id,
+                question=questions[query_id],
+                candidates=candidates,
+                answers=answers.get(query_id, []),
+            )
         )
     return queries
 

@@ -76,6 +76,64 @@ def cmd_evaluate(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_answer(args: argparse.Namespace) -> int:
+    """End to end: does a better ranking change the answer the pipeline gives?
+
+    Everything but the ranking route is held fixed — same questions, same
+    candidate pool, same top-k, same prompt, same generation model — so a
+    difference in the answer is attributable to the ranking.
+    """
+    from jev_rag.bedrock import BedrockGenerator
+    from jev_rag.config import Settings
+    from jev_rag.endtoend import answer_queries, format_answers
+    from jev_rag.jev.context import ContextSelector
+
+    settings = Settings()
+    names = args.rankers.split(",")
+    client = settings.jev.build_client() if any(n.startswith("jev") for n in names) else None
+    rankers = build_rankers(names, client=client, settings=settings.bedrock)
+    generator = BedrockGenerator(settings.bedrock)
+    queries = sample_queries(
+        load_jqara(args.data, max_candidates=args.candidates), args.queries, seed=args.seed
+    )
+
+    if args.select:
+        # the context-selection use case, applied after the ranking it follows
+        selector = ContextSelector(client, budget_chars=args.budget)
+
+        class Selected:
+            def __init__(self, inner):
+                self.inner = inner
+                self.name = f"{inner.name}+select"
+
+            def rank(self, question, docs):
+                ranked = self.inner.rank(question, docs)[: args.top_k]
+                return selector.select(question, ranked).selected
+
+        rankers = {r.name: r for r in (Selected(v) for v in rankers.values())}
+
+    def progress(name, done, total):
+        if done % 10 == 0 or done == total:
+            print(f"\r  {name}: {done}/{total}", end="", flush=True)
+            if done == total:
+                print()
+
+    results: dict = {}
+    for name, ranker in rankers.items():
+        try:
+            results[name] = answer_queries(
+                ranker, queries, generator, top_k=args.top_k, progress=progress
+            )
+        except Exception as error:  # noqa: BLE001 - reported per route, run continues
+            results[name] = {"error": f"{type(error).__name__}: {error}"}
+        save(results, args.out)
+
+    print(f"\n{args.out} に保存しました\n")
+    print(f"{len(queries)} 問、候補{args.candidates}件から上位{args.top_k}件を文脈に渡して回答")
+    print(format_answers(results, baseline=args.baseline))
+    return 0
+
+
 def cmd_sweep(args: argparse.Namespace) -> int:
     """How accuracy moves with the number of candidates sharing one request.
 
@@ -246,6 +304,19 @@ def main(argv: list[str] | None = None) -> int:
     evaluate.add_argument("--baseline", default="embedding")
     evaluate.add_argument("--out", default=RESULTS_PATH)
     evaluate.set_defaults(func=cmd_evaluate)
+
+    answer = sub.add_parser("answer", help="検索経路を替えて最終回答の正解率を比べる")
+    answer.add_argument("--data", default=str(DEFAULT_PATH))
+    answer.add_argument("--rankers", default="embedding,cohere_rerank,jev_pointwise")
+    answer.add_argument("--queries", type=int, default=100)
+    answer.add_argument("--candidates", type=int, default=100)
+    answer.add_argument("--top-k", type=int, default=5, help="生成に渡す文書数")
+    answer.add_argument("--select", action="store_true", help="Jevの文脈選択を後段に挟む")
+    answer.add_argument("--budget", type=int, default=1500)
+    answer.add_argument("--seed", type=int, default=0)
+    answer.add_argument("--baseline", default="embedding")
+    answer.add_argument("--out", default="out/answers.json")
+    answer.set_defaults(func=cmd_answer)
 
     sweep = sub.add_parser("sweep", help="1リクエストに載せる候補数と精度の関係を測る")
     sweep.add_argument("--data", default=str(DEFAULT_PATH))
