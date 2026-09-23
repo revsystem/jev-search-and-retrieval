@@ -115,6 +115,9 @@ class BedrockGenerator:
             messages=[
                 {"role": "user", "content": [{"text": f"# 文章\n{context}\n\n# 質問\n{query}"}]}
             ],
-            inferenceConfig={"maxTokens": max_tokens, "temperature": 0.0},
+            # GPT-5.6 Luna rejects temperature on Converse ("This model doesn't
+            # support the temperature field"), so the run relies on the model's
+            # own default rather than pinning it.
+            inferenceConfig={"maxTokens": max_tokens},
         )
         return "".join(block.get("text", "") for block in response["output"]["message"]["content"])
