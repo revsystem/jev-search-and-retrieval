@@ -34,6 +34,8 @@ class EvalQuery:
     # JQaRA ships the gold answer, which is what lets the end-to-end
     # comparison be scored without an LLM judge
     answers: list[str] = field(default_factory=list)
+    # a label for breaking results down, such as the synthetic set's question type
+    category: str = ""
 
     @property
     def total_relevant(self) -> int:
