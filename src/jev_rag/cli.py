@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import sys
 
 from jev_rag.dataset import DEFAULT_PATH, load_jqara, sample_queries
@@ -90,7 +91,8 @@ def cmd_answer(args: argparse.Namespace) -> int:
 
     settings = Settings()
     names = args.rankers.split(",")
-    client = settings.jev.build_client() if any(n.startswith("jev") for n in names) else None
+    needs_jev = args.select or any(n.startswith("jev") for n in names)
+    client = settings.jev.build_client() if needs_jev else None
     rankers = build_rankers(names, client=client, settings=settings.bedrock)
     generator = BedrockGenerator(settings.bedrock)
     queries = sample_queries(
@@ -111,6 +113,9 @@ def cmd_answer(args: argparse.Namespace) -> int:
                 return selector.select(question, ranked).selected
 
         rankers = {r.name: r for r in (Selected(v) for v in rankers.values())}
+        baseline = f"{args.baseline}+select"
+    else:
+        baseline = args.baseline
 
     def progress(name, done, total):
         if done % 10 == 0 or done == total:
@@ -128,9 +133,22 @@ def cmd_answer(args: argparse.Namespace) -> int:
             results[name] = {"error": f"{type(error).__name__}: {error}"}
         save(results, args.out)
 
+    from jev_rag.bedrock import SYSTEM_PROMPT
+
+    results["_run"] = {
+        "queries": len(queries),
+        "candidates": args.candidates,
+        "top_k": args.top_k,
+        "seed": args.seed,
+        "select": args.select,
+        "budget": args.budget if args.select else None,
+        "generation_model": settings.bedrock.generation_model_id,
+        "prompt_sha256": hashlib.sha256(SYSTEM_PROMPT.encode("utf-8")).hexdigest()[:16],
+    }
+    save(results, args.out)
     print(f"\n{args.out} に保存しました\n")
     print(f"{len(queries)} 問、候補{args.candidates}件から上位{args.top_k}件を文脈に渡して回答")
-    print(format_answers(results, baseline=args.baseline))
+    print(format_answers(results, baseline=baseline))
     return 0
 
 

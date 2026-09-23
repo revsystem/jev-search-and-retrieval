@@ -77,7 +77,9 @@ def to_queries(rows: list[dict[str, Any]], max_candidates: int | None = None) ->
     for row in rows:
         grouped.setdefault(row["q_id"], []).append(row)
         questions[row["q_id"]] = row["question"]
-        answers[row["q_id"]] = [str(a) for a in (row.get("answers") or [])]
+        # parquet hands this back as a numpy array, whose truth value raises
+        # once it holds more than one element
+        answers[row["q_id"]] = [str(a) for a in list(row.get("answers", []))]
 
     queries: list[EvalQuery] = []
     for query_id, group in grouped.items():
