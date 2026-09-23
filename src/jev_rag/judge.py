@@ -1,7 +1,7 @@
 """Each route as a relevance judge.
 
-JQaRA labels every (query, passage) pair, so a route's scores can be evaluated
-as a binary classifier rather than only as an ordering. The distinction matters
+Every dataset here labels each (query, document) pair, so a route's scores can
+be evaluated as a binary classifier rather than only as an ordering. The distinction matters
 for the claim "Jev as a Judge":
 
 - per-query ROC-AUC asks whether a route orders one query's candidates. That
@@ -10,8 +10,8 @@ for the claim "Jev as a Judge":
   means the same thing across queries. A judge needs that: a threshold is only
   useful if 0.8 is 0.8 whatever the query.
 
-PR-AUC is the headline because about 8 of 100 candidates are relevant, and
-ROC-AUC flatters a skew like that. Both are unchanged by any monotone rescaling
+PR-AUC is the headline because relevant documents are the minority of each
+pool, and ROC-AUC flatters a skew like that. Both are unchanged by any monotone rescaling
 of the score, so a route that does not emit probabilities is not penalised.
 
 Calibration — ECE and Brier score — is computed only for routes that emit a
@@ -19,21 +19,26 @@ probability. TypeSafe documents Noul answers as calibrated; nothing else in
 the comparison claims to be, and an ECE for a score that is not a probability
 would measure nothing.
 
-The negatives are hard: JQaRA's non-relevant candidates were retrieved by a
-first-stage system, not drawn at random, so absolute AUCs sit below what a
-random-negative benchmark would report.
+The negatives are hard in all three datasets — judged retrieval results in
+MIRACL, near misses written to share the question's terms in J-RAGBench and
+the synthetic set — so absolute AUCs sit below what a random-negative
+benchmark would report.
 """
 
 from __future__ import annotations
 
+import json
 import time
 from collections import defaultdict
+from pathlib import Path
 from typing import Any
 
 import numpy as np
 from sklearn.metrics import average_precision_score, precision_recall_curve, roc_auc_score
 
 from jev_rag.dataset import EvalQuery
+from jev_rag.runner import save
+from jev_rag.synthetic import baseline_scores
 
 
 def score_pairs(ranker: Any, queries: list[EvalQuery]) -> dict[str, Any]:
@@ -140,6 +145,32 @@ def judge_metrics(
         result["brier"] = float(np.mean((scores - labels) ** 2))
         result["calibration"] = table
     return result
+
+
+def run_judge(rankers: dict[str, Any], queries: list[EvalQuery], out: str | Path) -> dict[str, Any]:
+    """Score every route once and save after each, so a rerun resumes.
+
+    A route already measured in ``out`` is not paid for again; one that failed
+    every query is. The trivial baselines are added for free: if BM25 judges as
+    well as a model, the dataset is not testing judgement.
+    """
+    target = Path(out)
+    results = json.loads(target.read_text(encoding="utf-8")) if target.exists() else {}
+    for name, rows in baseline_scores(queries).items():
+        scored = {"pairs": rows, "failed": [], "dropped": 0, "seconds": 0.0}
+        results[name] = judge_metrics(rows, probabilistic=False) | {"scored": scored}
+    for name, ranker in rankers.items():
+        if "pr_auc" in results.get(name, {}):
+            continue
+        scored = score_pairs(ranker, queries)
+        if scored["pairs"]:
+            metrics = judge_metrics(scored["pairs"], probabilistic=name.startswith("jev"))
+        else:
+            metrics = {"error": "全問失敗"}
+        results[name] = metrics | {"scored": scored}
+        save(results, target)
+    save(results, target)
+    return results
 
 
 def format_judge(results: dict[str, Any]) -> str:

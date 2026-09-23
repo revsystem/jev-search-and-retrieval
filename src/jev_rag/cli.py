@@ -213,6 +213,40 @@ def cmd_sweep(args: argparse.Namespace) -> int:
     return 0
 
 
+def _judge_queries(dataset: str):
+    if dataset == "synthetic":
+        from jev_rag.synthetic import load_synthetic
+
+        return [q for part in ("gen_a", "gen_b") for q in load_synthetic(f"data/synthetic/{part}")]
+    from jev_rag.public import load_public
+
+    return load_public()[dataset]
+
+
+def cmd_judge(args: argparse.Namespace) -> int:
+    """Each route as a relevance judge: one score per (query, document) pair."""
+    from jev_rag.config import Settings
+    from jev_rag.judge import format_judge, run_judge
+
+    settings = Settings()
+    queries = sample_queries(_judge_queries(args.dataset), args.queries, seed=args.seed)
+    names = [n for n in args.rankers.split(",") if n]
+    needs_jev = any(n.startswith("jev") for n in names)
+    if names:
+        _preflight(settings, names, needs_jev=needs_jev)
+    client = settings.jev.build_client() if needs_jev else None
+    rankers = build_rankers(names, client=client, settings=settings.bedrock)
+    pairs = sum(len(q.candidates) for q in queries)
+    print(
+        f"{args.dataset}: {len(queries)} 問 / ペア {pairs} 件、{len(names)} 経路を判定器として評価"
+    )
+    out = args.out or f"out/judge-{args.dataset}.json"
+    results = run_judge(rankers, queries, out)
+    print(f"{out} に保存しました\n")
+    print(format_judge(results))
+    return 0
+
+
 def cmd_report(args: argparse.Namespace) -> int:
     from jev_rag.runner import inconsistent_query_counts, merge_files
 
@@ -365,6 +399,14 @@ def main(argv: list[str] | None = None) -> int:
     sweep.add_argument("--seed", type=int, default=0)
     sweep.add_argument("--out", default="out/sweep.json")
     sweep.set_defaults(func=cmd_sweep)
+
+    judge = sub.add_parser("judge", help="各経路を関連度の判定器として評価する")
+    judge.add_argument("--dataset", choices=["synthetic", "jragbench", "miracl"], required=True)
+    judge.add_argument("--rankers", default="embedding,cohere_rerank,jev_pointwise,jev_crossencode")
+    judge.add_argument("--queries", type=int, default=10_000, help="評価する問題数（既定は全問）")
+    judge.add_argument("--seed", type=int, default=0)
+    judge.add_argument("--out", default=None, help="既定は out/judge-<dataset>.json")
+    judge.set_defaults(func=cmd_judge)
 
     report = sub.add_parser("report", help="保存済みの結果から表を出し直す")
     report.add_argument(

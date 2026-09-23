@@ -1,6 +1,6 @@
 """Evaluating each route as a relevance judge, not only as a ranker.
 
-JQaRA labels every (query, passage) pair, so a route's scores can be scored as
+Every dataset labels each (query, document) pair, so a route's scores can be scored as
 a binary classifier. Two views are kept apart because they answer different
 questions:
 
@@ -16,7 +16,7 @@ Calibration (ECE, Brier) is computed only for routes that emit a probability.
 import pytest
 
 from jev_rag.dataset import EvalQuery
-from jev_rag.judge import calibration_bins, format_judge, judge_metrics, score_pairs
+from jev_rag.judge import calibration_bins, format_judge, judge_metrics, run_judge, score_pairs
 from jev_rag.types import RetrievedDoc
 
 
@@ -192,3 +192,69 @@ def test_the_table_has_one_row_per_route_and_consistent_columns():
     rows = [line for line in table.splitlines() if line.startswith("|")]
     assert len({line.count("|") for line in rows}) == 1
     assert "jev" in table and "cohere" in table and "boom" in table
+
+
+# --- a whole run --------------------------------------------------------------
+
+
+class Constant:
+    """Scores relevant candidates 0.9 and the rest 0.1, counting its calls."""
+
+    def __init__(self):
+        self.calls = 0
+
+    def rank(self, question, docs):
+        self.calls += 1
+        for doc in docs:
+            doc.score = 0.9 if doc.label else 0.1
+        return sorted(docs, key=lambda d: -d.score)
+
+
+def two_queries():
+    return [
+        EvalQuery(
+            query_id=q,
+            question="Q",
+            candidates=[
+                RetrievedDoc(doc_id=f"{q}-a", text="a", score=0.0, label=1),
+                RetrievedDoc(doc_id=f"{q}-b", text="b", score=0.0, label=0),
+            ],
+        )
+        for q in ("q1", "q2")
+    ]
+
+
+def test_a_run_keeps_the_pairs_and_the_metrics(tmp_path):
+    out = tmp_path / "judge.json"
+    results = run_judge({"jev_pointwise": Constant()}, two_queries(), out)
+    route = results["jev_pointwise"]
+    assert route["pr_auc"] == pytest.approx(1.0)
+    assert len(route["scored"]["pairs"]) == 4
+    assert "ece" in route  # a Jev route emits probabilities
+
+
+def test_a_run_adds_the_trivial_baselines_without_calibration(tmp_path):
+    results = run_judge({}, two_queries(), tmp_path / "judge.json")
+    assert {"bm25", "term_overlap", "length"} <= set(results)
+    assert "ece" not in results["bm25"]
+
+
+def test_a_rerun_skips_routes_already_scored(tmp_path):
+    out = tmp_path / "judge.json"
+    run_judge({"cohere_rerank": Constant()}, two_queries(), out)
+    again = Constant()
+    run_judge({"cohere_rerank": again}, two_queries(), out)
+    assert again.calls == 0
+
+
+def test_a_route_that_failed_every_query_is_retried(tmp_path):
+    class Broken:
+        def rank(self, question, docs):
+            raise RuntimeError("throttled")
+
+    out = tmp_path / "judge.json"
+    first = run_judge({"cohere_rerank": Broken()}, two_queries(), out)
+    assert "error" in first["cohere_rerank"]
+    retry = Constant()
+    run_judge({"cohere_rerank": retry}, two_queries(), out)
+    assert retry.calls == 2
