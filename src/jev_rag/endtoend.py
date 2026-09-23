@@ -119,7 +119,12 @@ def paired_difference(baseline_rows: list[dict], other_rows: list[dict]) -> dict
 
 
 def format_answers(results: dict[str, Any], baseline: str) -> str:
-    """One row per pipeline: how often the answer was right."""
+    """One row per pipeline: how often the answer was right.
+
+    The saved results also carry a ``_run`` block describing the run, which is
+    not a pipeline and has none of these fields.
+    """
+    results = {name: result for name, result in results.items() if name != "_run"}
     if baseline not in results:
         names = ", ".join(results)
         return f"注意: 基準の経路 {baseline!r} が結果に無い（あるのは {names}）。差分は出せない。"
@@ -132,7 +137,8 @@ def format_answers(results: dict[str, Any], baseline: str) -> str:
     lines = [header, "|---|---|---|---|---|---|---|---|"]
     for name, result in results.items():
         if "error" in result:
-            lines.append(f"| {name} | {result['error']} | | | |")
+            blanks = " | ".join([""] * (len(lines[0].split("|")) - 4))
+            lines.append(f"| {name} | {result['error']} | {blanks} |")
             continue
         error = (result.get("stderr") or {}).get("accuracy", 0.0)
         cell = f"{result['accuracy']:.3f}±{error:.3f}"

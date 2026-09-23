@@ -53,7 +53,7 @@ def test_a_generation_failure_is_counted_separately_from_a_wrong_answer():
 
 def test_the_error_count_reaches_the_table():
     result = answer_queries(Ranker(), [query()], Generator([RuntimeError("throttled")]))
-    assert "1" in format_answers({"r": result}, baseline="r")
+    assert "API失敗" in format_answers({"r": result}, baseline="r")
 
 
 def test_an_empty_generation_is_a_wrong_answer_not_an_error():
@@ -86,3 +86,41 @@ def test_the_paired_difference_ignores_queries_only_one_route_answered():
 
 def test_no_shared_queries_gives_no_difference():
     assert paired_difference([{"query_id": "a", "correct": True}], []) == {}
+
+
+def test_run_metadata_does_not_break_the_table():
+    """The saved results carry a _run block; the table must skip it.
+
+    Adding that block made format_answers raise KeyError on the last line of a
+    long run — after the results were saved, but with no table and a non-zero
+    exit.
+    """
+    result = answer_queries(Ranker(), [query()], Generator(["<answer>絶対零度</answer>"]))
+    table = format_answers({"r": result, "_run": {"queries": 1, "seed": 0}}, baseline="r")
+    assert "_run" not in table
+    assert "1.000" in table
+
+
+def test_the_missing_baseline_warning_does_not_list_run_metadata():
+    table = format_answers({"_run": {"seed": 0}}, baseline="embedding")
+    assert "_run" not in table
+
+
+def test_a_failed_route_row_has_the_same_number_of_columns():
+    result = answer_queries(Ranker(), [query()], Generator(["<answer>絶対零度</answer>"]))
+    table = format_answers({"r": result, "broken": {"error": "boom"}}, baseline="r")
+    rows = [line for line in table.splitlines() if line.startswith("|")]
+    widths = {line.count("|") for line in rows}
+    assert len(widths) == 1, f"ragged table: {widths}"
+
+
+def test_the_api_failure_count_is_reported_in_its_own_column():
+    result = answer_queries(Ranker(), [query()], Generator([RuntimeError("throttled")]))
+    assert result["errors"] == 1
+    row = next(
+        line
+        for line in format_answers({"r": result}, baseline="r").splitlines()
+        if line.startswith("| r ")
+    )
+    # 構成, 正解率, 部分一致, 根拠率, 抽出失敗, API失敗, n, 秒
+    assert [c.strip() for c in row.split("|")[1:-1]][5] == "1"
