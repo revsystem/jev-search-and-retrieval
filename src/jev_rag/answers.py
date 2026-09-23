@@ -1,22 +1,23 @@
 """Scoring a generated answer against JQaRA's gold answer.
 
-JQaRA carries one gold answer per question, inherited from JAQKET, and those
-answers are short proper nouns: 絶対零度, 加藤シゲアキ, 天邪鬼. A generated
-answer counts as correct when it contains the gold string after normalisation.
+JQaRA carries one gold answer per question, inherited from JAQKET (AI王), and
+those answers are short proper nouns: 絶対零度, 加藤シゲアキ, 天邪鬼.
 
-Two things about this rule are worth stating, because every end-to-end number
-rests on it.
+The model is asked to put its answer in ``<answer>…</answer>`` and only that
+span is scored, following llm-jp-eval's handling of the same dataset. Scoring
+the whole response instead would count an answer correct whenever the gold
+string appears anywhere in it, and that inflates in ways which differ by
+route: three questions in the test split contain the gold answer in the
+question itself (音読み/訓読み, 上方置換/下方置換, マッシュポテト/スイートポテト),
+130 of 1,667 gold answers are one or two characters after normalisation, and a
+hedged answer naming several candidates would score correct for naming the
+right one among them.
 
-Containment rather than equality: the model is asked for the term alone but
-writes a sentence often enough that equality would measure instruction
-following rather than retrieval. The cost is that a wrong answer containing
-the gold string as a substring is scored correct.
-
-One gold answer per question: a correct answer worded differently (a reading
-instead of the kanji, a fuller or shorter form of a name) is scored wrong.
-This depresses every route equally, so it is a floor on the absolute numbers
-rather than a bias between them — but it means the absolute figures understate
-what the pipelines actually get right.
+Two figures are reported. Exact match after normalisation is the primary one,
+matching AI王's own scoring. Containment within the extracted span is reported
+beside it because exact match alone is unreliable for verbose answers
+(Adlakha et al., TACL 2024): a disagreement between the two is the signal that
+the models are answering correctly but in a different form.
 """
 
 from __future__ import annotations
@@ -25,33 +26,52 @@ import re
 import unicodedata
 from dataclasses import dataclass
 
-# Removed before comparison: the gold answers carry none of it, and a model
-# writing 「絶対零度」 or 加藤 シゲアキ is not answering differently.
-_IGNORED = re.compile(r"[\s　「」『』（）()\[\]【】、。,.・:：;；!！?？\"'`]")
+ANSWER_TAG = re.compile(r"<answer>(.*?)</answer>", re.DOTALL)
+_QUOTED = re.compile(r"[「『](.*?)[」』]")
+_STRIPPED = str.maketrans("", "", "・=-")
 
 
 def normalise_answer(text: str) -> str:
-    """Fold the differences that are not differences of answer."""
-    return _IGNORED.sub("", unicodedata.normalize("NFKC", text)).lower()
+    """AI王's normalisation: width, case, quotes, separators, whitespace."""
+    text = unicodedata.normalize("NFKC", text.replace("～", "〜")).lower()
+    text = _QUOTED.sub(r"\1", text)
+    return re.sub(r"\s+", "", text.translate(_STRIPPED))
 
 
-def contains_answer(generated: str, gold: list[str]) -> bool:
-    return score_answer(generated, gold).correct
+def extract_answer(generated: str) -> str | None:
+    """The tagged span, or None when the model did not produce one."""
+    match = ANSWER_TAG.search(generated or "")
+    return match.group(1) if match else None
 
 
 @dataclass(frozen=True)
 class AnswerScore:
-    correct: bool
+    parsed: bool
+    exact: bool
+    contains: bool
+    extracted: str | None = None
     matched: str | None = None
+
+    @property
+    def correct(self) -> bool:
+        """The primary verdict."""
+        return self.exact
 
 
 def score_answer(generated: str, gold: list[str]) -> AnswerScore:
-    """Whether the generation contains any gold answer, and which one."""
-    haystack = normalise_answer(generated or "")
-    if not haystack:
-        return AnswerScore(correct=False)
+    span = extract_answer(generated)
+    if span is None:
+        return AnswerScore(parsed=False, exact=False, contains=False)
+
+    predicted = normalise_answer(span)
     for answer in gold:
         needle = normalise_answer(answer)
-        if needle and needle in haystack:
-            return AnswerScore(correct=True, matched=answer)
-    return AnswerScore(correct=False)
+        if not needle:
+            continue
+        if predicted == needle:
+            return AnswerScore(True, True, True, extracted=span, matched=answer)
+    for answer in gold:
+        needle = normalise_answer(answer)
+        if needle and needle in predicted:
+            return AnswerScore(True, False, True, extracted=span, matched=answer)
+    return AnswerScore(parsed=True, exact=False, contains=False, extracted=span)

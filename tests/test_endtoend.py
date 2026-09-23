@@ -35,7 +35,9 @@ class EchoGenerator:
 
     def answer(self, question, docs, **kw):
         self.calls.append([d.doc_id for d in docs])
-        return docs[0].text if docs else ""
+        # the real prompt asks for a tagged span, so the stub produces one
+        text = docs[0].text if docs else ""
+        return f"<answer>{text.split('は')[0]}</answer>"
 
 
 def test_a_ranking_that_puts_the_evidence_first_answers_correctly():
@@ -62,7 +64,7 @@ def test_each_answer_is_kept_for_inspection():
     row = result["per_query"][0]
     assert row["query_id"] == "q1"
     assert row["gold"] == ["絶対零度"]
-    assert "絶対零度" in row["answer"]
+    assert row["extracted"] == "絶対零度"
     assert row["correct"] is True
 
 

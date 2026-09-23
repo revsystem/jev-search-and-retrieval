@@ -48,22 +48,41 @@ def answer_queries(
         try:
             generated = generator.answer(query.question, context)
         except Exception as error:  # noqa: BLE001 - one throttled call must not end the run
-            row.update(answer="", correct=False, error=f"{type(error).__name__}: {error}")
+            row.update(
+                answer="",
+                correct=False,
+                contains=False,
+                parsed=False,
+                error=f"{type(error).__name__}: {error}",
+            )
         else:
             verdict = score_answer(generated, query.answers)
-            row.update(answer=generated, correct=verdict.correct, matched=verdict.matched)
+            row.update(
+                answer=generated,
+                extracted=verdict.extracted,
+                correct=verdict.correct,
+                contains=verdict.contains,
+                parsed=verdict.parsed,
+                matched=verdict.matched,
+            )
         rows.append(row)
         if progress:
             progress(getattr(ranker, "name", "?"), len(rows), len(queries))
 
     scores = [
-        {"accuracy": float(row["correct"]), "evidence_rate": float(row["evidence_in_prompt"])}
+        {
+            "accuracy": float(row["correct"]),
+            "contains": float(row.get("contains", False)),
+            "evidence_rate": float(row["evidence_in_prompt"]),
+        }
         for row in rows
     ]
     means = mean_metrics(scores)
     return {
         "accuracy": means.get("accuracy", 0.0),
+        "contains": means.get("contains", 0.0),
         "evidence_rate": means.get("evidence_rate", 0.0),
+        "unparsed": sum(1 for row in rows if not row.get("parsed", False)),
         "stderr": standard_errors(scores),
         "queries": len(rows),
         "seconds": round(time.monotonic() - started, 1),
@@ -74,10 +93,11 @@ def answer_queries(
 def format_answers(results: dict[str, Any], baseline: str) -> str:
     """One row per pipeline: how often the answer was right."""
     reference = (results.get(baseline) or {}).get("accuracy")
-    lines = [
-        "| 構成 | 回答正解率 | 正解文書がプロンプトに入った割合 | n | 秒 |",
-        "|---|---|---|---|---|",
-    ]
+    header = (
+        "| 構成 | 回答正解率(完全一致) | 部分一致 "
+        "| 正解文書がプロンプトに入った割合 | 抽出失敗 | n | 秒 |"
+    )
+    lines = [header, "|---|---|---|---|---|---|---|"]
     for name, result in results.items():
         if "error" in result:
             lines.append(f"| {name} | {result['error']} | | | |")
@@ -87,7 +107,8 @@ def format_answers(results: dict[str, Any], baseline: str) -> str:
         if name != baseline and reference is not None:
             cell += f" ({result['accuracy'] - reference:+.3f})"
         lines.append(
-            f"| {name} | {cell} | {result['evidence_rate']:.3f} | "
+            f"| {name} | {cell} | {result.get('contains', 0.0):.3f} | "
+            f"{result['evidence_rate']:.3f} | {result.get('unparsed', 0)} | "
             f"{result['queries']} | {result.get('seconds', '-')} |"
         )
     return "\n".join(lines)
