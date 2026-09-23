@@ -1,0 +1,77 @@
+{
+  "id": "a-021",
+  "verdicts": [
+    {
+      "doc_id": "a-021-d09",
+      "facts_stated": [
+        "f3"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-021-d07",
+      "facts_stated": [
+        "f1"
+      ],
+      "leak_phrase": false,
+      "note": "第7条の2・3への参照はあるが、その中身（f2・f3）は本文にない。"
+    },
+    {
+      "doc_id": "a-021-d03",
+      "facts_stated": [
+        "f2"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-021-d04",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "会食一般の注意喚起。金額・入札・回数の条件は述べていない。"
+    },
+    {
+      "doc_id": "a-021-d10",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "事前承認なしで接待を受けた懲戒事例。金額・入札・回数の条件（f1〜f3）は述べていない。"
+    },
+    {
+      "doc_id": "a-021-d05",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "贈答品の受領（第6条）。飲食の接待受領ではない。"
+    },
+    {
+      "doc_id": "a-021-d06",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "改定後の申請増とシステム移行の議事。承認要否の判断基準そのものは書いていない。"
+    },
+    {
+      "doc_id": "a-021-d02",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2022年4月改定版。閾値は1万円・承認者は所属課長で、f1と一致しない。"
+    },
+    {
+      "doc_id": "a-021-d01",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "別会社（アオバネ・ロジスティクス）。閾値8千円・総務部長で、f1〜f3と一致しない。"
+    },
+    {
+      "doc_id": "a-021-d08",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "接待の実施（出す側）の第9条。受領の条件ではない。閾値も2万円でf1と異なる。"
+    }
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": "金額・入札交渉・回数の三条件が別文書。条件の組み合わせの問い。"
+  }
+}

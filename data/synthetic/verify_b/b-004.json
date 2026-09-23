@@ -1,0 +1,21 @@
+{
+  "id": "b-004",
+  "verdicts": [
+    {"doc_id": "b-004-d03", "facts_stated": [], "leak_phrase": false, "note": "カゲロウ鋳造という別会社の数値"},
+    {"doc_id": "b-004-d01", "facts_stated": [], "leak_phrase": false, "note": "対象月は2024年10月の実績で、油温(80℃)・予熱(8分)・目視の時期(冷却直後)がf1・f2・f3と異なる"},
+    {"doc_id": "b-004-d08", "facts_stated": ["f3"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-004-d10", "facts_stated": [], "leak_phrase": false, "note": "焼戻しの日報であり、焼入れの対象外"},
+    {"doc_id": "b-004-d06", "facts_stated": [], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-004-d07", "facts_stated": [], "leak_phrase": false, "note": "油槽ヒータの点検表で、油温設定・予熱時間・目視時期の変更には触れていない"},
+    {"doc_id": "b-004-d02", "facts_stated": ["f1"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-004-d04", "facts_stated": [], "leak_phrase": false, "note": "2022年4月制定の作業標準で、油温(70〜90℃)・予熱(10分)・目視の時期(冷却直後)がf1・f2・f3と異なる"},
+    {"doc_id": "b-004-d09", "facts_stated": [], "leak_phrase": false, "note": "食堂の床タイルのひび割れについての記録で、製品の割れとは別の意味"},
+    {"doc_id": "b-004-d05", "facts_stated": ["f2"], "leak_phrase": false, "note": ""}
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": ""
+  }
+}

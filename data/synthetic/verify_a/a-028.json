@@ -1,0 +1,77 @@
+{
+  "id": "a-028",
+  "verdicts": [
+    {
+      "doc_id": "a-028-d07",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2026年5月の審議開催記録。否決理由やf1〜f3の内容は記載されていない。"
+    },
+    {
+      "doc_id": "a-028-d06",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2025年9月の別案件（C氏）で承認された事例。本件（2026年5月）ではない。"
+    },
+    {
+      "doc_id": "a-028-d01",
+      "facts_stated": [
+        "f1"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-028-d09",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "会計監査人の独立性確認。取締役の兼業承認ではない。"
+    },
+    {
+      "doc_id": "a-028-d10",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2025年度の承認件数。2026年5月否決の理由は述べていない。"
+    },
+    {
+      "doc_id": "a-028-d03",
+      "facts_stated": [
+        "f2"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-028-d05",
+      "facts_stated": [
+        "f3"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-028-d02",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2018年改定版の規程。本件否決の理由（競合・持株・過去処分）ではない。"
+    },
+    {
+      "doc_id": "a-028-d08",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "会社との直接取引の条項。兼業承認の本件理由ではない。"
+    },
+    {
+      "doc_id": "a-028-d04",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "利益相反の一般論。本件の具体事実はない。"
+    }
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": "否決理由が三要因に分かれ、なぜ否決されたかの問い。"
+  }
+}

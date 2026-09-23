@@ -1,0 +1,21 @@
+{
+  "id": "b-017",
+  "verdicts": [
+    {"doc_id": "b-017-d09", "facts_stated": [], "leak_phrase": false, "note": "販売システムの移行についての報告で、基幹システムの対象外"},
+    {"doc_id": "b-017-d03", "facts_stated": [], "leak_phrase": false, "note": "オボロ情報という別会社の事例写し"},
+    {"doc_id": "b-017-d05", "facts_stated": ["f2"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-017-d02", "facts_stated": ["f1"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-017-d08", "facts_stated": ["f3"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-017-d10", "facts_stated": [], "leak_phrase": false, "note": "会議の案内のみで、回数・件数・照合結果は別紙とされている"},
+    {"doc_id": "b-017-d01", "facts_stated": [], "leak_phrase": false, "note": "2023年の移行のふりかえりで、リハーサル回数(1回)・未完了件数(7件)・残高照合の扱い(翌週手合わせ)がf1・f2・f3と異なる"},
+    {"doc_id": "b-017-d04", "facts_stated": [], "leak_phrase": false, "note": "2020年制定の定義で、見る項目の名前のみを挙げ、回数や件数は空欄とされている"},
+    {"doc_id": "b-017-d07", "facts_stated": [], "leak_phrase": false, "note": "移行当日の監視メモで、チケットの残件数や翌朝の残高の欄はないと明記されている"},
+    {"doc_id": "b-017-d06", "facts_stated": [], "leak_phrase": false, "note": "座席移動についての案内で、「移行」を別の意味で使用"}
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": ""
+  }
+}

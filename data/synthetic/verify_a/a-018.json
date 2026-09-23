@@ -1,0 +1,79 @@
+{
+  "id": "a-018",
+  "verdicts": [
+    {
+      "doc_id": "a-018-d06",
+      "facts_stated": [
+        "f3"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-018-d05",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "予算編成の一般的な流れ。日付や増減率はない。"
+    },
+    {
+      "doc_id": "a-018-d02",
+      "facts_stated": [
+        "f1"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-018-d03",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "別会社（カサネ紙業）。日程・承認機関が異なる。"
+    },
+    {
+      "doc_id": "a-018-d09",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "広告宣伝予算の配分。全社予算の方針→要求→査定→承認の順序ではない。"
+    },
+    {
+      "doc_id": "a-018-d10",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "承認後の執行状況。策定の順序ではない。"
+    },
+    {
+      "doc_id": "a-018-d01",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "前年度の反省。次年度の方針・要求・査定・承認の具体はない。"
+    },
+    {
+      "doc_id": "a-018-d08",
+      "facts_stated": [
+        "f4"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-018-d04",
+      "facts_stated": [
+        "f2"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-018-d07",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2023年度。要求8%増・承認3%増で、f1〜f4と一致しない。"
+    }
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": "各段階が別文書。策定順序の経緯の問い。"
+  }
+}

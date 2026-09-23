@@ -1,0 +1,77 @@
+{
+  "id": "a-005",
+  "verdicts": [
+    {
+      "doc_id": "a-005-d09",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "単身赴任者を除く住宅手当。家賃補助の上限・実績ではない。"
+    },
+    {
+      "doc_id": "a-005-d02",
+      "facts_stated": [
+        "f1"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-005-d07",
+      "facts_stated": [
+        "f3"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-005-d03",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2021年改定版。上限6万円でf1の9万円と一致しない。"
+    },
+    {
+      "doc_id": "a-005-d06",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "名古屋支社の平均家賃。大阪支社のf2ではない。"
+    },
+    {
+      "doc_id": "a-005-d10",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2024年度上期の大阪平均7万9千円。f2の6万8千円・対象期と一致しない。"
+    },
+    {
+      "doc_id": "a-005-d01",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "別会社（ツクモリ印刷）。上限7万円でf1と異なる。"
+    },
+    {
+      "doc_id": "a-005-d08",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "FAQ。上限額や超過分の数値は規程参照に委ねている。"
+    },
+    {
+      "doc_id": "a-005-d04",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "社宅制度の考え方。上限額・大阪実績・天引きの具体はない。"
+    },
+    {
+      "doc_id": "a-005-d05",
+      "facts_stated": [
+        "f2"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    }
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": "上限・実績・超過時の扱いが別文書。余裕の程度を問う統合の問い。"
+  }
+}

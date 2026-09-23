@@ -1,0 +1,21 @@
+{
+  "id": "b-006",
+  "verdicts": [
+    {"doc_id": "b-006-d04", "facts_stated": [], "leak_phrase": false, "note": "2019年制定の取扱票で、校正の間隔やゼロ点の欄は設けていないとされる"},
+    {"doc_id": "b-006-d09", "facts_stated": [], "leak_phrase": false, "note": "計量会社への支払いが年1回という記載はあるが、対象器具の名前を明示しておらず、ノギスの校正であるとは特定できない"},
+    {"doc_id": "b-006-d06", "facts_stated": [], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-006-d07", "facts_stated": [], "leak_phrase": false, "note": "社内の基準器そのものの外部校正成績で、現場のノギスの校正方法の変更ではない"},
+    {"doc_id": "b-006-d01", "facts_stated": ["f1"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-006-d10", "facts_stated": [], "leak_phrase": false, "note": "「校正」を検定の採点のやり直しという別の意味で使用"},
+    {"doc_id": "b-006-d05", "facts_stated": ["f2"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-006-d08", "facts_stated": ["f3"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-006-d03", "facts_stated": [], "leak_phrase": false, "note": "クラカケ計測という別会社の聞き取りメモ"},
+    {"doc_id": "b-006-d02", "facts_stated": [], "leak_phrase": false, "note": "マイクロメータの校正票で、ノギスはこの票の対象外と明記されている"}
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": ""
+  }
+}

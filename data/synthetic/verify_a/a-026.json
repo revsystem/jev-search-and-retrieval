@@ -1,0 +1,79 @@
+{
+  "id": "a-026",
+  "verdicts": [
+    {
+      "doc_id": "a-026-d10",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "申請様式と提出期限。許可が必要かどうかの判断基準はない。"
+    },
+    {
+      "doc_id": "a-026-d04",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "輸出管理の一般論。品目・仕向国・需要者の条件はない。"
+    },
+    {
+      "doc_id": "a-026-d08",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "申請件数の実績。許可要否の判断条件は述べていない。"
+    },
+    {
+      "doc_id": "a-026-d01",
+      "facts_stated": [
+        "f1"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-026-d06",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "別会社（ウツセミ精機）。決裁者・確認手続きが異なる。"
+    },
+    {
+      "doc_id": "a-026-d07",
+      "facts_stated": [
+        "f4"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-026-d02",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2020年改定版。輸出額50万円超のみ許可で、仕向地問わずのf1と一致しない。"
+    },
+    {
+      "doc_id": "a-026-d09",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "固定資産台帳上の「管理対象品目」。輸出管理リストではない。"
+    },
+    {
+      "doc_id": "a-026-d03",
+      "facts_stated": [
+        "f2"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-026-d05",
+      "facts_stated": [
+        "f3"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    }
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": "品目・仕向国・需要者・該当なしの条件が別文書。組み合わせの問い。"
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "id": "a-027",
+  "verdicts": [
+    {
+      "doc_id": "a-027-d05",
+      "facts_stated": [
+        "f3"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-027-d04",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "通報制度の意義の一般論。受付方法・対象の具体差はない。"
+    },
+    {
+      "doc_id": "a-027-d06",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "別会社（カゲロウメディカル販売）。対象・期限が異なる。"
+    },
+    {
+      "doc_id": "a-027-d09",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "不利益取扱いの禁止。窓口間の受付方法の違いではない。"
+    },
+    {
+      "doc_id": "a-027-d08",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "製品苦情対応。内部通報の窓口比較ではない。"
+    },
+    {
+      "doc_id": "a-027-d10",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "調査体制の一般規定。社内・社外窓口の受付差はない。"
+    },
+    {
+      "doc_id": "a-027-d02",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2020年改定版。社外窓口がなく、調査開始期限も部長判断でf1〜f3と一致しない。"
+    },
+    {
+      "doc_id": "a-027-d07",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "通報件数の実績。受付方法・対象者の違いの説明はない。"
+    },
+    {
+      "doc_id": "a-027-d01",
+      "facts_stated": [
+        "f1"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-027-d03",
+      "facts_stated": [
+        "f2"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    }
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": "社内・社外・対象者の違いが別文書。比較の問い。"
+  }
+}

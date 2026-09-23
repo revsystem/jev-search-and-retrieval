@@ -1,0 +1,21 @@
+{
+  "id": "b-016",
+  "verdicts": [
+    {"doc_id": "b-016-d01", "facts_stated": ["f1"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-016-d02", "facts_stated": [], "leak_phrase": false, "note": "入社時のアカウント手順で、退職で止める話はこの手順には出てこないと明記されている"},
+    {"doc_id": "b-016-d04", "facts_stated": [], "leak_phrase": false, "note": "2018年制定の手引で、退職日との前後も上長の入力も指定していない"},
+    {"doc_id": "b-016-d07", "facts_stated": [], "leak_phrase": false, "note": "退職届の説明であり、停止のタイミングや上長の入力は範囲外と明記されている"},
+    {"doc_id": "b-016-d03", "facts_stated": [], "leak_phrase": false, "note": "ユフヅキネットという別会社の聞き取りメモ"},
+    {"doc_id": "b-016-d06", "facts_stated": [], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-016-d09", "facts_stated": [], "leak_phrase": false, "note": "勘定科目についてのメモで、「アカウント」を別の意味で使用"},
+    {"doc_id": "b-016-d10", "facts_stated": [], "leak_phrase": false, "note": "休職者向けの手順で、退職の当日停止とは用紙を分けていると明記されている"},
+    {"doc_id": "b-016-d08", "facts_stated": ["f3"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-016-d05", "facts_stated": ["f2"], "leak_phrase": false, "note": ""}
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": ""
+  }
+}

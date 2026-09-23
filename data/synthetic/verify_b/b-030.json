@@ -1,0 +1,21 @@
+{
+  "id": "b-030",
+  "verdicts": [
+    {"doc_id": "b-030-d06", "facts_stated": [], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-030-d08", "facts_stated": ["f3"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-030-d07", "facts_stated": [], "leak_phrase": false, "note": "訪問の日報に、見積の番号や納期の日数の記載はない"},
+    {"doc_id": "b-030-d04", "facts_stated": [], "leak_phrase": false, "note": "2020年制定の手引で、見る項目の名前のみを挙げ、番号も日数も空欄とされている"},
+    {"doc_id": "b-030-d10", "facts_stated": [], "leak_phrase": false, "note": "見積書番号Q-3で、宛先は北嶺製作所。f2のQ-9・宛先南嶺製作所とは異なる"},
+    {"doc_id": "b-030-d01", "facts_stated": [], "leak_phrase": false, "note": "失注記録番号M-2で、日付は2024年11月。f1のM-15とは番号・年が異なる"},
+    {"doc_id": "b-030-d05", "facts_stated": ["f2"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-030-d03", "facts_stated": [], "leak_phrase": false, "note": "ヒナゲシ商事という別会社の失注写し"},
+    {"doc_id": "b-030-d09", "facts_stated": [], "leak_phrase": false, "note": "経費を配る単位についてのメモで、「案件」を別の意味で使用"},
+    {"doc_id": "b-030-d02", "facts_stated": ["f1"], "leak_phrase": false, "note": ""}
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": ""
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "id": "b-013",
+  "verdicts": [
+    {"doc_id": "b-013-d07", "facts_stated": ["f3"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-013-d06", "facts_stated": [], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-013-d08", "facts_stated": [], "leak_phrase": false, "note": "停電・地震時の安否確認についての連絡網で、「障害」を別の意味で使用"},
+    {"doc_id": "b-013-d09", "facts_stated": [], "leak_phrase": false, "note": "監視画面の仕様説明のみで、期限の分数や連絡手段の具体的な記載はない"},
+    {"doc_id": "b-013-d03", "facts_stated": [], "leak_phrase": false, "note": "オボロ情報という別会社の手順写し"},
+    {"doc_id": "b-013-d05", "facts_stated": ["f2"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-013-d10", "facts_stated": [], "leak_phrase": false, "note": "本社を対象とした手順であり、北浦・南嶺事務所の対象外"},
+    {"doc_id": "b-013-d02", "facts_stated": ["f1"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-013-d04", "facts_stated": [], "leak_phrase": false, "note": "2020年制定の手引で、期限の分数もチケットという言葉もこの版にはないとされる"},
+    {"doc_id": "b-013-d01", "facts_stated": [], "leak_phrase": false, "note": "2024年度の実績(メール、検知から2時間)で、f1・f2・f3と異なる"}
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": ""
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "id": "b-019",
+  "verdicts": [
+    {"doc_id": "b-019-d04", "facts_stated": [], "leak_phrase": false, "note": "2022年制定の標準で、見る項目の名前のみを挙げ、番号や百分率は空欄とされている"},
+    {"doc_id": "b-019-d03", "facts_stated": [], "leak_phrase": false, "note": "ハルウ計算という別会社の写し"},
+    {"doc_id": "b-019-d06", "facts_stated": [], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-019-d08", "facts_stated": ["f3"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-019-d02", "facts_stated": ["f1"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-019-d10", "facts_stated": [], "leak_phrase": false, "note": "変更票CH-4で、対象は出荷のデータベース。f2のCH-19・受注のデータベースとは異なる"},
+    {"doc_id": "b-019-d01", "facts_stated": [], "leak_phrase": false, "note": "障害票IN-40で、発生は2026年4月、対象は在庫のデータベース。f1のIN-77・受注のデータベースとは異なる"},
+    {"doc_id": "b-019-d09", "facts_stated": [], "leak_phrase": false, "note": "空調フィルタ交換の作業報告で、受注のデータベースやディスク使用量は扱っていないと明記されている"},
+    {"doc_id": "b-019-d07", "facts_stated": [], "leak_phrase": false, "note": "監視画面の操作説明のみで、変更番号やディスク使用率の具体的な記載は範囲外とされている"},
+    {"doc_id": "b-019-d05", "facts_stated": ["f2"], "leak_phrase": false, "note": ""}
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": ""
+  }
+}

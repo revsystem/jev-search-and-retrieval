@@ -1,0 +1,77 @@
+{
+  "id": "a-004",
+  "verdicts": [
+    {
+      "doc_id": "a-004-d08",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "支給件数の実績。金額区分や100km条件は述べていない。"
+    },
+    {
+      "doc_id": "a-004-d07",
+      "facts_stated": [
+        "f3"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-004-d09",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "香典の取扱い。見舞金額・花輪手配の条件ではない。"
+    },
+    {
+      "doc_id": "a-004-d01",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2020年改定版。一親等7万・二親等2万で、f1の10万・3万と一致しない。"
+    },
+    {
+      "doc_id": "a-004-d10",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "取引先の訃報対応。社員家族の見舞金規程の対象外。"
+    },
+    {
+      "doc_id": "a-004-d06",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "結婚・出産祝金。死亡見舞金ではない。"
+    },
+    {
+      "doc_id": "a-004-d03",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "一般論のQ&A。具体的な金額・距離条件はない。"
+    },
+    {
+      "doc_id": "a-004-d05",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "別会社（ユウナギ物流）。金額・加算・供花料がf1〜f3と異なる。"
+    },
+    {
+      "doc_id": "a-004-d04",
+      "facts_stated": [
+        "f2"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-004-d02",
+      "facts_stated": [
+        "f1"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    }
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": "親等・同居・距離の条件が別文書。条件組み合わせの問い。"
+  }
+}

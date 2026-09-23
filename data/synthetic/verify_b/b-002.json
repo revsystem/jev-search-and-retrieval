@@ -1,0 +1,21 @@
+{
+  "id": "b-002",
+  "verdicts": [
+    {"doc_id": "b-002-d09", "facts_stated": [], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-002-d10", "facts_stated": [], "leak_phrase": false, "note": "谷戸工場の数値であり、岸辺・岬工場の対象外"},
+    {"doc_id": "b-002-d06", "facts_stated": [], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-002-d03", "facts_stated": [], "leak_phrase": false, "note": "ヌマヅチ塗装という別会社の数値"},
+    {"doc_id": "b-002-d07", "facts_stated": ["f3"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-002-d01", "facts_stated": [], "leak_phrase": false, "note": "2024年度下期の実績値で、測定時期(翌朝先頭3枚)も止める基準(岸辺3.0μm/岬3.2μm)もf1・f2・f3と異なる"},
+    {"doc_id": "b-002-d02", "facts_stated": ["f1"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-002-d05", "facts_stated": ["f2"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-002-d08", "facts_stated": [], "leak_phrase": false, "note": "食堂の壁塗装についての記録で、製品の塗装ではない"},
+    {"doc_id": "b-002-d04", "facts_stated": [], "leak_phrase": false, "note": "2021年6月制定の検査標準で、測定方法(シフト終わりに1枚)も止める基準(両工場6.0μm)もf1・f2・f3と異なる"}
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": ""
+  }
+}

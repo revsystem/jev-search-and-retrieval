@@ -1,0 +1,21 @@
+{
+  "id": "b-021",
+  "verdicts": [
+    {"doc_id": "b-021-d05", "facts_stated": ["f2"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-021-d02", "facts_stated": [], "leak_phrase": false, "note": "ホノカ商事という別会社の動向メモ"},
+    {"doc_id": "b-021-d09", "facts_stated": [], "leak_phrase": false, "note": "通信販売チームの手順で、新規開拓は展示会でなくウェブ広告としている点も異なる"},
+    {"doc_id": "b-021-d10", "facts_stated": [], "leak_phrase": false, "note": "2022年度の展示会予算の起票記録で、方針変更の記載はない"},
+    {"doc_id": "b-021-d08", "facts_stated": ["f3"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-021-d03", "facts_stated": ["f1"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-021-d06", "facts_stated": [], "leak_phrase": false, "note": "新規開拓と既存顧客対応の一般原則を説明する研修教材で、具体的な日付や施策の記載がない"},
+    {"doc_id": "b-021-d07", "facts_stated": [], "leak_phrase": false, "note": "会議室予約の管理記録で、方針変更の記載はない"},
+    {"doc_id": "b-021-d04", "facts_stated": [], "leak_phrase": false, "note": "2019年版(最終)の営業の手引で、展示会に毎年出展し手紙で案内する旧来の方法を記載"},
+    {"doc_id": "b-021-d01", "facts_stated": [], "leak_phrase": false, "note": "2023年度の営業方針で、展示会への継続出展・年1回郵送案内という2024年4月以前の旧方針を記載"}
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": ""
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "id": "b-026",
+  "verdicts": [
+    {"doc_id": "b-026-d01", "facts_stated": ["f1"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-026-d05", "facts_stated": ["f2"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-026-d04", "facts_stated": [], "leak_phrase": false, "note": "2018年制定の手引で、表を付けるかも確認者も空欄のままとされている"},
+    {"doc_id": "b-026-d03", "facts_stated": [], "leak_phrase": false, "note": "スミレモ商事という別会社の聞き取りメモ"},
+    {"doc_id": "b-026-d08", "facts_stated": ["f3"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-026-d06", "facts_stated": [], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-026-d10", "facts_stated": [], "leak_phrase": false, "note": "客の締め切りに合わせた緊急対応の記録で、通常の表や本社の確認は事後に補っていると明記され、恒久的な手順変更とは別事象"},
+    {"doc_id": "b-026-d02", "facts_stated": [], "leak_phrase": false, "note": "小口の見積手順で、大口の金額の出し方はこの手順には出てこないと明記されている"},
+    {"doc_id": "b-026-d09", "facts_stated": [], "leak_phrase": false, "note": "月次決算で使う標準原価についてのメモで、客へ出す金額は扱わないと明記されている"},
+    {"doc_id": "b-026-d07", "facts_stated": [], "leak_phrase": false, "note": "見積システムの操作説明のみで、どの表を付けるか・誰の確認が必要かは操作の話に限ると明記されている"}
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": ""
+  }
+}

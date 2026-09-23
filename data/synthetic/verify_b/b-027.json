@@ -1,0 +1,21 @@
+{
+  "id": "b-027",
+  "verdicts": [
+    {"doc_id": "b-027-d06", "facts_stated": [], "leak_phrase": false, "note": "備品を買う店についての名簿で、「取引先」を別の意味で使用"},
+    {"doc_id": "b-027-d07", "facts_stated": [], "leak_phrase": false, "note": "支店の月報に、初回・継続の社数や粗利達成の欄はない"},
+    {"doc_id": "b-027-d04", "facts_stated": [], "leak_phrase": false, "note": "2020年制定の定義で、見る項目の名前のみを挙げ、社数も百分率も空欄とされている"},
+    {"doc_id": "b-027-d10", "facts_stated": [], "leak_phrase": false, "note": "会議の案内のみで、社数や粗利は別紙とされている"},
+    {"doc_id": "b-027-d03", "facts_stated": [], "leak_phrase": false, "note": "ヤマユリ商事という別会社の年報写し"},
+    {"doc_id": "b-027-d02", "facts_stated": ["f1"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-027-d09", "facts_stated": [], "leak_phrase": false, "note": "既存の取引先についての年報で、新規の社数はこの年報では集計していないと明記されている"},
+    {"doc_id": "b-027-d05", "facts_stated": ["f2"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-027-d08", "facts_stated": ["f3"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-027-d01", "facts_stated": [], "leak_phrase": false, "note": "2024年度の年報で、初回4社・翌年残り1社・粗利70%とされ、f1・f2・f3と異なる"}
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": ""
+  }
+}

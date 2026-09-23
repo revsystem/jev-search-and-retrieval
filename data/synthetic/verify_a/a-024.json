@@ -1,0 +1,79 @@
+{
+  "id": "a-024",
+  "verdicts": [
+    {
+      "doc_id": "a-024-d07",
+      "facts_stated": [
+        "f4"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-024-d03",
+      "facts_stated": [
+        "f2"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-024-d09",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "採用選考の誓約書。テナント契約の確認手続きではない。"
+    },
+    {
+      "doc_id": "a-024-d02",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2019年改定版。警察への電話確認で、誓約書・外部DB・委員会の手順ではない。"
+    },
+    {
+      "doc_id": "a-024-d06",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "別会社（タマユラ商事）。信用調査レポート中心で手順が異なる。"
+    },
+    {
+      "doc_id": "a-024-d05",
+      "facts_stated": [
+        "f3"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-024-d04",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "関係遮断の一般論。誓約書→照会→委員会→締結の手順はない。"
+    },
+    {
+      "doc_id": "a-024-d10",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "照会件数の実績。手続きの順序そのものは述べていない。"
+    },
+    {
+      "doc_id": "a-024-d08",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "既存テナント更新時。新規契約の申込みからの順序ではない。"
+    },
+    {
+      "doc_id": "a-024-d01",
+      "facts_stated": [
+        "f1"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    }
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": "各段階が別文書。手続き順序の経緯の問い。"
+  }
+}

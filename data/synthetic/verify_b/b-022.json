@@ -1,0 +1,21 @@
+{
+  "id": "b-022",
+  "verdicts": [
+    {"doc_id": "b-022-d04", "facts_stated": [], "leak_phrase": false, "note": "2020年制定の標準で、百分率の上限も決裁者も空欄のままとされている"},
+    {"doc_id": "b-022-d02", "facts_stated": ["f1"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-022-d09", "facts_stated": [], "leak_phrase": false, "note": "見積システムの操作説明のみで、何%まで誰が見るかは操作の話に限ると明記されている"},
+    {"doc_id": "b-022-d07", "facts_stated": ["f3"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-022-d06", "facts_stated": [], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-022-d01", "facts_stated": [], "leak_phrase": false, "note": "2024年度の手引で、両支店とも12%・支店長決裁とされ、f1・f2・f3と異なる"},
+    {"doc_id": "b-022-d05", "facts_stated": ["f2"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-022-d03", "facts_stated": [], "leak_phrase": false, "note": "カワラケ物産という別会社の権限写し"},
+    {"doc_id": "b-022-d10", "facts_stated": [], "leak_phrase": false, "note": "北浦支店の権限表であり、東湾・西湾支店の対象外"},
+    {"doc_id": "b-022-d08", "facts_stated": [], "leak_phrase": false, "note": "振込手数料の会社負担についてのメモで、「値引き」を別の意味で使用"}
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": ""
+  }
+}

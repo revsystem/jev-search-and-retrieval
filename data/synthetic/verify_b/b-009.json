@@ -1,0 +1,21 @@
+{
+  "id": "b-009",
+  "verdicts": [
+    {"doc_id": "b-009-d07", "facts_stated": [], "leak_phrase": false, "note": "設備点検表に、ロットの速度やバイトの型式の欄はない"},
+    {"doc_id": "b-009-d01", "facts_stated": [], "leak_phrase": false, "note": "返品票だが受付R-210・ロットJ-02で、f1のR-552・J-17とは異なる"},
+    {"doc_id": "b-009-d10", "facts_stated": [], "leak_phrase": false, "note": "フランジのラインの日報であり、軸のラインの対象外"},
+    {"doc_id": "b-009-d04", "facts_stated": [], "leak_phrase": false, "note": "2022年制定の標準で、戻されたロットの番号やその週の工具交換には触れていない"},
+    {"doc_id": "b-009-d03", "facts_stated": [], "leak_phrase": false, "note": "ユキヤマ金属という別会社の不具合写し"},
+    {"doc_id": "b-009-d05", "facts_stated": ["f2"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-009-d02", "facts_stated": ["f1"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-009-d08", "facts_stated": ["f3"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-009-d09", "facts_stated": [], "leak_phrase": false, "note": "経理の部門負担の呼び方についてのメモで、「軸」を別の意味で使用"},
+    {"doc_id": "b-009-d06", "facts_stated": [], "leak_phrase": false, "note": ""}
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": ""
+  }
+}

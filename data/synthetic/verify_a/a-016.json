@@ -1,0 +1,77 @@
+{
+  "id": "a-016",
+  "verdicts": [
+    {
+      "doc_id": "a-016-d01",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2022年度第2四半期。予約未利用・6円円安で、f1〜f3の対象期・数値と一致しない。"
+    },
+    {
+      "doc_id": "a-016-d05",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "為替差損益の一般論。予約比率・円安幅・支払条件の具体はない。"
+    },
+    {
+      "doc_id": "a-016-d09",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2025年度第1四半期。対象期が異なり、f1〜f3の要因は述べていない。"
+    },
+    {
+      "doc_id": "a-016-d10",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2023年度。円高・予約引上げで利益側。f1〜f3と一致しない。"
+    },
+    {
+      "doc_id": "a-016-d07",
+      "facts_stated": [
+        "f3"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-016-d02",
+      "facts_stated": [
+        "f1"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-016-d06",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "差損の金額結果のみ。悪化の原因（f1〜f3）は述べていない。"
+    },
+    {
+      "doc_id": "a-016-d04",
+      "facts_stated": [
+        "f2"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-016-d08",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "出張旅費の精算レート。仕入・バス契約の為替差損益要因ではない。"
+    },
+    {
+      "doc_id": "a-016-d03",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "別会社（ワタツミ汽船）。予約比率の引上げなど方向も異なる。"
+    }
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": "理由が三要因に分かれ、なぜ悪化したかの問い。"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "id": "b-010",
+  "verdicts": [
+    {"doc_id": "b-010-d03", "facts_stated": [], "leak_phrase": false, "note": "ナギサ硝子という別会社の写し"},
+    {"doc_id": "b-010-d04", "facts_stated": [], "leak_phrase": false, "note": "2021年制定の標準で、出荷前の項目は包装の項に送るとされ、具体的な項目や炉・ロットの記載はない"},
+    {"doc_id": "b-010-d06", "facts_stated": [], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-010-d07", "facts_stated": [], "leak_phrase": false, "note": "炉の点検表に、ロットや出荷前の検査項目の欄はない"},
+    {"doc_id": "b-010-d02", "facts_stated": ["f1"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-010-d01", "facts_stated": [], "leak_phrase": false, "note": "返品票だが受付C-2・ロットG-11で、f1のC-14・G-30とは異なる"},
+    {"doc_id": "b-010-d09", "facts_stated": [], "leak_phrase": false, "note": "食堂のタイルについての記録で、溶解の炉や出荷前検査は扱っていない"},
+    {"doc_id": "b-010-d05", "facts_stated": ["f2"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-010-d08", "facts_stated": ["f3"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-010-d10", "facts_stated": [], "leak_phrase": false, "note": "3号炉・ロットG-44の日報で、皿用の別の台帳であり瓶のロットG-30とは異なる"}
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": ""
+  }
+}

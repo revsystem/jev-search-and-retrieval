@@ -1,0 +1,77 @@
+{
+  "id": "a-002",
+  "verdicts": [
+    {
+      "doc_id": "a-002-d10",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "研究開発本部の受講率100%。全社未達の理由ではない。"
+    },
+    {
+      "doc_id": "a-002-d07",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "現場作業員向け安全研修。管理職向けコンプライアンス研修の未達要因ではない。"
+    },
+    {
+      "doc_id": "a-002-d04",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "別会社（トキワギ物流）。受講率96%で、切替・決算重複・窓口の問題は述べていない。"
+    },
+    {
+      "doc_id": "a-002-d08",
+      "facts_stated": [
+        "f3"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-002-d06",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "受講率82%という結果のみ。f1〜f3の要因は述べていない。"
+    },
+    {
+      "doc_id": "a-002-d03",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "研修運用の一般論。切替遅延・決算重複・窓口位置の具体はない。"
+    },
+    {
+      "doc_id": "a-002-d01",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2024年度上期。目標達成で、対象期・結果がf1〜f3と一致しない。"
+    },
+    {
+      "doc_id": "a-002-d05",
+      "facts_stated": [
+        "f2"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-002-d09",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "情報セキュリティ研修。対象・内容が異なり、未達要因ではない。"
+    },
+    {
+      "doc_id": "a-002-d02",
+      "facts_stated": [
+        "f1"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    }
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": "理由がf1〜f3に分かれ、なぜ目標を下回ったかの問い。"
+  }
+}

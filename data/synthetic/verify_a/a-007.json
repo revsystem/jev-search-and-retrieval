@@ -1,0 +1,77 @@
+{
+  "id": "a-007",
+  "verdicts": [
+    {
+      "doc_id": "a-007-d07",
+      "facts_stated": [
+        "f3"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-007-d08",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "品質監査の改善提案窓口。ハラスメント相談窓口とは別。"
+    },
+    {
+      "doc_id": "a-007-d02",
+      "facts_stated": [
+        "f1"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-007-d09",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "FAQ。件数増加の要因は述べていない。"
+    },
+    {
+      "doc_id": "a-007-d05",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "別会社（シラハエ物流）。増加要因・運営も異なる。"
+    },
+    {
+      "doc_id": "a-007-d03",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "防止の一般論。2025年の具体施策はない。"
+    },
+    {
+      "doc_id": "a-007-d10",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "長距離輸送部門の立ち上げ経緯。相談が増加分の半数を占めたとは述べていない。"
+    },
+    {
+      "doc_id": "a-007-d06",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "件数の倍増という結果のみ。社外窓口・研修・長距離部門の要因は述べていない。"
+    },
+    {
+      "doc_id": "a-007-d04",
+      "facts_stated": [
+        "f2"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-007-d01",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2023年度。社外窓口・研修の拡充はなく、倍増の理由ではない。"
+    }
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": "理由がf1〜f3に分かれ、なぜ倍増したかの問い。"
+  }
+}

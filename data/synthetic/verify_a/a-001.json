@@ -1,0 +1,79 @@
+{
+  "id": "a-001",
+  "verdicts": [
+    {
+      "doc_id": "a-001-d06",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "改定後の利用実績（週2.4日・月5.1日）。規程上の上限そのものではない。"
+    },
+    {
+      "doc_id": "a-001-d09",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "上限日数や申請手続きの具体値がなく、規程確認を促す一般論のみ。"
+    },
+    {
+      "doc_id": "a-001-d01",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2023年10月改定版。上限は本部共通で週2日、申請は3営業日前で、f1〜f4と一致しない。"
+    },
+    {
+      "doc_id": "a-001-d04",
+      "facts_stated": [
+        "f2"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-001-d10",
+      "facts_stated": [
+        "f1"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-001-d03",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "別会社（カゼミチ物流）。上限・申請の数値は事務部門・配車センター向け。"
+    },
+    {
+      "doc_id": "a-001-d08",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "在宅勤務手当のFAQ。上限日数・本部別の申請手続きは述べていない。"
+    },
+    {
+      "doc_id": "a-001-d05",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "管理本部の上限・申請。開発・営業のf1〜f4とは対象が異なる。"
+    },
+    {
+      "doc_id": "a-001-d07",
+      "facts_stated": [
+        "f4"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-001-d02",
+      "facts_stated": [
+        "f3"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    }
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": "上限はf1・f2、申請はf3・f4に分かれ、比較の問い。"
+  }
+}

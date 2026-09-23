@@ -1,0 +1,79 @@
+{
+  "id": "a-012",
+  "verdicts": [
+    {
+      "doc_id": "a-012-d07",
+      "facts_stated": [
+        "f4"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-012-d02",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "別会社（キリフリ工業）。上乗せ0.6%など条件が異なる。"
+    },
+    {
+      "doc_id": "a-012-d06",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "方針確認のみ。金利・担保・財務制限の具体条件は次回提示としている。"
+    },
+    {
+      "doc_id": "a-012-d03",
+      "facts_stated": [
+        "f2"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-012-d09",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "運転資金の当座貸越。新工場建設資金ではなく、上乗せ0.3%もf1と異なる。"
+    },
+    {
+      "doc_id": "a-012-d04",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2021年度の3年債・年0.9%。今回検討の5年債1.2%・財務制限条項とは一致しない。"
+    },
+    {
+      "doc_id": "a-012-d10",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "別会社（イブキノ電材）。金利上乗せ1.1%・担保対象も異なる。"
+    },
+    {
+      "doc_id": "a-012-d05",
+      "facts_stated": [
+        "f3"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-012-d01",
+      "facts_stated": [
+        "f1"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-012-d08",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "資金調達の一般論。金利水準や条項の数値はない。"
+    }
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": "金利と担保・条項が手段ごとに別文書。比較の問い。"
+  }
+}

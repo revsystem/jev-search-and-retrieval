@@ -1,0 +1,77 @@
+{
+  "id": "a-009",
+  "verdicts": [
+    {
+      "doc_id": "a-009-d03",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "旅費規程の考え方。具体的な距離・上限額はない。"
+    },
+    {
+      "doc_id": "a-009-d08",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "営業評価の出張加算。旅費規程の手当・宿泊精算ではない。"
+    },
+    {
+      "doc_id": "a-009-d05",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2019年改定版。距離30km・手当1000円・上限8千円でf1〜f3と一致しない。"
+    },
+    {
+      "doc_id": "a-009-d02",
+      "facts_stated": [
+        "f1"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-009-d04",
+      "facts_stated": [
+        "f2"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-009-d07",
+      "facts_stated": [
+        "f3"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-009-d09",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "FAQ。距離・金額・役員同行の具体条件はない。"
+    },
+    {
+      "doc_id": "a-009-d06",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "執行状況の集計。手当・宿泊の支給条件そのものではない。"
+    },
+    {
+      "doc_id": "a-009-d10",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "交通費精算。出張手当・宿泊費の条件ではない。"
+    },
+    {
+      "doc_id": "a-009-d01",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "別会社（ヒヨリダ物産）。一律1500円など基準が異なる。"
+    }
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": "距離・宿泊施設・役員同行の条件が別文書。条件で決まる仕組みの問い。"
+  }
+}

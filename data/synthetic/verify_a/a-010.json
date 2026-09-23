@@ -1,0 +1,77 @@
+{
+  "id": "a-010",
+  "verdicts": [
+    {
+      "doc_id": "a-010-d09",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "FAQ。上限時間や月次実績の数値はない。"
+    },
+    {
+      "doc_id": "a-010-d02",
+      "facts_stated": [
+        "f1"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-010-d04",
+      "facts_stated": [
+        "f2"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-010-d01",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "別会社（オボロヅキ物流）。月75時間・年5回でf1と一致しない。"
+    },
+    {
+      "doc_id": "a-010-d05",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2024年度。最高58時間で特別条項適用なし。f2・f3の対象期と一致しない。"
+    },
+    {
+      "doc_id": "a-010-d10",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "8月の繁忙の経緯。平均72時間という数値は述べていない。"
+    },
+    {
+      "doc_id": "a-010-d03",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "労働時間管理の一般論。80時間・6回・72時間の具体はない。"
+    },
+    {
+      "doc_id": "a-010-d06",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "営業部門の残業。開発部門のf2・f3ではない。"
+    },
+    {
+      "doc_id": "a-010-d07",
+      "facts_stated": [
+        "f3"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-010-d08",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "品質保証の社内用語「特別条項」。36協定とは無関係。"
+    }
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": "協定上限・実績・適用回数が別文書。上限接近の有無を問う統合の問い。"
+  }
+}

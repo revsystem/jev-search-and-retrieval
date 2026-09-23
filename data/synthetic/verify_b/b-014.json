@@ -1,0 +1,21 @@
+{
+  "id": "b-014",
+  "verdicts": [
+    {"doc_id": "b-014-d06", "facts_stated": [], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-014-d01", "facts_stated": ["f1"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-014-d09", "facts_stated": [], "leak_phrase": false, "note": "フユモリ計算という別会社のメモ"},
+    {"doc_id": "b-014-d07", "facts_stated": [], "leak_phrase": false, "note": "監視画面の仕様説明のみで、サーバの再起動タイミングは説明の範囲外と明記されている"},
+    {"doc_id": "b-014-d02", "facts_stated": [], "leak_phrase": false, "note": "対象月は2025年4月の実績(再試行5回、添付8MB、夜の処理後に再起動)で、f1・f2・f3と異なる"},
+    {"doc_id": "b-014-d08", "facts_stated": ["f3"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-014-d10", "facts_stated": [], "leak_phrase": false, "note": "2026年4月3日の障害当日の記録で、当番が手動で再試行した単発の対応。サーバの再起動はこの票ではしていないと明記され、恒久的な変更とは別事象"},
+    {"doc_id": "b-014-d04", "facts_stated": [], "leak_phrase": false, "note": "2023年制定の手順で、再試行上限なし・添付10MBまで・週初めに1回入れ直すとされ、f1・f2・f3と異なる"},
+    {"doc_id": "b-014-d05", "facts_stated": ["f2"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-014-d03", "facts_stated": [], "leak_phrase": false, "note": "夕の出荷メールの日報であり、朝の受注メールの対象外"}
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": ""
+  }
+}

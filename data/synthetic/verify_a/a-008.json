@@ -1,0 +1,77 @@
+{
+  "id": "a-008",
+  "verdicts": [
+    {
+      "doc_id": "a-008-d04",
+      "facts_stated": [
+        "f2"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-008-d09",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "FAQ。年度ごとの詳細は要領参照に委ねている。"
+    },
+    {
+      "doc_id": "a-008-d03",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "選考の考え方の一般論。年度ごとの変更内容はない。"
+    },
+    {
+      "doc_id": "a-008-d05",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "中途採用。新卒選考の変遷ではない。"
+    },
+    {
+      "doc_id": "a-008-d08",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "製品の適性検査。採用のWeb適性検査とは別。"
+    },
+    {
+      "doc_id": "a-008-d07",
+      "facts_stated": [
+        "f3"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-008-d10",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2019年卒は面接3回。f1の「2023年卒までESと2回の面接」とは面接回数も年度も一致しない。"
+    },
+    {
+      "doc_id": "a-008-d06",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2024年卒の結果数値。プロセス変更内容そのものは述べていない。"
+    },
+    {
+      "doc_id": "a-008-d01",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "グループ会社（アサギリ精機）。基準・最終面接方式が異なる。"
+    },
+    {
+      "doc_id": "a-008-d02",
+      "facts_stated": [
+        "f1"
+      ],
+      "leak_phrase": false,
+      "note": "一次・最終の2回面接で適性検査なし。2023年卒時点の選考としてf1に該当。"
+    }
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": "各卒年の変更が別文書。プロセス変遷の問い。"
+  }
+}

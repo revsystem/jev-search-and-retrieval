@@ -1,0 +1,77 @@
+{
+  "id": "a-011",
+  "verdicts": [
+    {
+      "doc_id": "a-011-d04",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "営業利益率の低下は数値で示されるが、原因となるf1〜f3は述べていない。"
+    },
+    {
+      "doc_id": "a-011-d06",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2023年度第3四半期。利益率は改善方向で、f1〜f3の内容はない。"
+    },
+    {
+      "doc_id": "a-011-d08",
+      "facts_stated": [
+        "f3"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-011-d10",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2025年度第2四半期。対象期が違い、小麦粉は前年並みでf1とも一致しない。"
+    },
+    {
+      "doc_id": "a-011-d05",
+      "facts_stated": [
+        "f1"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-011-d03",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "営業利益率の見方の一般論。18%・4.2億円・価格改定延期などの具体はない。"
+    },
+    {
+      "doc_id": "a-011-d01",
+      "facts_stated": [
+        "f2"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-011-d07",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "担当顧客別の営業利益率という評価指標のFAQ。決算の営業利益率低下要因ではない。"
+    },
+    {
+      "doc_id": "a-011-d02",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2022年度第3四半期。小麦粉上昇の話題は近いが、上昇率は27%でf1の18%・対象期とも一致しない。"
+    },
+    {
+      "doc_id": "a-011-d09",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "競合ハナツグ製菓の説明。ソラノハのf1〜f3とは別会社・別要因。"
+    }
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": "f1〜f3が別文書に分かれ、理由問いとして一問一答ではない。"
+  }
+}

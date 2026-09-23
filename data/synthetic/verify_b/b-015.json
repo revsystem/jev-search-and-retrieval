@@ -1,0 +1,21 @@
+{
+  "id": "b-015",
+  "verdicts": [
+    {"doc_id": "b-015-d07", "facts_stated": [], "leak_phrase": false, "note": "反映ツールの説明のみで、承認人数や印の要否は説明の範囲外と明記されている"},
+    {"doc_id": "b-015-d01", "facts_stated": ["f1"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-015-d04", "facts_stated": [], "leak_phrase": false, "note": "2019年制定の手引で、承認の人数や確認の印を指定していない"},
+    {"doc_id": "b-015-d05", "facts_stated": ["f2"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-015-d09", "facts_stated": [], "leak_phrase": false, "note": "備品発注の承認についての記録で、本番反映は扱わないと明記されている"},
+    {"doc_id": "b-015-d02", "facts_stated": [], "leak_phrase": false, "note": "試験環境への反映票で、本番の承認とは別と明記され、承認欄も空のまま"},
+    {"doc_id": "b-015-d06", "facts_stated": [], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-015-d03", "facts_stated": [], "leak_phrase": false, "note": "ノドカソフトという別会社の聞き取りメモ"},
+    {"doc_id": "b-015-d10", "facts_stated": [], "leak_phrase": false, "note": "障害対応としての緊急反映で、部長の口頭許可による例外対応。通常必要な承認人数はこの記録では繰り返していないと明記されている"},
+    {"doc_id": "b-015-d08", "facts_stated": ["f3"], "leak_phrase": false, "note": ""}
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": ""
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "id": "b-001",
+  "verdicts": [
+    {"doc_id": "b-001-d07", "facts_stated": ["f3"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-001-d10", "facts_stated": [], "leak_phrase": false, "note": "北翼工場の数値であり、東翼・西翼工場の対象外"},
+    {"doc_id": "b-001-d09", "facts_stated": [], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-001-d05", "facts_stated": ["f2"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-001-d01", "facts_stated": [], "leak_phrase": false, "note": "2024年度上期の実績値で、検査方法(出荷前日に完成品1台)も不良率目標(東翼1.20%/西翼1.50%)もf1・f2・f3と異なる"},
+    {"doc_id": "b-001-d02", "facts_stated": ["f1"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-001-d06", "facts_stated": [], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-001-d03", "facts_stated": [], "leak_phrase": false, "note": "ヌノビ精機という別会社の数値"},
+    {"doc_id": "b-001-d08", "facts_stated": [], "leak_phrase": false, "note": "「検査」「不良率」を資格試験の合否という別の意味で使用"},
+    {"doc_id": "b-001-d04", "facts_stated": [], "leak_phrase": false, "note": "2022年4月制定の規程で、検査方法(1日最先2枚)も不良率目標(両工場3.00%)もf1・f2・f3と異なる"}
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": ""
+  }
+}

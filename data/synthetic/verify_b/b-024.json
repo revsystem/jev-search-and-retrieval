@@ -1,0 +1,21 @@
+{
+  "id": "b-024",
+  "verdicts": [
+    {"doc_id": "b-024-d04", "facts_stated": [], "leak_phrase": false, "note": "2021年制定の手引で、間隔・画面の初期値・納品後の電話のいずれも指定していないとされている"},
+    {"doc_id": "b-024-d02", "facts_stated": [], "leak_phrase": false, "note": "2024年度下期の実績で、配送は月1回のまま・手入力・電話なしとされ、f1・f2・f3と異なる"},
+    {"doc_id": "b-024-d05", "facts_stated": ["f2"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-024-d03", "facts_stated": [], "leak_phrase": false, "note": "カワラケ物産という別会社の聞き取りメモ"},
+    {"doc_id": "b-024-d07", "facts_stated": [], "leak_phrase": false, "note": "物流の配車表に、画面の仕様や電話担当の欄はない"},
+    {"doc_id": "b-024-d06", "facts_stated": [], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-024-d09", "facts_stated": [], "leak_phrase": false, "note": "仕入先への保守料についてのメモで、「リピート」を別の意味で使用"},
+    {"doc_id": "b-024-d08", "facts_stated": ["f3"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-024-d01", "facts_stated": ["f1"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-024-d10", "facts_stated": [], "leak_phrase": false, "note": "機器の販売日報であり、消耗品の対象外"}
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": ""
+  }
+}

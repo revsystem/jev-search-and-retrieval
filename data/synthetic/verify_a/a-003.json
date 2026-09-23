@@ -1,0 +1,77 @@
+{
+  "id": "a-003",
+  "verdicts": [
+    {
+      "doc_id": "a-003-d09",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2025年度の実施結果。制度変遷（f1〜f3）そのものは述べていない。"
+    },
+    {
+      "doc_id": "a-003-d03",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "人材育成の一般論。試行導入・推薦枠・年2回化の具体はない。"
+    },
+    {
+      "doc_id": "a-003-d10",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2021年度は前年度踏襲。f1〜f3の改定内容はない。"
+    },
+    {
+      "doc_id": "a-003-d01",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "別会社（ホシノミ物流）の配車管理者登用。要件も異なる。"
+    },
+    {
+      "doc_id": "a-003-d08",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "新卒採用の推薦枠。登用試験の推薦枠とは別。"
+    },
+    {
+      "doc_id": "a-003-d07",
+      "facts_stated": [
+        "f3"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-003-d06",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "FAQ。受験資格や実施回数の具体は人事部への照会に委ねている。"
+    },
+    {
+      "doc_id": "a-003-d02",
+      "facts_stated": [
+        "f1"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-003-d05",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "班長登用制度。運行管理者登用試験とは別制度。"
+    },
+    {
+      "doc_id": "a-003-d04",
+      "facts_stated": [
+        "f2"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    }
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": "変遷の各段階が別文書。経緯の問い。"
+  }
+}

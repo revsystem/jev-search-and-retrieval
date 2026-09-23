@@ -1,0 +1,21 @@
+{
+  "id": "b-028",
+  "verdicts": [
+    {"doc_id": "b-028-d03", "facts_stated": [], "leak_phrase": false, "note": "ヒナゲシ商事という別会社の価格写し"},
+    {"doc_id": "b-028-d05", "facts_stated": ["f2"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-028-d02", "facts_stated": ["f1"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-028-d06", "facts_stated": [], "leak_phrase": false, "note": "社員食堂の定食価格についての案内で、「価格表」を別の意味で使用"},
+    {"doc_id": "b-028-d09", "facts_stated": [], "leak_phrase": false, "note": "運賃の改定であり、商品の価格表はこの改定では触れていないと明記されている"},
+    {"doc_id": "b-028-d07", "facts_stated": [], "leak_phrase": false, "note": "支店の要望に、材料の率・競合の社数・割引の段数の記載はない"},
+    {"doc_id": "b-028-d01", "facts_stated": [], "leak_phrase": false, "note": "前期の実績(4%値上げ、材料8%高い、競合2社値上げ、割引段据え置き)で、f1・f2・f3と異なる"},
+    {"doc_id": "b-028-d08", "facts_stated": ["f3"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-028-d10", "facts_stated": [], "leak_phrase": false, "note": "会議の案内のみで、材料の率・競合・割引の結論は別紙とされている"},
+    {"doc_id": "b-028-d04", "facts_stated": [], "leak_phrase": false, "note": "2019年制定の手引で、見る項目の名前のみを挙げ、百分率も社数も空欄とされている"}
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": ""
+  }
+}

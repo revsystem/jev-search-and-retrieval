@@ -1,0 +1,21 @@
+{
+  "id": "b-025",
+  "verdicts": [
+    {"doc_id": "b-025-d09", "facts_stated": [], "leak_phrase": false, "note": "社員向けの社内報発送についてのメモで、「冊子」を別の意味で使用"},
+    {"doc_id": "b-025-d01", "facts_stated": ["f1"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-025-d10", "facts_stated": [], "leak_phrase": false, "note": "展示会の案内状についての記録で、カタログの印刷費はこの案内の費用に入っていないと明記されている"},
+    {"doc_id": "b-025-d02", "facts_stated": [], "leak_phrase": false, "note": "2025年の実績で、費用は増加・送付先は全員・フルカラー・宅配とされ、f1・f2・f3と異なる"},
+    {"doc_id": "b-025-d03", "facts_stated": [], "leak_phrase": false, "note": "ツユクサ商事という別会社の聞き取りメモ"},
+    {"doc_id": "b-025-d07", "facts_stated": [], "leak_phrase": false, "note": "印刷会社の納品書に、色・送付先・発送便の欄はない"},
+    {"doc_id": "b-025-d04", "facts_stated": [], "leak_phrase": false, "note": "2019年制定の手引で、外す対象・色・便のいずれも空欄のままとされている"},
+    {"doc_id": "b-025-d05", "facts_stated": ["f2"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-025-d08", "facts_stated": ["f3"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-025-d06", "facts_stated": [], "leak_phrase": false, "note": ""}
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": ""
+  }
+}

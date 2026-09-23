@@ -1,0 +1,79 @@
+{
+  "id": "a-029",
+  "verdicts": [
+    {
+      "doc_id": "a-029-d07",
+      "facts_stated": [
+        "f4"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-029-d03",
+      "facts_stated": [
+        "f2"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-029-d04",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "職務発明制度の意義の一般論。届出〜対価の手順はない。"
+    },
+    {
+      "doc_id": "a-029-d08",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "届出書の記入手引き。審査期限や対価額は述べていない。"
+    },
+    {
+      "doc_id": "a-029-d01",
+      "facts_stated": [
+        "f1"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-029-d02",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2017年改定版。人事部経由・90日・対価3万/15万で現行と一致しない。"
+    },
+    {
+      "doc_id": "a-029-d09",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "事業用車両の登録。職務発明の手続きではない。"
+    },
+    {
+      "doc_id": "a-029-d10",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "届出・出願件数の実績。手順の内容そのものではない。"
+    },
+    {
+      "doc_id": "a-029-d06",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "別会社（ユキマチロジスティクス）。対価額・判定期間が異なる。"
+    },
+    {
+      "doc_id": "a-029-d05",
+      "facts_stated": [
+        "f3"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    }
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": "届出・審査・出願時対価・登録時対価が別文書。手順の問い。"
+  }
+}

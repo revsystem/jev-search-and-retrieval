@@ -1,0 +1,21 @@
+{
+  "id": "b-029",
+  "verdicts": [
+    {"doc_id": "b-029-d08", "facts_stated": ["f3"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-029-d04", "facts_stated": [], "leak_phrase": false, "note": "2021年制定の手引で、どの列を使うか・何個で切り替わるかは空欄のままとされている"},
+    {"doc_id": "b-029-d10", "facts_stated": [], "leak_phrase": false, "note": "伝票番号S-70で、宛先は南嶺機工。f1の伝票S-61・宛先北嶺機工とは異なる"},
+    {"doc_id": "b-029-d09", "facts_stated": [], "leak_phrase": false, "note": "在庫評価の原価についてのメモで、客との契約や伝票の売価は扱わないと明記されている"},
+    {"doc_id": "b-029-d06", "facts_stated": [], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-029-d07", "facts_stated": [], "leak_phrase": false, "note": "物流の日報に、単価や契約の番号の欄はない"},
+    {"doc_id": "b-029-d05", "facts_stated": ["f2"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-029-d01", "facts_stated": [], "leak_phrase": false, "note": "伝票番号S-12で、日付は2026年1月、品目はピン。f1の伝票S-61・軸受とは異なる"},
+    {"doc_id": "b-029-d03", "facts_stated": [], "leak_phrase": false, "note": "ヤマユリ物産という別会社の納品写し"},
+    {"doc_id": "b-029-d02", "facts_stated": ["f1"], "leak_phrase": false, "note": ""}
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": ""
+  }
+}

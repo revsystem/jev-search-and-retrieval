@@ -1,0 +1,21 @@
+{
+  "id": "b-011",
+  "verdicts": [
+    {"doc_id": "b-011-d10", "facts_stated": [], "leak_phrase": false, "note": "2026年3月4日の障害当日の記録で、再送は当番が手動で3件行ったという単発の対応。f1の恒久的な上限設定とは別事象"},
+    {"doc_id": "b-011-d04", "facts_stated": [], "leak_phrase": false, "note": "2024年制定の旧手順(再送上限なし、索引三つ、開始午前2時)で、f1・f2・f3のいずれとも異なる"},
+    {"doc_id": "b-011-d09", "facts_stated": [], "leak_phrase": false, "note": "ホタカ計算社という別会社の記録"},
+    {"doc_id": "b-011-d02", "facts_stated": [], "leak_phrase": false, "note": "対象月は2025年3月の実績(再送5回まで、索引三つ、開始午前2時)で、f1・f2・f3のいずれとも異なる"},
+    {"doc_id": "b-011-d03", "facts_stated": [], "leak_phrase": false, "note": "出荷連携の夜間バッチであり、受注連携ではない"},
+    {"doc_id": "b-011-d07", "facts_stated": [], "leak_phrase": false, "note": "監視画面の仕様説明のみで、再送回数・索引構成・開始時刻の具体的な値の記載がない"},
+    {"doc_id": "b-011-d05", "facts_stated": ["f2"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-011-d06", "facts_stated": [], "leak_phrase": false, "note": "回数・時刻を記号で示す一般的な研修教材で、具体的な数値の記載がない"},
+    {"doc_id": "b-011-d01", "facts_stated": ["f1"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-011-d08", "facts_stated": ["f3"], "leak_phrase": false, "note": ""}
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": ""
+  }
+}

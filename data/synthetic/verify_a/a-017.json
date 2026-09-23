@@ -1,0 +1,79 @@
+{
+  "id": "a-017",
+  "verdicts": [
+    {
+      "doc_id": "a-017-d04",
+      "facts_stated": [
+        "f2"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-017-d02",
+      "facts_stated": [
+        "f1"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-017-d10",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "予算上の目標コストとしての「標準原価」。棚卸資産評価の標準原価法ではない。"
+    },
+    {
+      "doc_id": "a-017-d03",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "別会社（ハマユウ化工）。先入先出法など方針が異なる。"
+    },
+    {
+      "doc_id": "a-017-d06",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "実地棚卸の立会い強化。評価方法・評価損基準ではない。"
+    },
+    {
+      "doc_id": "a-017-d07",
+      "facts_stated": [
+        "f3"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-017-d08",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "評価損の計上実績額。計上基準そのものではない。"
+    },
+    {
+      "doc_id": "a-017-d09",
+      "facts_stated": [
+        "f4"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-017-d01",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2019年改定版。全社総平均法で事業別の違いがなく、f1〜f4と一致しない。"
+    },
+    {
+      "doc_id": "a-017-d05",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "評価方法の一般論。事業別の具体的な方法・基準はない。"
+    }
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": "評価方法と評価損基準が事業ごとに別文書。比較の問い。"
+  }
+}

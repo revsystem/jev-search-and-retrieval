@@ -1,0 +1,21 @@
+{
+  "id": "b-023",
+  "verdicts": [
+    {"doc_id": "b-023-d05", "facts_stated": ["f2"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-023-d04", "facts_stated": [], "leak_phrase": false, "note": "2019年制定の標準で、日数も番号の扱いも空欄のままとされている"},
+    {"doc_id": "b-023-d06", "facts_stated": [], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-023-d01", "facts_stated": [], "leak_phrase": false, "note": "2023年度の手引で、直販・代理店経由とも60日とされ、f1・f3と異なる"},
+    {"doc_id": "b-023-d02", "facts_stated": ["f1"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-023-d08", "facts_stated": [], "leak_phrase": false, "note": "コピー機の借用料金についての依頼で、「見積」を別の意味で使用"},
+    {"doc_id": "b-023-d03", "facts_stated": [], "leak_phrase": false, "note": "シオサイ商事という別会社の規則写し"},
+    {"doc_id": "b-023-d10", "facts_stated": [], "leak_phrase": false, "note": "海外向けの規則であり、直販・代理店経由の対象外"},
+    {"doc_id": "b-023-d09", "facts_stated": [], "leak_phrase": false, "note": "見積システムの操作説明のみで、何日か・番号を取り直すかは操作の話に限ると明記されている"},
+    {"doc_id": "b-023-d07", "facts_stated": ["f3"], "leak_phrase": false, "note": ""}
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": ""
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "id": "a-025",
+  "verdicts": [
+    {
+      "doc_id": "a-025-d05",
+      "facts_stated": [
+        "f3"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-025-d07",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2026年5月分のクモイ工業。対象月が異なり、日付もf3と一致しない。"
+    },
+    {
+      "doc_id": "a-025-d04",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "下請代金の一般論。60日・起算日・本件日付はない。"
+    },
+    {
+      "doc_id": "a-025-d03",
+      "facts_stated": [
+        "f2"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-025-d02",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2016年改定版。検収完了から90日で、現行のf1・f2と一致しない。"
+    },
+    {
+      "doc_id": "a-025-d09",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "給与の支払期日。下請代金ではない。"
+    },
+    {
+      "doc_id": "a-025-d10",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "別会社（ヒスイダ精密）。支払期限45日など基準が異なる。"
+    },
+    {
+      "doc_id": "a-025-d08",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "8月の振込完了通知。受領日6月10日・支払日8月20日という日付の組はない。"
+    },
+    {
+      "doc_id": "a-025-d06",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "トビウオ海運への支払。クモイ工業のf3ではない。"
+    },
+    {
+      "doc_id": "a-025-d01",
+      "facts_stated": [
+        "f1"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    }
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": "規程と本件実績が別文書。期限遵守の統合の問い。"
+  }
+}

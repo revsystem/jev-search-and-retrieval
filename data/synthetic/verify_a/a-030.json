@@ -1,0 +1,77 @@
+{
+  "id": "a-030",
+  "verdicts": [
+    {
+      "doc_id": "a-030-d01",
+      "facts_stated": [
+        "f1"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-030-d06",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "別件の業務委託契約。2018年6月締結の本件ではない。"
+    },
+    {
+      "doc_id": "a-030-d03",
+      "facts_stated": [
+        "f2"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-030-d10",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "廃棄件数の実績。本件契約の起算・保管期間はない。"
+    },
+    {
+      "doc_id": "a-030-d09",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "サーバーログの保管。契約書の文書管理ではない。"
+    },
+    {
+      "doc_id": "a-030-d02",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2015年改定版。一律5年・起算は締結日で現行のf1・f2と一致しない。"
+    },
+    {
+      "doc_id": "a-030-d07",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "会計帳簿の保管期間。業務委託契約書ではない。"
+    },
+    {
+      "doc_id": "a-030-d04",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "文書管理の一般論。7年・起算日・本件更新履歴はない。"
+    },
+    {
+      "doc_id": "a-030-d05",
+      "facts_stated": [
+        "f3"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-030-d08",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "廃棄申請の手続き。本件を今年度廃棄できるかの判定材料はない。"
+    }
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": "保管期間・起算・本件履歴が別文書。廃棄可否の統合の問い。"
+  }
+}

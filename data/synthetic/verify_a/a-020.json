@@ -1,0 +1,79 @@
+{
+  "id": "a-020",
+  "verdicts": [
+    {
+      "doc_id": "a-020-d02",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2022年3月版。FCF水準1.5億円で現行のf1（3億円）と一致しない。"
+    },
+    {
+      "doc_id": "a-020-d07",
+      "facts_stated": [
+        "f4"
+      ],
+      "leak_phrase": false,
+      "note": "定義は営業CFから有形・無形固定資産取得支出を差し引く形。f4の趣旨（営業から投資支出を差し引く）に該当。"
+    },
+    {
+      "doc_id": "a-020-d06",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "FCFの一般説明。3億円・実績値はない。"
+    },
+    {
+      "doc_id": "a-020-d09",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "部門予算上の投資活動。キャッシュフロー計算書の投資CFではない。"
+    },
+    {
+      "doc_id": "a-020-d10",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "別会社（ミズカガミ商事）。維持水準2億円など条件が異なる。"
+    },
+    {
+      "doc_id": "a-020-d04",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2024年度第3四半期までの集計。対象期が異なり、数値もf2・f3と一致しない。"
+    },
+    {
+      "doc_id": "a-020-d03",
+      "facts_stated": [
+        "f2"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-020-d05",
+      "facts_stated": [
+        "f3"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-020-d08",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "確認中との報告。抵触判定に必要な数値・定義はない。"
+    },
+    {
+      "doc_id": "a-020-d01",
+      "facts_stated": [
+        "f1"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    }
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": "条項・実績・定義が別文書。抵触判定の統合の問い。"
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "id": "a-019",
+  "verdicts": [
+    {
+      "doc_id": "a-019-d07",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "大口案件の承認フロー。着手金の比率・支払時期は述べていない。"
+    },
+    {
+      "doc_id": "a-019-d09",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "着手金の回収実績。比率や特例の条件は述べていない。"
+    },
+    {
+      "doc_id": "a-019-d08",
+      "facts_stated": [
+        "f4"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-019-d04",
+      "facts_stated": [
+        "f2"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-019-d03",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "別会社（ツキシロ電機）。800万円・25%など条件が異なる。"
+    },
+    {
+      "doc_id": "a-019-d06",
+      "facts_stated": [
+        "f3"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-019-d02",
+      "facts_stated": [
+        "f1"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-019-d05",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "取引条件の一般論。金額・ランク・比率の具体はない。"
+    },
+    {
+      "doc_id": "a-019-d10",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "従業員の給与前払い。受注の着手金条件ではない。"
+    },
+    {
+      "doc_id": "a-019-d01",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2020年改定版。1000万円以上・着手金20%・残45日でf1〜f4と一致しない。"
+    }
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": "金額・与信・特急・継続の条件が別文書。組み合わせの問い。"
+  }
+}

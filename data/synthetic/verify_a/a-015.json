@@ -1,0 +1,79 @@
+{
+  "id": "a-015",
+  "verdicts": [
+    {
+      "doc_id": "a-015-d04",
+      "facts_stated": [
+        "f2"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-015-d08",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2020年改定版。回収6年以内・IRR6%以上で現行のf1と一致しない。"
+    },
+    {
+      "doc_id": "a-015-d05",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "設備投資判断の一般論。基準値・試算値はない。"
+    },
+    {
+      "doc_id": "a-015-d03",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "冷蔵倉庫拡張案。投資額・回収年・IRRが新型パッケージング案と異なる。"
+    },
+    {
+      "doc_id": "a-015-d10",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "導入スケジュール。承認基準や試算数値はない。"
+    },
+    {
+      "doc_id": "a-015-d06",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "更新必要性の報告。投資額・回収年・IRRはない。"
+    },
+    {
+      "doc_id": "a-015-d01",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "1億円以上3億円未満の基準。本件（3億円以上）のf1ではない。"
+    },
+    {
+      "doc_id": "a-015-d09",
+      "facts_stated": [
+        "f4"
+      ],
+      "leak_phrase": false,
+      "note": "経営企画部の検証でIRR9.1%。稟議書本文そのものではないが、同案のIRRとしてf4の数値を述べている。"
+    },
+    {
+      "doc_id": "a-015-d02",
+      "facts_stated": [
+        "f1"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-015-d07",
+      "facts_stated": [
+        "f3"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    }
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": "基準と試算が別文書。両面で満たすかの統合の問い。"
+  }
+}

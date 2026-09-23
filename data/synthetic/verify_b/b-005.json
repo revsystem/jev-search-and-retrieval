@@ -1,0 +1,21 @@
+{
+  "id": "b-005",
+  "verdicts": [
+    {"doc_id": "b-005-d07", "facts_stated": ["f3"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-005-d10", "facts_stated": [], "leak_phrase": false, "note": "水分計の校正成績のみで、合否の基準や抜取缶数の記載がない"},
+    {"doc_id": "b-005-d06", "facts_stated": [], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-005-d02", "facts_stated": [], "leak_phrase": false, "note": "納入の遅延状況の月報で、受入検査の方法には触れていない"},
+    {"doc_id": "b-005-d09", "facts_stated": [], "leak_phrase": false, "note": "包装材倉庫向けの手順で、原料のドラムは対象外と明記されている"},
+    {"doc_id": "b-005-d04", "facts_stated": [], "leak_phrase": false, "note": "2022年9月制定の手引で、ラベルと漏れの有無を見るのみで数値測定は行わないとされ、f1とは異なる"},
+    {"doc_id": "b-005-d05", "facts_stated": ["f2"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-005-d01", "facts_stated": ["f1"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-005-d03", "facts_stated": [], "leak_phrase": false, "note": "ユキヤマ化学という別会社の手順写し"},
+    {"doc_id": "b-005-d08", "facts_stated": [], "leak_phrase": false, "note": "事務用文具の数量合わせについての記録で、「受入検査」を別の意味で使用"}
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": ""
+  }
+}

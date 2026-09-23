@@ -1,0 +1,21 @@
+{
+  "id": "b-008",
+  "verdicts": [
+    {"doc_id": "b-008-d09", "facts_stated": [], "leak_phrase": false, "note": "シャフトの品質月報で、ギヤは集計対象外と明記されている"},
+    {"doc_id": "b-008-d02", "facts_stated": ["f1"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-008-d07", "facts_stated": [], "leak_phrase": false, "note": "製造日報に返品率・客先の返事・在庫処分の欄はない"},
+    {"doc_id": "b-008-d06", "facts_stated": [], "leak_phrase": false, "note": "作業着のサイズ交換についての記録で、「返品」を別の意味で使用"},
+    {"doc_id": "b-008-d03", "facts_stated": [], "leak_phrase": false, "note": "クモヤミギヤという別会社の聞き取りメモ"},
+    {"doc_id": "b-008-d05", "facts_stated": ["f2"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-008-d10", "facts_stated": [], "leak_phrase": false, "note": "会議の案内のみで、率・客先の返事・在庫の数量は別紙とされている"},
+    {"doc_id": "b-008-d01", "facts_stated": [], "leak_phrase": false, "note": "2025年1月の実績(返品率0.80%)で、対象年月と数値がf1・f2・f3と異なる"},
+    {"doc_id": "b-008-d04", "facts_stated": [], "leak_phrase": false, "note": "2023年制定の手引で、手順の名前のみを挙げ、具体的な数値や完了の事実の記載はない"},
+    {"doc_id": "b-008-d08", "facts_stated": ["f3"], "leak_phrase": false, "note": ""}
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": ""
+  }
+}

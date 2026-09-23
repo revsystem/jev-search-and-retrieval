@@ -1,0 +1,79 @@
+{
+  "id": "a-014",
+  "verdicts": [
+    {
+      "doc_id": "a-014-d01",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2021年改定版。評点70点・1.5か月分で保証引き上げもなく、f1〜f4と一致しない。"
+    },
+    {
+      "doc_id": "a-014-d10",
+      "facts_stated": [
+        "f4"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-014-d02",
+      "facts_stated": [
+        "f1"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-014-d08",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "依頼書の様式。限度額や手形可否の判断基準はない。"
+    },
+    {
+      "doc_id": "a-014-d03",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "別会社（オチバ製作所）。評点70点以上など基準が異なる。"
+    },
+    {
+      "doc_id": "a-014-d05",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "与信管理の一般論。数値条件はない。"
+    },
+    {
+      "doc_id": "a-014-d04",
+      "facts_stated": [
+        "f2"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-014-d07",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "法人カードの個人与信枠。取引先与信とは別。"
+    },
+    {
+      "doc_id": "a-014-d09",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "設定件数の実績。評点・設立年数・保証・手形の条件は述べていない。"
+    },
+    {
+      "doc_id": "a-014-d06",
+      "facts_stated": [
+        "f3"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    }
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": "評点・新設・保証・支払条件が別文書。条件組み合わせの問い。"
+  }
+}

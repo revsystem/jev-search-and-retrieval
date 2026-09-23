@@ -1,0 +1,77 @@
+{
+  "id": "a-022",
+  "verdicts": [
+    {
+      "doc_id": "a-022-d02",
+      "facts_stated": [
+        "f1"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-022-d05",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "契約審査の一般論。金額区分や処理日数はない。"
+    },
+    {
+      "doc_id": "a-022-d04",
+      "facts_stated": [
+        "f2"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-022-d09",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "契約書の保管。審査・決裁の手続きではない。"
+    },
+    {
+      "doc_id": "a-022-d08",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "審査件数の実績。少額・高額の手続き差や標準日数は述べていない。"
+    },
+    {
+      "doc_id": "a-022-d10",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "原材料の受入審査。契約審査規程ではない。"
+    },
+    {
+      "doc_id": "a-022-d01",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2022年改定版。区分が500万・1000万、処理期間一律5営業日でf1〜f3と一致しない。"
+    },
+    {
+      "doc_id": "a-022-d06",
+      "facts_stated": [
+        "f3"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-022-d03",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "別会社（セキレイ物流）。金額区分・決裁者が異なる。"
+    },
+    {
+      "doc_id": "a-022-d07",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "改定の趣旨通達。金額区分や標準処理期間の具体はない。"
+    }
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": "少額・高額・処理期間が別文書。手続き比較の問い。"
+  }
+}

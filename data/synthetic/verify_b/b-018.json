@@ -1,0 +1,21 @@
+{
+  "id": "b-018",
+  "verdicts": [
+    {"doc_id": "b-018-d07", "facts_stated": [], "leak_phrase": false, "note": "請求額と月割り予算の比較のみで、3か月の率・来期の見積・予備費の合意の記載はない"},
+    {"doc_id": "b-018-d01", "facts_stated": [], "leak_phrase": false, "note": "前期の月報で、利用額は枠の95%・来期見積は未作成・結論は出していないとされ、f1・f2・f3と異なる"},
+    {"doc_id": "b-018-d09", "facts_stated": [], "leak_phrase": false, "note": "通信費の月報で、クラウドの利用額は別科目で空欄とされている"},
+    {"doc_id": "b-018-d03", "facts_stated": [], "leak_phrase": false, "note": "フユモリ計算という別会社の予算写し"},
+    {"doc_id": "b-018-d02", "facts_stated": ["f1"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-018-d04", "facts_stated": [], "leak_phrase": false, "note": "2021年制定の手引で、見る項目の名前のみを挙げ、百分率も金額も空欄とされている"},
+    {"doc_id": "b-018-d06", "facts_stated": [], "leak_phrase": false, "note": "個人のファイル保管についての案内で、「クラウド」を別の意味で使用"},
+    {"doc_id": "b-018-d05", "facts_stated": ["f2"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-018-d10", "facts_stated": [], "leak_phrase": false, "note": "会議の案内のみで、率・見積・予備費の結論は別紙とされている"},
+    {"doc_id": "b-018-d08", "facts_stated": ["f3"], "leak_phrase": false, "note": ""}
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": ""
+  }
+}

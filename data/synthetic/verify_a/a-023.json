@@ -1,0 +1,77 @@
+{
+  "id": "a-023",
+  "verdicts": [
+    {
+      "doc_id": "a-023-d04",
+      "facts_stated": [
+        "f2"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-023-d07",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "流出のお詫びと対応案内。再委託・権限棚卸・監視無効の原因は述べていない。"
+    },
+    {
+      "doc_id": "a-023-d03",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "個人情報保護の一般論。本件の具体原因はない。"
+    },
+    {
+      "doc_id": "a-023-d06",
+      "facts_stated": [
+        "f3"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-023-d10",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2021年改定版の規程。権限棚卸や再委託禁止の規定はあるが、本件でそれが守られなかった事実は述べていない。"
+    },
+    {
+      "doc_id": "a-023-d02",
+      "facts_stated": [
+        "f1"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-023-d09",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "発覚後の対応状況。原因（f1〜f3）は述べていない。"
+    },
+    {
+      "doc_id": "a-023-d05",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "紙の機密文書の持ち出し。顧客DB流出の原因ではない。"
+    },
+    {
+      "doc_id": "a-023-d01",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2024年の誤送信ヒヤリハット。本件（2026年2月）とは別事案。"
+    },
+    {
+      "doc_id": "a-023-d08",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "別会社（ミソラ物流）。原因も多要素認証未導入など異なる。"
+    }
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": "原因が三要因に分かれ、なぜ起きたかの問い。"
+  }
+}

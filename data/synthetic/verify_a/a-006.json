@@ -1,0 +1,79 @@
+{
+  "id": "a-006",
+  "verdicts": [
+    {
+      "doc_id": "a-006-d10",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "FAQ。雇用形態差の詳細は規程参照に委ねている。"
+    },
+    {
+      "doc_id": "a-006-d01",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "別会社（カナタベ薬品）。補助上限2万円でf1の3万円と異なる。"
+    },
+    {
+      "doc_id": "a-006-d03",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "福利厚生の一般論。補助額や休暇日数の具体はない。"
+    },
+    {
+      "doc_id": "a-006-d02",
+      "facts_stated": [
+        "f1"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-006-d07",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "受診率の実績。補助の有無や休暇付与の条件ではない。"
+    },
+    {
+      "doc_id": "a-006-d06",
+      "facts_stated": [
+        "f3"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-006-d04",
+      "facts_stated": [
+        "f2"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-006-d05",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "2020年改定版。正社員上限2万円で、契約社員にも同額補助がありf1・f2と一致しない。"
+    },
+    {
+      "doc_id": "a-006-d08",
+      "facts_stated": [
+        "f4"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-006-d09",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "品質監査の社内用語「休暇」。労働法上の休暇制度ではない。"
+    }
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": "補助と休暇が雇用形態ごとに別文書。比較の問い。"
+  }
+}

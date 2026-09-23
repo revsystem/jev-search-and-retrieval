@@ -1,0 +1,21 @@
+{
+  "id": "b-020",
+  "verdicts": [
+    {"doc_id": "b-020-d10", "facts_stated": [], "leak_phrase": false, "note": "表計算のツールについての集計で、設計ツールの対象外"},
+    {"doc_id": "b-020-d05", "facts_stated": ["f2"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-020-d07", "facts_stated": [], "leak_phrase": false, "note": "サーバ画面の操作説明のみで、何人で足すか・何本単位かは操作の話に限ると明記されている"},
+    {"doc_id": "b-020-d04", "facts_stated": [], "leak_phrase": false, "note": "2020年制定の手引で、本数の単位や超過月数は空欄のままとされている"},
+    {"doc_id": "b-020-d09", "facts_stated": [], "leak_phrase": false, "note": "総務が買う描画ソフトについての記録で、設計ツールの同時利用や5本の束は扱わないと明記されている"},
+    {"doc_id": "b-020-d01", "facts_stated": [], "leak_phrase": false, "note": "2024年度の台帳で、追加本数は5本・申請番号L-2。f1の20本・L-8とは異なる"},
+    {"doc_id": "b-020-d03", "facts_stated": [], "leak_phrase": false, "note": "アキノ情報という別会社の契約写し"},
+    {"doc_id": "b-020-d06", "facts_stated": [], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-020-d08", "facts_stated": ["f3"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-020-d02", "facts_stated": ["f1"], "leak_phrase": false, "note": ""}
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": ""
+  }
+}

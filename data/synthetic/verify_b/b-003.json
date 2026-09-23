@@ -1,0 +1,21 @@
+{
+  "id": "b-003",
+  "verdicts": [
+    {"doc_id": "b-003-d10", "facts_stated": [], "leak_phrase": false, "note": "薄板プレスの記録であり、厚板プレスの対象外"},
+    {"doc_id": "b-003-d03", "facts_stated": [], "leak_phrase": false, "note": "クラカケプレスという別会社の数値"},
+    {"doc_id": "b-003-d05", "facts_stated": ["f2"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-003-d09", "facts_stated": [], "leak_phrase": false, "note": "クラッチ交換の保全報告で、金型点検・材料硬さ・廃棄判断の変更には触れていない"},
+    {"doc_id": "b-003-d06", "facts_stated": [], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-003-d07", "facts_stated": [], "leak_phrase": false, "note": "事務所の紙・トナー回収の記録で、厚板プレスの廃棄とは別の意味"},
+    {"doc_id": "b-003-d08", "facts_stated": ["f3"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-003-d04", "facts_stated": [], "leak_phrase": false, "note": "2023年5月制定の作業標準で、金型点検(月の第1営業日)も材料硬さ上限(HV240)も廃棄判断(作業者が自分で)もf1・f2・f3と異なる"},
+    {"doc_id": "b-003-d02", "facts_stated": [], "leak_phrase": false, "note": "対象月は2025年2月の実績で、金型点検(週初め1回)・材料硬さ上限(HV220)・廃棄判断(作業者がその場で)がf1・f2・f3と異なる"},
+    {"doc_id": "b-003-d01", "facts_stated": ["f1"], "leak_phrase": false, "note": ""}
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": ""
+  }
+}

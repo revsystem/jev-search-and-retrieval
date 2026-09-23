@@ -1,0 +1,21 @@
+{
+  "id": "b-012",
+  "verdicts": [
+    {"doc_id": "b-012-d07", "facts_stated": ["f3"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-012-d04", "facts_stated": [], "leak_phrase": false, "note": "2021年制定の標準で、間隔(月1回)も戻す目標(「業務に支障がないこと」)もf1・f2・f3と異なる"},
+    {"doc_id": "b-012-d01", "facts_stated": [], "leak_phrase": false, "note": "2024年度の実績で、間隔(週1回、同拠点ディスク)も戻す目標(3日以内)もf1・f2・f3と異なる"},
+    {"doc_id": "b-012-d06", "facts_stated": [], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-012-d02", "facts_stated": ["f1"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-012-d10", "facts_stated": [], "leak_phrase": false, "note": "北浦拠点の票であり、東湾・西湾拠点の対象外"},
+    {"doc_id": "b-012-d03", "facts_stated": [], "leak_phrase": false, "note": "サザナミ計算という別会社の写し"},
+    {"doc_id": "b-012-d09", "facts_stated": [], "leak_phrase": false, "note": "ディスク増設とテープ装置清掃の会議メモで、バックアップの取り方や戻す目標には触れていない"},
+    {"doc_id": "b-012-d05", "facts_stated": ["f2"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-012-d08", "facts_stated": [], "leak_phrase": false, "note": "契約書のスキャン保管についての記録で、「バックアップ」を別の意味で使用"}
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": ""
+  }
+}

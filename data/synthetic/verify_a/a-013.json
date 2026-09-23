@@ -1,0 +1,79 @@
+{
+  "id": "a-013",
+  "verdicts": [
+    {
+      "doc_id": "a-013-d03",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "別会社（ネムノキ食品）の事例。短縮幅も異なる。"
+    },
+    {
+      "doc_id": "a-013-d08",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "年度決算の発表日数一覧。四半期決算の施策内容（棚卸前倒し等）は述べていない。"
+    },
+    {
+      "doc_id": "a-013-d05",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "別会社（マツヨイ物流）。10→8営業日など短縮幅も異なる。"
+    },
+    {
+      "doc_id": "a-013-d04",
+      "facts_stated": [
+        "f2"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-013-d06",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "ペーパーレス化。発表日数の短縮幅（12→9等）は述べていない。"
+    },
+    {
+      "doc_id": "a-013-d07",
+      "facts_stated": [
+        "f3"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-013-d01",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "キックオフの方針提示。削減幅・実施内容の具体はない。"
+    },
+    {
+      "doc_id": "a-013-d10",
+      "facts_stated": [],
+      "leak_phrase": false,
+      "note": "決算早期化の一般説明。段階ごとの日数はない。"
+    },
+    {
+      "doc_id": "a-013-d09",
+      "facts_stated": [
+        "f4"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    },
+    {
+      "doc_id": "a-013-d02",
+      "facts_stated": [
+        "f1"
+      ],
+      "leak_phrase": false,
+      "note": ""
+    }
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": "各段階の施策が別文書。順序・経緯の問い。"
+  }
+}

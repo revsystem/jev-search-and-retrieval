@@ -1,0 +1,21 @@
+{
+  "id": "b-007",
+  "verdicts": [
+    {"doc_id": "b-007-d05", "facts_stated": ["f2"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-007-d04", "facts_stated": [], "leak_phrase": false, "note": "直行率の定義のみで、実際の数値の記載がない"},
+    {"doc_id": "b-007-d07", "facts_stated": [], "leak_phrase": false, "note": "日次の出来高と止まり時間のみで、月間の直行率・クレーム件数・監査結果の記載はない"},
+    {"doc_id": "b-007-d06", "facts_stated": [], "leak_phrase": false, "note": "「直行」を倉庫を経由しない配送便という別の意味で使用"},
+    {"doc_id": "b-007-d02", "facts_stated": ["f1"], "leak_phrase": false, "note": ""},
+    {"doc_id": "b-007-d10", "facts_stated": [], "leak_phrase": false, "note": "会議の案内のみで、百分率や件数の記載はない"},
+    {"doc_id": "b-007-d03", "facts_stated": [], "leak_phrase": false, "note": "ナギサ製作所という別会社の公開資料の写し"},
+    {"doc_id": "b-007-d01", "facts_stated": [], "leak_phrase": false, "note": "2024年度の実績(直行率95%前後、クレーム6件、重大1件軽微5件)で、f1・f2・f3と異なる"},
+    {"doc_id": "b-007-d09", "facts_stated": [], "leak_phrase": false, "note": "塗装工程の月報であり、組立の対象外"},
+    {"doc_id": "b-007-d08", "facts_stated": ["f3"], "leak_phrase": false, "note": ""}
+  ],
+  "question_checks": {
+    "needs_multiple_docs": true,
+    "non_factoid": true,
+    "answerable_from_facts": true,
+    "note": ""
+  }
+}
