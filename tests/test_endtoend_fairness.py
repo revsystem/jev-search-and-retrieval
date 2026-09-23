@@ -124,3 +124,16 @@ def test_the_api_failure_count_is_reported_in_its_own_column():
     )
     # 構成, 正解率, 部分一致, 根拠率, 抽出失敗, API失敗, n, 秒
     assert [c.strip() for c in row.split("|")[1:-1]][5] == "1"
+
+
+def test_a_truncated_answer_is_recorded_as_unparsed_not_as_a_wrong_answer():
+    """A cut-off response is a budget problem, not a retrieval one.
+
+    GPT-5.6 Luna counts reasoning against maxTokens, so a tight cap produced
+    "<answer>いっこく堂</" — the right answer, scored wrong. The unparsed
+    count is what surfaces that; it must not be silently folded into accuracy.
+    """
+    result = answer_queries(Ranker(), [query()], Generator(["<answer>絶対零"]))
+    assert result["unparsed"] == 1
+    assert result["accuracy"] == 0.0
+    assert result["errors"] == 0

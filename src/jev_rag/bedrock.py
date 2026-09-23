@@ -107,7 +107,12 @@ class BedrockGenerator:
         self.settings = settings or BedrockSettings()
         self.client = client or _client("bedrock-runtime", self.settings.region)
 
-    def answer(self, query: str, docs: list[RetrievedDoc], max_tokens: int = 64) -> str:
+    # GPT-5.6 Luna counts its reasoning tokens against maxTokens, so a budget
+    # sized for the answer alone truncates mid-word: a 64-token cap produced
+    # "<answer>いっこく堂</" and bare "" for 9-11% of questions, scored as
+    # wrong answers. The answer itself is a few tokens; the headroom is for
+    # the reasoning in front of it.
+    def answer(self, query: str, docs: list[RetrievedDoc], max_tokens: int = 2048) -> str:
         context = "\n\n".join(f"- {doc.text}" for doc in docs)
         response = self.client.converse(
             modelId=self.settings.generation_model_id,
