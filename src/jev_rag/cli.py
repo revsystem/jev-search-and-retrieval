@@ -77,6 +77,25 @@ def cmd_evaluate(args: argparse.Namespace) -> int:
     return 0
 
 
+def _preflight(settings, names: list[str], needs_jev: bool) -> None:
+    """Fail now rather than forty minutes in.
+
+    A route needing AWS and a route needing Jev are checked before any
+    measurement starts, because an expiring credential mid-run costs the whole
+    run and reads as a route scoring zero.
+    """
+    import boto3
+
+    from jev_rag.preflight import check_aws, check_jev
+
+    if any(not n.startswith("jev") or n == "jev_hybrid" for n in names):
+        identity = check_aws(boto3.client("sts", region_name=settings.bedrock.region))
+        print(f"AWS: {identity}")
+    if needs_jev:
+        check_jev(settings.jev.build_client())
+        print(f"Jev: {settings.jev.transport} 経路で応答あり")
+
+
 def cmd_answer(args: argparse.Namespace) -> int:
     """End to end: does a better ranking change the answer the pipeline gives?
 
@@ -93,6 +112,7 @@ def cmd_answer(args: argparse.Namespace) -> int:
     names = args.rankers.split(",")
     needs_jev = args.select or any(n.startswith("jev") for n in names)
     client = settings.jev.build_client() if needs_jev else None
+    _preflight(settings, names, needs_jev)
     rankers = build_rankers(names, client=client, settings=settings.bedrock)
     generator = BedrockGenerator(settings.bedrock)
     queries = sample_queries(
