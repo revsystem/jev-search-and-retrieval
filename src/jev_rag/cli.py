@@ -247,6 +247,46 @@ def cmd_judge(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_dilution(args: argparse.Namespace) -> int:
+    """How many documents can share one request before judging suffers.
+
+    Each synthetic question's own ten documents are scored while documents
+    written for other questions pad the pool, so the request carries more and
+    more detail unrelated to the decision.
+    """
+    from jev_rag.config import Settings
+    from jev_rag.judge import run_dilution
+    from jev_rag.rankers import JevPointwiseRanker
+    from jev_rag.synthetic import with_distractors
+
+    settings = Settings()
+    _preflight(settings, ["jev_pointwise"], needs_jev=True)
+    client = settings.jev.build_client()
+    queries = _judge_queries("synthetic")
+    settings_list = [tuple(int(n) for n in item.split(":")) for item in args.settings.split(",")]
+    pools = {
+        (pool, batch): with_distractors(queries, pool, seed=args.seed)
+        for pool, batch in settings_list
+    }
+    results = run_dilution(
+        lambda batch: JevPointwiseRanker(client, batch_size=batch), pools, args.out
+    )
+    print(f"{args.out} に保存しました\n")
+    print(
+        "| 設定 | PR-AUC | 問題内ROC-AUC | ECE | 無関係の平均 | 無関係で0.5以上 | リクエスト | 秒 |"
+    )
+    print("|---|---|---|---|---|---|---|---|")
+    for key, r in results.items():
+        d = r["distractors"]
+        mean = "-" if d["mean_score"] is None else f"{d['mean_score']:.3f}"
+        share = "-" if d["share_at_half"] is None else f"{d['share_at_half']:.3f}"
+        print(
+            f"| {key} | {r['pr_auc']:.3f} | {r['per_query_roc_auc']:.3f} | {r['ece']:.3f} "
+            f"| {mean} | {share} | {r['requests']} | {r['seconds']} |"
+        )
+    return 0
+
+
 def cmd_report(args: argparse.Namespace) -> int:
     from jev_rag.runner import inconsistent_query_counts, merge_files
 
@@ -407,6 +447,18 @@ def main(argv: list[str] | None = None) -> int:
     judge.add_argument("--seed", type=int, default=0)
     judge.add_argument("--out", default=None, help="既定は out/judge-<dataset>.json")
     judge.set_defaults(func=cmd_judge)
+
+    dilution = sub.add_parser(
+        "dilution", help="無関係な文書を混ぜ、1リクエストの件数と判定精度を測る"
+    )
+    dilution.add_argument(
+        "--settings",
+        default="10:1,10:10,100:5,100:10,100:25,100:50,100:100",
+        help="候補数:1リクエストの件数 をカンマ区切りで",
+    )
+    dilution.add_argument("--seed", type=int, default=0)
+    dilution.add_argument("--out", default="out/dilution.json")
+    dilution.set_defaults(func=cmd_dilution)
 
     report = sub.add_parser("report", help="保存済みの結果から表を出し直す")
     report.add_argument(

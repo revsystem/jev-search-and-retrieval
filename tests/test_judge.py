@@ -21,6 +21,7 @@ from jev_rag.judge import (
     format_judge,
     judge_metrics,
     paired_bootstrap,
+    run_dilution,
     run_judge,
     score_pairs,
 )
@@ -301,3 +302,40 @@ def test_the_bootstrap_uses_only_queries_both_routes_scored():
     a, b = many_queries(better_margin=True)
     result = paired_bootstrap(a, [r for r in b if r["query_id"] != "q0"], samples=50, seed=0)
     assert result["queries"] == 29
+
+
+# --- how the pool around a document changes its score ----------------------
+
+
+def own_and_foreign():
+    queries = two_queries()
+    for q in queries:
+        q.candidates.append(RetrievedDoc(doc_id="other-x", text="x", score=0.0, label=0))
+    return queries
+
+
+def test_dilution_scores_only_each_question_s_own_documents(tmp_path):
+    results = run_dilution(
+        lambda batch: Constant(), {(3, 2): own_and_foreign()}, tmp_path / "d.json"
+    )
+    (entry,) = results.values()
+    assert entry["pairs"] == 4
+    assert entry["distractors"]["count"] == 2
+
+
+def test_dilution_reports_how_distractors_were_scored(tmp_path):
+    results = run_dilution(
+        lambda batch: Constant(), {(3, 2): own_and_foreign()}, tmp_path / "d.json"
+    )
+    (entry,) = results.values()
+    assert entry["distractors"]["mean_score"] == pytest.approx(0.1)
+    assert entry["distractors"]["share_at_half"] == 0.0
+    assert entry["requests"] == 4  # two queries, three documents, two per request
+
+
+def test_dilution_resumes_finished_settings(tmp_path):
+    out = tmp_path / "d.json"
+    run_dilution(lambda batch: Constant(), {(3, 2): own_and_foreign()}, out)
+    again = Constant()
+    run_dilution(lambda batch: again, {(3, 2): own_and_foreign()}, out)
+    assert again.calls == 0

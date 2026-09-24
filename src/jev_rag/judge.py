@@ -218,6 +218,41 @@ def run_judge(rankers: dict[str, Any], queries: list[EvalQuery], out: str | Path
     return results
 
 
+def run_dilution(
+    make_ranker: Any,
+    pools: dict[tuple[int, int], list[EvalQuery]],
+    out: str | Path,
+) -> dict[str, Any]:
+    """Judge accuracy on each question's own documents as the request fills up.
+
+    ``pools`` maps (pool size, batch size) to queries whose candidates include
+    documents written for other questions. Only a question's own documents are
+    scored as pairs; the rest are reported apart, as how often the judge called
+    a plainly unrelated document relevant.
+    """
+    target = Path(out)
+    results = json.loads(target.read_text(encoding="utf-8")) if target.exists() else {}
+    for (pool, batch), queries in pools.items():
+        key = f"pool={pool},batch={batch}"
+        if "pr_auc" in results.get(key, {}):
+            continue
+        scored = score_pairs(make_ranker(batch), queries)
+        own = [r for r in scored["pairs"] if r["doc_id"].startswith(r["query_id"])]
+        foreign = [r["score"] for r in scored["pairs"] if not r["doc_id"].startswith(r["query_id"])]
+        results[key] = judge_metrics(own, probabilistic=True) | {
+            "distractors": {
+                "count": len(foreign),
+                "mean_score": float(np.mean(foreign)) if foreign else None,
+                "share_at_half": float(np.mean(np.array(foreign) >= 0.5)) if foreign else None,
+            },
+            "requests": sum(-(-len(q.candidates) // batch) for q in queries),
+            "failed": scored["failed"],
+            "seconds": scored["seconds"],
+        }
+        save(results, target)
+    return results
+
+
 def format_judge(results: dict[str, Any]) -> str:
     header = [
         "経路",

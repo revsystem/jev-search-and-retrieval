@@ -25,6 +25,7 @@ import re
 import statistics
 import unicodedata
 from collections import Counter
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
@@ -220,3 +221,26 @@ def baseline_scores(queries: list[EvalQuery]) -> dict[str, list[dict[str, Any]]]
             out["term_overlap"].append(base | {"score": _overlap(query.question, doc.text)})
             out["bm25"].append(base | {"score": bm})
     return out
+
+
+def with_distractors(queries: list[EvalQuery], total: int, seed: int = 0) -> list[EvalQuery]:
+    """Each pool padded to ``total`` with documents written for other questions.
+
+    Another question's documents name another fictional company, so they are
+    irrelevant by construction — exactly the "detail unrelated to the
+    decision" TypeSafe says degrades a request. Only a question's own documents
+    carry labels worth scoring; the padding measures how much it hurts them.
+    """
+    padded = []
+    for query in queries:
+        others = [
+            c for other in queries if other.query_id != query.query_id for c in other.candidates
+        ]
+        rng = random.Random(f"{seed}:{query.query_id}")
+        extra = rng.sample(others, max(total - len(query.candidates), 0))
+        candidates = [
+            RetrievedDoc(doc_id=c.doc_id, text=c.text, score=0.0, label=0) for c in extra
+        ] + query.as_documents()
+        rng.shuffle(candidates)
+        padded.append(replace(query, candidates=candidates))
+    return padded

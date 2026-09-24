@@ -15,6 +15,7 @@ from jev_rag.synthetic import (
     load_synthetic,
     sanity_report,
     terms,
+    with_distractors,
     write_views,
 )
 
@@ -263,3 +264,34 @@ def test_bm25_prefers_the_document_sharing_rare_terms(tmp_path):
     by_doc = {r["doc_id"]: r["score"] for r in rows}
     # d03 shares 2024年度 and 週2日; the general-policy negative shares little
     assert by_doc["a-001-d03"] > by_doc["a-001-d02"]
+
+
+# --- padding a pool with documents from other questions ---------------------
+
+
+def test_distractors_pad_each_pool_to_the_requested_size(tmp_path):
+    write(tmp_path, item("a-001"), item("a-002"), item("a-003"))
+    queries = with_distractors(load_synthetic(tmp_path), total=7, seed=0)
+    assert all(len(q.candidates) == 7 for q in queries)
+
+
+def test_distractors_come_from_other_questions_and_are_negative(tmp_path):
+    write(tmp_path, item("a-001"), item("a-002"), item("a-003"))
+    (first, *_) = with_distractors(load_synthetic(tmp_path), total=7, seed=0)
+    added = [c for c in first.candidates if not c.doc_id.startswith(first.query_id)]
+    assert len(added) == 4
+    assert all(c.label == 0 for c in added)
+
+
+def test_the_original_documents_are_all_kept(tmp_path):
+    write(tmp_path, item("a-001"), item("a-002"))
+    (first, _) = with_distractors(load_synthetic(tmp_path), total=5, seed=0)
+    own = {c.doc_id for c in first.candidates if c.doc_id.startswith(first.query_id)}
+    assert own == {"a-001-d01", "a-001-d02", "a-001-d03"}
+
+
+def test_padding_does_not_touch_the_source_queries(tmp_path):
+    write(tmp_path, item("a-001"), item("a-002"))
+    source = load_synthetic(tmp_path)
+    with_distractors(source, total=5, seed=0)
+    assert all(len(q.candidates) == 3 for q in source)
