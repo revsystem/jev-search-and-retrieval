@@ -248,6 +248,7 @@ def run_dilution(
             "requests": sum(-(-len(q.candidates) // batch) for q in queries),
             "failed": scored["failed"],
             "seconds": scored["seconds"],
+            "own_pairs": own,
         }
         save(results, target)
     return results

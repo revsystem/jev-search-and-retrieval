@@ -99,9 +99,11 @@ class JevPointwiseRanker:
     """
 
     # Measured on JQaRA (30 queries, 100 candidates): accuracy is flat from 1
-    # to 10 candidates per request (nDCG@10 0.835 / 0.833 / 0.836) and falls
-    # off a cliff after it (0.578 at 25, 0.204 at 100), while the time per
-    # query drops tenfold from 1 to 10. Ten is where both curves are good.
+    # to 10 candidates per request and falls off a cliff after it (nDCG@10
+    # 0.835 at 1, 0.836 at 10, 0.578 at 25, 0.204 at 100). As a judge on the
+    # synthetic set, ten of one question's candidates together beat one at a
+    # time (PR-AUC 0.912 vs 0.753), unrelated padding is harmless up to 25 and
+    # ruinous from 50 (`jev-rag dilution`). Ten is where every curve is good.
     DEFAULT_BATCH_SIZE = 10
 
     def __init__(self, client: JevClient, batch_size: int | None = DEFAULT_BATCH_SIZE) -> None:
