@@ -106,19 +106,30 @@ class JevPointwiseRanker:
     # ruinous from 50 (`jev-rag dilution`). Ten is where every curve is good.
     DEFAULT_BATCH_SIZE = 10
 
-    def __init__(self, client: JevClient, batch_size: int | None = DEFAULT_BATCH_SIZE) -> None:
+    def __init__(
+        self,
+        client: JevClient,
+        batch_size: int | None = DEFAULT_BATCH_SIZE,
+        plain: bool = False,
+    ) -> None:
         self.reranker = JevReranker(client)
         self.batch_size = batch_size
+        # plain drops the written relevance criteria, to separate what the
+        # model judges on its own from what the definition we wrote adds
+        self.plain = plain
+        base = "jev_pointwise_plain" if plain else "jev_pointwise"
         self.name = (
-            "jev_pointwise"
+            base
             if batch_size == self.DEFAULT_BATCH_SIZE
-            else ("jev_pointwise@all" if batch_size is None else f"jev_pointwise@{batch_size}")
+            else (f"{base}@all" if batch_size is None else f"{base}@{batch_size}")
         )
 
     def rank(self, question: str, docs: list[RetrievedDoc]) -> list[RetrievedDoc]:
         if not docs:
             return []
-        return self.reranker.noul_rerank(question, docs, batch_size=self.batch_size)
+        return self.reranker.noul_rerank(
+            question, docs, batch_size=self.batch_size, plain=self.plain
+        )
 
 
 class JevCrossEncodeRanker:
@@ -203,6 +214,7 @@ def build_rankers(names: list[str], client: JevClient | None = None, settings=No
         "embedding": embedding,
         "cohere_rerank": cohere_rerank,
         "jev_pointwise": lambda: JevPointwiseRanker(client),
+        "jev_pointwise_plain": lambda: JevPointwiseRanker(client, plain=True),
         "jev_crossencode": lambda: JevCrossEncodeRanker(client, with_grade=True),
         "jev_pairwise": lambda: JevPairwiseRanker(client),
         "jev_hybrid": lambda: HybridRanker(embedding(), JevPointwiseRanker(client)),

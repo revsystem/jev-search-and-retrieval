@@ -15,6 +15,9 @@ RELEVANCE_CRITERIA = {
 # {path} is filled with a backticked path such as `candidates[3].text`; see
 # jev_rag.jev.state for why candidates are addressed by position.
 NOUL_INSTRUCTION = "{path} は `query` に答えるための根拠として役に立ちますか。"
+# The ablation: no written definition of relevance, so what counts as
+# relevant is left to the model, as it is inside a trained reranker.
+PLAIN_NOUL_INSTRUCTION = "{path} は `query` に関連しますか。"
 
 SCORE_INSTRUCTION = (
     "`query` に答えるための根拠として、{path} の有用性を判定してください。"

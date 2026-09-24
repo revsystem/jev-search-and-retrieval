@@ -23,6 +23,7 @@ from jev_rag.jev.budget import estimate_tokens, fitting_batch_size
 from jev_rag.jev.client import JevClient
 from jev_rag.jev.prompts import (
     NOUL_INSTRUCTION,
+    PLAIN_NOUL_INSTRUCTION,
     RELEVANCE_CRITERIA,
     RELEVANCE_LEVELS,
     SCORE_INSTRUCTION,
@@ -111,6 +112,7 @@ class JevReranker:
         docs: list[RetrievedDoc],
         top_k: int | None = None,
         batch_size: int | None = None,
+        plain: bool = False,
     ) -> list[RetrievedDoc]:
         """Score query-to-candidate relevance and sort on the probability itself.
 
@@ -121,6 +123,9 @@ class JevReranker:
         """
         if not docs:
             return []
+        instruction, criteria = (
+            (PLAIN_NOUL_INSTRUCTION, None) if plain else (NOUL_INSTRUCTION, RELEVANCE_CRITERIA)
+        )
 
         # Every question in a request carries the rest of the batch as
         # distractors, and TypeSafe documents accuracy falling as the state
@@ -130,8 +135,7 @@ class JevReranker:
         longest = max(
             estimate_tokens(
                 Noul(
-                    NOUL_INSTRUCTION.format(path=candidate_path(len(docs))),
-                    criteria=RELEVANCE_CRITERIA,
+                    instruction.format(path=candidate_path(len(docs))), criteria=criteria
                 ).payload()
             ),
             1,
@@ -144,8 +148,8 @@ class JevReranker:
             state, position = candidate_state(query, group)
             questions = {
                 doc.chunk_id: Noul(
-                    NOUL_INSTRUCTION.format(path=candidate_path(position[doc.doc_id])),
-                    criteria=RELEVANCE_CRITERIA,
+                    instruction.format(path=candidate_path(position[doc.doc_id])),
+                    criteria=criteria,
                 )
                 for doc in group
             }

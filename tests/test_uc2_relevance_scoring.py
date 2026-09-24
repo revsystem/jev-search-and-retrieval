@@ -61,3 +61,28 @@ def test_an_empty_shortlist_needs_no_request():
     transport = FakeTransport()
     assert JevReranker(JevClient(transport)).noul_rerank("問い", []) == []
     assert transport.requests == []
+
+
+def test_the_default_question_carries_the_written_relevance_criteria():
+    transport = FakeTransport(nouls={"topical": 0.1, "evidence": 0.9})
+    JevReranker(JevClient(transport)).noul_rerank("問い", shortlist())
+    question = next(iter(transport.requests[0]["questions"].values()))
+    assert "criteria" in question
+    assert "根拠" in question["instructions"]
+
+
+def test_the_plain_question_asks_only_whether_the_document_is_relevant():
+    # the ablation: no definition of relevance, so the model's own notion decides
+    transport = FakeTransport(nouls={"topical": 0.1, "evidence": 0.9})
+    JevReranker(JevClient(transport)).noul_rerank("問い", shortlist(), plain=True)
+    question = next(iter(transport.requests[0]["questions"].values()))
+    assert "criteria" not in question
+    assert "根拠" not in question["instructions"]
+    assert "関連" in question["instructions"]
+
+
+def test_the_plain_ranker_is_named_apart():
+    from jev_rag.rankers import build_rankers
+
+    (name,) = build_rankers(["jev_pointwise_plain"], client=JevClient(FakeTransport()))
+    assert name == "jev_pointwise_plain"
