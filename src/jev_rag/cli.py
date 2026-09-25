@@ -287,6 +287,44 @@ def cmd_dilution(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_prepare_judge(args: argparse.Namespace) -> int:
+    """The public anchors of the judge evaluation: J-RAGBench and MIRACL Japanese dev."""
+    from pathlib import Path
+
+    from jev_rag import public
+
+    raw = Path(args.raw)
+    public.prepare_public(raw)
+    for name, queries in public.load_public(raw).items():
+        pairs = sum(len(q.candidates) for q in queries)
+        relevant = sum(q.total_relevant for q in queries)
+        print(f"{name}: {len(queries)} 問 / ペア {pairs} 件 / 関連 {relevant} 件")
+    print("  出典: J-RAGBench (neoai-inc) CC BY-SA 4.0、MIRACL (miracl) Apache-2.0")
+    return 0
+
+
+def cmd_synthetic_check(args: argparse.Namespace) -> int:
+    """The gate before a paid run: trivial scorers near chance, verification in agreement."""
+    from jev_rag.judge import format_judge, judge_metrics
+    from jev_rag.synthetic import baseline_scores, compare_verification, load_synthetic
+
+    queries = load_synthetic(args.gen)
+    baselines = {
+        name: judge_metrics(rows, probabilistic=False)
+        for name, rows in baseline_scores(queries).items()
+    }
+    print(f"{len(queries)} 問。素朴な判定器が正例率に近いほど、作り方から手がかりが漏れていない")
+    print(format_judge(baselines))
+    report = compare_verification(args.gen, args.verify)
+    findings, unverified = report["findings"], report["unverified"]
+    print(f"\n検証済み {report['checked_questions']} 問、食い違い {len(findings)} 件")
+    for finding in findings:
+        print(f"  {finding.get('doc_id', finding['id'])}: {finding['kind']}")
+    if unverified:
+        print(f"未検証: {', '.join(unverified)}")
+    return 1 if findings or unverified else 0
+
+
 def cmd_report(args: argparse.Namespace) -> int:
     from jev_rag.runner import inconsistent_query_counts, merge_files
 
@@ -402,11 +440,13 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="jev-rag", description="従来RAG/rerank と Jev の比較")
     sub = parser.add_subparsers(dest="command", required=True)
 
-    prepare = sub.add_parser("prepare", help="評価データセット JQaRA を取得する")
+    prepare = sub.add_parser("prepare", help="旧測定: JQaRA を取得する")
     prepare.add_argument("--out", default=str(DEFAULT_PATH))
     prepare.set_defaults(func=cmd_prepare)
 
-    evaluate = sub.add_parser("evaluate", help="各経路を同じ問題で評価して比較表を出す")
+    evaluate = sub.add_parser(
+        "evaluate", help="旧測定（JQaRA）: 各経路を同じ問題で評価して比較表を出す"
+    )
     evaluate.add_argument("--data", default=str(DEFAULT_PATH))
     evaluate.add_argument("--rankers", default=",".join(ALL_RANKERS))
     evaluate.add_argument("--queries", type=int, default=100, help="評価する問題数")
@@ -417,7 +457,9 @@ def main(argv: list[str] | None = None) -> int:
     evaluate.add_argument("--out", default=RESULTS_PATH)
     evaluate.set_defaults(func=cmd_evaluate)
 
-    answer = sub.add_parser("answer", help="検索経路を替えて最終回答の正解率を比べる")
+    answer = sub.add_parser(
+        "answer", help="旧測定（JQaRA）: 検索経路を替えて最終回答の正解率を比べる"
+    )
     answer.add_argument("--data", default=str(DEFAULT_PATH))
     answer.add_argument("--rankers", default="embedding,cohere_rerank,jev_pointwise")
     answer.add_argument("--queries", type=int, default=100)
@@ -430,7 +472,9 @@ def main(argv: list[str] | None = None) -> int:
     answer.add_argument("--out", default="out/answers.json")
     answer.set_defaults(func=cmd_answer)
 
-    sweep = sub.add_parser("sweep", help="1リクエストに載せる候補数と精度の関係を測る")
+    sweep = sub.add_parser(
+        "sweep", help="旧測定（JQaRA）: 1リクエストに載せる候補数と精度の関係を測る"
+    )
     sweep.add_argument("--data", default=str(DEFAULT_PATH))
     sweep.add_argument("--batches", default="1,5,10,25,100")
     sweep.add_argument("--queries", type=int, default=30)
@@ -439,6 +483,19 @@ def main(argv: list[str] | None = None) -> int:
     sweep.add_argument("--seed", type=int, default=0)
     sweep.add_argument("--out", default="out/sweep.json")
     sweep.set_defaults(func=cmd_sweep)
+
+    prepare_judge = sub.add_parser(
+        "prepare-judge", help="判定器評価用の J-RAGBench と MIRACL 日本語版を取得する"
+    )
+    prepare_judge.add_argument("--raw", default="data/raw")
+    prepare_judge.set_defaults(func=cmd_prepare_judge)
+
+    synthetic_check = sub.add_parser(
+        "synthetic-check", help="合成データの関門（素朴な判定器）と検証の突き合わせ"
+    )
+    synthetic_check.add_argument("--gen", required=True, help="例: data/synthetic/gen_a")
+    synthetic_check.add_argument("--verify", required=True, help="例: data/synthetic/verify_a")
+    synthetic_check.set_defaults(func=cmd_synthetic_check)
 
     judge = sub.add_parser("judge", help="各経路を関連度の判定器として評価する")
     judge.add_argument("--dataset", choices=["synthetic", "jragbench", "miracl"], required=True)
@@ -460,7 +517,7 @@ def main(argv: list[str] | None = None) -> int:
     dilution.add_argument("--out", default="out/dilution.json")
     dilution.set_defaults(func=cmd_dilution)
 
-    report = sub.add_parser("report", help="保存済みの結果から表を出し直す")
+    report = sub.add_parser("report", help="旧測定（JQaRA）: 保存済みの結果から表を出し直す")
     report.add_argument(
         "--results", default=RESULTS_PATH, help="カンマ区切りで複数指定すると統合して表示する"
     )
@@ -469,7 +526,9 @@ def main(argv: list[str] | None = None) -> int:
     report.add_argument("--limit", type=int, default=10)
     report.set_defaults(func=cmd_report)
 
-    context = sub.add_parser("context", help="文脈選択が削る量と、残る正解の割合を測る")
+    context = sub.add_parser(
+        "context", help="旧測定（JQaRA）: 文脈選択が削る量と、残る正解の割合を測る"
+    )
     context.add_argument("--data", default=str(DEFAULT_PATH))
     context.add_argument("--queries", type=int, default=50)
     context.add_argument("--candidates", type=int, default=30)
