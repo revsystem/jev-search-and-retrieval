@@ -42,7 +42,7 @@ uv venv
 uv pip install -e ".[dev]"
 cp .env.example .env
 
-aws sso login --profile production     # Bedrock 用。鍵ではなく SSO
+aws sso login --profile <プロファイル名>  # Bedrock 用。鍵ではなく SSO
 uv run jev-rag check                   # Jev の疎通確認
 uv run jev-rag prepare-judge           # J-RAGBench と MIRACL 日本語版を取得する（MIRACL のコーパスは約 1GB）
 
