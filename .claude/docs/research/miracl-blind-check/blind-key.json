@@ -1,0 +1,122 @@
+[
+ {
+  "id": "P01",
+  "query_id": "mi-2194",
+  "doc_id": "407121#0",
+  "kind": "best_labeled_relevant"
+ },
+ {
+  "id": "P02",
+  "query_id": "mi-3757",
+  "doc_id": "227185#36",
+  "kind": "best_labeled_relevant"
+ },
+ {
+  "id": "P03",
+  "query_id": "mi-2436",
+  "doc_id": "48598#4",
+  "kind": "best_labeled_relevant"
+ },
+ {
+  "id": "P04",
+  "query_id": "mi-1054",
+  "doc_id": "1681#18",
+  "kind": "jev_top_labeled_irrelevant"
+ },
+ {
+  "id": "P05",
+  "query_id": "mi-3451",
+  "doc_id": "1417657#0",
+  "kind": "best_labeled_relevant"
+ },
+ {
+  "id": "P06",
+  "query_id": "mi-3451",
+  "doc_id": "1417657#4",
+  "kind": "jev_top_labeled_irrelevant"
+ },
+ {
+  "id": "P07",
+  "query_id": "mi-1054",
+  "doc_id": "377536#7",
+  "kind": "best_labeled_relevant"
+ },
+ {
+  "id": "P08",
+  "query_id": "mi-2494",
+  "doc_id": "230209#2",
+  "kind": "best_labeled_relevant"
+ },
+ {
+  "id": "P09",
+  "query_id": "mi-3757",
+  "doc_id": "576454#10",
+  "kind": "jev_top_labeled_irrelevant"
+ },
+ {
+  "id": "P10",
+  "query_id": "mi-3110",
+  "doc_id": "5157#74",
+  "kind": "jev_top_labeled_irrelevant"
+ },
+ {
+  "id": "P11",
+  "query_id": "mi-4497",
+  "doc_id": "958578#43",
+  "kind": "best_labeled_relevant"
+ },
+ {
+  "id": "P12",
+  "query_id": "mi-3069",
+  "doc_id": "40796#0",
+  "kind": "best_labeled_relevant"
+ },
+ {
+  "id": "P13",
+  "query_id": "mi-2194",
+  "doc_id": "125804#2",
+  "kind": "jev_top_labeled_irrelevant"
+ },
+ {
+  "id": "P14",
+  "query_id": "mi-4497",
+  "doc_id": "382006#161",
+  "kind": "jev_top_labeled_irrelevant"
+ },
+ {
+  "id": "P15",
+  "query_id": "mi-1487",
+  "doc_id": "525179#15",
+  "kind": "best_labeled_relevant"
+ },
+ {
+  "id": "P16",
+  "query_id": "mi-2494",
+  "doc_id": "15509#1",
+  "kind": "jev_top_labeled_irrelevant"
+ },
+ {
+  "id": "P17",
+  "query_id": "mi-3110",
+  "doc_id": "5157#29",
+  "kind": "best_labeled_relevant"
+ },
+ {
+  "id": "P18",
+  "query_id": "mi-1487",
+  "doc_id": "323451#1",
+  "kind": "jev_top_labeled_irrelevant"
+ },
+ {
+  "id": "P19",
+  "query_id": "mi-3069",
+  "doc_id": "40796#1",
+  "kind": "jev_top_labeled_irrelevant"
+ },
+ {
+  "id": "P20",
+  "query_id": "mi-2436",
+  "doc_id": "48598#13",
+  "kind": "jev_top_labeled_irrelevant"
+ }
+]
