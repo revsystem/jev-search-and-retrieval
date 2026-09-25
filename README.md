@@ -1,39 +1,39 @@
-# Jev は RAG の検索精度を上げるのか
+# Jev は RAG の rerank で関連文書を正しく見分けられるか
 
-TypeSafe の System One モデル Jev を検索・再ランキングに挟むと、従来のRAGと比べて実際にスコアが上がるのか。公式ドキュメントの Search and retrieval ユースケースごとに実装し、同じ問題・同じ候補・同じ指標で横並びに測るためのリポジトリです。
+TypeSafe の System One モデル Jev を、RAG の rerank（検索で集めた候補文書を、質問への関連度で並べ替える工程）の判定器として使ったとき、Cohere Rerank より関連文書を正しく見分けられるかを測るリポジトリです。質問と候補文書の組ごとに各手法のスコアを付け、「関連する／しない」をどれだけ正しく見分けたかを比べます。
 
-## 何を比べているか
+測定結果の詳細は `.claude/docs/research/judge-results.md` にあります。
 
-日本語の検索評価データセット JQaRA を使います。1問につき Wikipedia の文章100件が候補として与えられ、そのうちどれが「その質問に答えられる文章か」の正解ラベルが最初から付いています。評価はこの候補を並べ替える課題です。上位10件にどれだけ正解を集められたかを nDCG@10 で測ります。
+## 比べる手法
 
-正解ラベルを自分で作らずに済むのがこのデータセットを選んだ理由です。検索の比較で最も恣意的になりやすいのが「何を正解とするか」で、そこを公開データに委ねれば結果の信頼性が上がります。公開されている日本語リランカーのスコアとも同じ土俵で比べられます。
+どの手法も、データセットに含まれる同じ候補文書にスコアを付けます。埋め込みもベクトル索引から検索するのではなく、質問と各候補文書のベクトルの近さをそのままスコアにします。
 
-比較する経路は6つです。
+| 経路 | 中身 |
+|---|---|
+| `length` / `term_overlap` / `bm25` | 文書の長さ、質問との語の重なり、キーワード一致（BM25）。データに手がかりが漏れていないかを見る素朴な判定器 |
+| `embedding` | Cohere Embed v4 のベクトルのコサイン類似度 |
+| `cohere_rerank` | Amazon Bedrock の Cohere Rerank 3.5 |
+| `jev_pointwise` | Jev。1 つの質問の候補文書を 10 件ずつ 1 つの state にまとめ、判定基準（`criteria`）付きの Noul で「根拠として役に立つか」の確率を返させる |
+| `jev_pointwise_plain` | Jev。判定基準を渡さず「関連しますか」とだけ尋ねる版 |
+| `jev_crossencode` | Jev。候補文書 1 件ごとに 1 リクエスト |
 
-| 経路 | 中身 | 位置づけ |
-|---|---|---|
-| `embedding` | Cohere Embed v4 で候補を類似度順に並べる | 従来のRAG。比較の基準 |
-| `cohere_rerank` | Cohere Rerank v3.5 で並べ替える | 従来の再ランキング |
-| `jev_pointwise` | 候補ごとにNoulを1問立て、返った確率で並べる | Jev: 関連度スコアリング |
-| `jev_crossencode` | 候補1件ごとにリクエストを分けて判定する | Jev: クロスエンコード（公式レシピ） |
-| `jev_pairwise` | 2候補のどちらが良いかをChoiceで比べ、勝率で並べる | Jev: ペアワイズ比較 |
-| `jev_hybrid` | 埋め込みの順位とJevの判定を重み付き融合する | Jev: 埋め込みの補完 |
+## データ
 
-## 公式ユースケースとの対応
+性質の違う 3 つのデータを、混ぜずに別々に集計します。
 
-公式ドキュメントの Search and retrieval は5項目で、すべてに実装とテストを対応させています。`uv run jev-rag usecases` でも出力できます。
+| データ | 中身 | 規模 | 関連文書の割合 |
+|---|---|---|---|
+| MIRACL 日本語 dev | Wikipedia の検索結果に人が関連の有無を付けた公開データ。質問は一問一答型 | 860 問、8,354 組 | 21% |
+| J-RAGBench | 架空企業の業務寄りの質問。回答不能な 54 問は関連文書がないので除く | 60 問、709 組 | 21% |
+| 合成データ | 比較・理由・経緯・複数要因・統合の 5 種類の業務の質問。同じ話題で必要な事実だけがない紛らわしい無関係文書を含む | 60 問、600 組 | 33% |
 
-| 公式ユースケース | 実装 | 経路 |
-|---|---|---|
-| Replace or supplement embeddings in RAG pipelines | `jev_rag.rankers` | `jev_hybrid`（補完）/ `jev_crossencode`（置換） |
-| Score query-to-candidate relevance | `jev_rag.jev.rerank` | `jev_pointwise` |
-| Rerank results with pairwise comparisons | `jev_rag.jev.pairwise` | `jev_pairwise` |
-| Cross-encode queries and candidates | `jev_rag.jev.crossencode` | `jev_crossencode` |
-| Select useful context for downstream AI workflows | `jev_rag.jev.context` | `jev-rag context` |
+合成データの仕様は `.claude/docs/specs/synthetic-judge-dataset.md` にあります。正解は作り方で決め（必要な事実を書いた文書が関連）、後から AI に判定させて決めてはいません。生成は Claude（Opus 5.5 が 3 問、Sonnet 5 が 27 問）と Grok 4.7 が 30 問ずつ、検証は作っていない側（Cursor Agent と Claude Sonnet 5）が正解を伏せたビューで行い、作成時の正解と全文書で一致しました。無作為に選んだ 6 問は人が目で確認しています。
 
-「埋め込みの置換」と「クロスエンコード」が同じ経路なのは、候補が固定されたこの課題では両者が同じ処理になるためです。`jev_crossencode` は埋め込みモデルを一切使わないので、そのまま「置換」にあたります。無理に別の行を立てても意味のある差は出ません。
-
-文脈選択だけは並べ替えではなく採否の判断なので、順位の指標ではなく「渡す文脈が何文字減り、正解が何割残ったか」で測ります。
+| パス | 中身 |
+|---|---|
+| `data/synthetic/gen_a/`、`gen_b/` | 問題と文書、作成時の正解（`role`、`contains_facts`） |
+| `data/synthetic/views_a/`、`views_b/` | 正解を取り除き、文書の順序を入れ替えた検証用ビュー |
+| `data/synthetic/verify_a/`、`verify_b/` | 検証担当の判定 |
 
 ## 使い方
 
@@ -42,141 +42,112 @@ uv venv
 uv pip install -e ".[dev]"
 cp .env.example .env
 
-aws sso login --profile production      # Bedrock 用。鍵ではなくSSO
-uv run jev-rag prepare                  # JQaRA を取得する（60MB）
-uv run jev-rag check                    # Jev の疎通確認
-uv run jev-rag evaluate --queries 100 --candidates 30
-uv run jev-rag report --movers jev_crossencode
-uv run jev-rag context                  # 文脈選択の効果を測る
+aws sso login --profile production     # Bedrock 用。鍵ではなく SSO
+uv run jev-rag check                   # Jev の疎通確認
+uv run jev-rag prepare-judge           # J-RAGBench と MIRACL 日本語版を取得する（MIRACL のコーパスは約 1GB）
+
+uv run jev-rag synthetic-check --gen data/synthetic/gen_a --verify data/synthetic/verify_a
+uv run jev-rag synthetic-check --gen data/synthetic/gen_b --verify data/synthetic/verify_b
+
+uv run jev-rag judge --dataset miracl      # synthetic / jragbench / miracl
+uv run jev-rag dilution                    # 1 リクエストに載せる件数と判定精度
 ```
 
-`.env` に書く秘密情報は Vercel AI Gateway の `AI_GATEWAY_API_KEY` ひとつだけです。残りは接続先とモデルIDの指定で、秘密ではありません。TypeSafe のアカウントが開通したら `JEV_TRANSPORT=direct` と `TYPESAFE_API_KEY` に切り替えます。Bedrock の認証情報は `.env` には書きません。boto3 の既定のチェーンが `AWS_PROFILE` を見るので、プロファイル名だけ指定して `aws sso login` で認証します。`jev-rag` は起動時に `.env` を読みますが、既に export されている環境変数のほうが優先されます。
+`synthetic-check` は有料の測定の前に通す関門です。素朴な判定器の成績と、作成時の正解と検証結果の突き合わせを表示し、食い違いか未検証の問題があれば終了コード 1 を返します。
 
-`evaluate` は結果を `out/results.json` に保存します。`report` はそこから表を出し直すので、測り直さずに見せ方だけ変えられます。`--movers` を付けると、従来手法で沈んでいた正解をどの質問で引き上げたかが一覧で出ます。数字だけでは伝わらない部分なので、記事にはこちらが効きます。
+`judge` は全経路のスコアを組ごとに `out/judge-<dataset>.json` へ保存します。測定済みの経路は再実行しても呼び直さないので、途中で止まっても続きから再開できます。`--rankers` で経路を選べます（既定は `embedding,cohere_rerank,jev_pointwise,jev_crossencode`）。素朴な判定器は毎回あわせて計算します。
 
-費用の目安です。Jev は入力100万トークンあたり$0.042で、出力は無料です。100問×候補30件のクロスエンコードで3,000リクエスト、おおよそ150万トークンなので$0.07程度。全経路を回しても数十円の範囲に収まります。
-
-## Jev の2経路
-
-同じリクエストボディを2つの宛先に送り分けるだけの設計です。`JevClient` から上のコードは経路を知りません。
-
-アカウント開通前は Vercel AI Gateway を使います。`JEV_TRANSPORT=gateway` と `AI_GATEWAY_API_KEY` を設定すると `https://ai-gateway.vercel.sh/typesafe/v1/systemone` に `typesafe-ai/jev` として送ります。開通後は `JEV_TRANSPORT=direct` と `TYPESAFE_API_KEY` で `https://api.typesafe.ai/v1/systemone` に `jev-latest` として送ります。どちらも公式ドキュメントと照合済みです。
-
-分割はトークン予算で行います。公式の上限は1リクエスト64kトークン（state と全質問の合計）、state と最長の質問1件で32kトークンで、質問の件数に上限はありません。日本語は1文字あたりほぼ1トークン、ASCIIは4文字あたり1トークンとして見積もっています。
+`.env` に書く秘密情報は Jev の API キー（`TYPESAFE_API_KEY`、Vercel AI Gateway 経由なら `AI_GATEWAY_API_KEY`）です。Bedrock の認証情報は書かず、`AWS_PROFILE` にプロファイル名を指定して `aws sso login` で認証します。
 
 ## 結果
 
-JQaRA テストセットから100問、各100候補。指標は nDCG@10、±は標準誤差。時間は全100問の合計。
+PR-AUC は、関連文書を上位に、無関係文書を下位に並べられているほど 1 に近づく 0〜1 の値です。差の区間は、問題を重複を許して選び直す操作を 1,000 回以上繰り返したときの 2.5〜97.5 パーセンタイルです。
 
-| 経路 | nDCG@10 | 1問あたり | 中身 |
-|---|---|---|---|
-| embedding | 0.626±0.022 | 5.8秒 | Cohere Embed v4 の類似度順（従来のRAG、基準） |
-| cohere_rerank | 0.670±0.023 | 0.6秒 | Cohere Rerank v3.5（従来の再ランキング） |
-| jev_pointwise | 0.866±0.018 | 1.5秒 | Jev、候補10件を1リクエスト |
-| jev_hybrid | 0.864±0.018 | 5.7秒 | 埋め込みの順位と Jev の判定を融合（うち埋め込みの呼び出しが大半） |
-| jev_crossencode | 0.850±0.020 | 11.2秒 | Jev、候補1件ごとに1リクエスト |
-| jev_pairwise | 0.633±0.025 | 8.1秒 | Jev、2候補ずつ比較して勝率で並べる |
+1 つの質問の候補文書を並べ替える力（問題ごとの PR-AUC の平均。rerank に必要なのはこちら）:
 
-Jev の上位3経路は 0.85〜0.87 で、従来の再ランキングに対して +0.18 以上です。同じデータセットで公開されている日本語リランカーの最高値 0.771 も上回っています。ただし公開値とは同一クエリ集合での対照実験ではないので、「同じデータセットの公開値と比べて」という限定の上での比較です。
+| データ | でたらめ | 埋め込み | Cohere Rerank | Jev | Jev − Cohere Rerank |
+|---|---|---|---|---|---|
+| MIRACL（797 問） | 0.37 | 0.771 | 0.841 | 0.865 | +0.024（+0.007〜+0.040） |
+| J-RAGBench | 0.36 | 0.880 | 0.932 | 0.931 | −0.001（−0.043〜+0.045） |
+| 合成データ | 0.47 | 0.487 | 0.521 | 0.940 | +0.419（+0.369〜+0.468） |
 
-埋め込み単体が 0.626 で公開値のレンジ（0.554〜0.629）に収まっていることが、この比較が同じ土俵に乗っている根拠になります。
+質問をまたいでスコアの意味がそろっているか（全問題の組をまとめた PR-AUC。1 つのしきい値で切る使い方に必要なのはこちら）:
 
-## いちばん効いた変数はリクエストの形だった
+| データ | でたらめ | BM25 | 埋め込み | Cohere Rerank | Jev | Jev − Cohere Rerank |
+|---|---|---|---|---|---|---|
+| MIRACL | 0.21 | 0.29 | 0.54 | 0.69 | 0.76 | +0.07（+0.04〜+0.09） |
+| J-RAGBench | 0.21 | 0.64 | 0.70 | 0.79 | 0.88 | +0.09（+0.02〜+0.17） |
+| 合成データ | 0.33 | 0.35 | 0.33 | 0.36 | 0.92 | +0.56（+0.52〜+0.59） |
 
-1リクエストに何件の候補を載せるかだけを変えた結果です（30問、各100候補）。モデルも候補も指示文も同一です。
+読み方は次のとおりです。
 
-| 1リクエストの候補数 | nDCG@10 | 1問あたり |
+- 一問一答に近い検索（MIRACL、J-RAGBench）では、並べ替えの精度は Cohere Rerank とほぼ同じ
+- 同じ話題で中身だけが違う文書が並ぶ合成データでは、Cohere Rerank と埋め込みは当て推量の水準まで落ち、Jev との差が大きく開く。ただしこの差は合成データでしか確かめていない
+- 1 つのしきい値で全質問を切る使い方では、Jev の方が無関係な文書を多く落とせる。関連文書の 9 割を残すしきい値で切ると、MIRACL で残った文書のうち関連する割合は Cohere Rerank 42%、Jev 58%（+16 ポイント、+13〜+20）
+- 判定基準を渡さなくても、合成データで Jev は Cohere Rerank を大きく上回る（0.922 と 0.521）。差の大半はモデル自体から来ている
+- 候補文書 10 件の rerank 1 回の費用は、Jev が約 0.0002 ドル、Cohere Rerank が約 0.002 ドル
+
+### 1 リクエストに載せる件数
+
+合成データの各問題の 10 件に、他の問題の文書 90 件を混ぜて測りました（`jev-rag dilution`）。値は問題ごとの PR-AUC の平均です。
+
+| 候補文書の中身 | 1 リクエストの件数 | PR-AUC |
 |---|---|---|
-| 1（クロスエンコード） | 0.844±0.034 | 11.4秒 |
-| 5 | 0.835±0.035 | 1.65秒 |
-| 10 | 0.833±0.036 | 1.13秒 |
-| 25 | 0.586±0.039 | 0.74秒 |
-| 50 | 0.307±0.038 | 0.88秒 |
+| 同じ問題の 10 件 | 1 件ずつ | 0.87 |
+| 同じ問題の 10 件 | 10 件まとめて | 0.94 |
+| 混ぜた 100 件 | 10 件ずつ | 0.84 |
+| 混ぜた 100 件 | 25 件ずつ | 0.83 |
+| 混ぜた 100 件 | 50 件ずつ | 0.72 |
+| 混ぜた 100 件 | 100 件まとめて | 0.55 |
 
-1件から10件までは精度が横ばいで、10件と25件の間で崩れます。10件なら1件ずつ送るのとほぼ同じ精度が、10分の1の時間で得られます。
+同じ質問の候補文書を 10 件まとめて渡すと、1 件ずつより正確になります（+0.076、+0.046〜+0.108）。一緒に並ぶのが無関係な文書だと上乗せは消え、50 件を超えると崩れます。効いているのは件数ではなく、一緒に並ぶ中身です。
 
-これはバグではなく、公式ドキュメントが記載している挙動です。model-jaggedness のページに「Accuracy falls as the state grows with content unrelated to the decision」とあり、候補100件を1つの state に同居させると、各質問にとって残り99件が妨害情報になります。
+### 検索そのものを Jev に任せる場合
 
-実務上の意味は2つあります。候補をまとめて送るほど安く速くなるが、10件を超えたあたりから精度を失う。そして、この設定を誤ると同じモデルが 0.307 にも 0.866 にもなるので、Jev が効くかどうかより先に、リクエストの形が正しいかを疑うべきです。実際この検証でも、既定値を「収まる限り最大」にしていたとき pointwise は 0.276、hybrid は基準の埋め込みを下回る 0.547 でした。
+精度は測っていません。全文書に関連の有無が付いたデータがないためです。所要時間と費用の見積もり（文書を 10 件ずつ 1 リクエストにまとめ、8 並列で送った実測から）は次のとおりです。API の上限は 1 分あたり 1,200 リクエストです。
 
-## 文脈選択（5つ目のユースケース）
-
-並べ替えた上位10件を入力に、予算1500文字で選別した結果です（30問）。
-
-```
-渡す文脈: 75,961 -> 29,692 文字 (39%)
-採用件数: 118 / 300（1問あたり 3.9 件）
-正解の保持: 79 / 173 (46%)
-正解を1件以上残せた問題: 30 / 30
-```
-
-文脈を4割弱に削りながら、30問すべてで正解を1件以上残しています。正解の「件数」では半分以上を捨てていますが、回答に必要なのは通常1件なので、RAG の観点で見るべきは後者です。JQaRA は1問あたり正解が中央値8件あるため、同じ事実を伝える重複を落としているのが実態です。
-
-これは並べ替えの後段に置く処理なので、測定も並べ替え後の上位10件を入力にしています。シャッフル順の生の候補に対して測ると、検索が本来渡さない文書まで選別対象に入り、数字の意味が変わります。
-
-## 順位がどう変わるか
-
-`jev-rag report --movers jev_crossencode` は、埋め込み検索で沈んでいた正解が何位から何位に上がったかを一覧にします。
-
-```
-| 改善 | 前の順位 | 後の順位 | 質問 |
-|---|---|---|---|
-| +34 | 49 | 15 | グリーンティリキュールをウーロン茶で割ったカクテルの名前にもなっている、森林の形態の一種は何でしょう? |
-| +4  | 5  | 1  | 漫画『ゴールデンカムイ』には政治犯として幽閉されたのち網走監獄に収監されていたという設定で登場する、新選組の鬼の副長といえば誰? |
-| +3  | 4  | 1  | 「英検」の正式名称は実用英語技能検定ですが、「漢検」の正式名称は何でしょう? |
-```
-
-語彙の重なりでは拾えない問いほど差が出ます。
-
-## retrieve と rerank のどちらの話か
-
-この検証が測っているのは rerank です。JQaRA は1問につき候補100件を最初から与えるので、コーパス全体から候補を見つける段は測っていません。両者を分けて書きます。
-
-大規模コーパスの retrieve を Jev で置き換えることはできません。Jev は全文書に1件ずつ判定を投げるしかなく、公式のリランキング cookbook も「millions of documents means millions of comparisons per query」と書いて二段構えを勧めています。リクエスト数が文書数に比例するので、100万件なら1クエリあたり10万リクエストです。埋め込みがインデックスを作って対数時間で引けるのに対し、構造的に置き換えられません。
-
-一方、範囲が区切られていれば、埋め込みなしに Jev だけで検索できます。この検証の `jev_pointwise` と `jev_crossencode` は埋め込みスコアを一切使っておらず、候補100件を Jev だけで並べて nDCG@10 = 0.866 でした。埋め込み検索の 0.626 を上回っています。つまり100件規模なら Jev 単独で検索が成立します。公式の line-by-line search cookbook が、GitHub の利用規約218行を1リクエストで採点して fast search を置いていないのも同じ話です。
-
-ただし1リクエストに詰め込める数と、精度が保てる数は別です。日本語400字の文書なら state の32kトークン制限で約90件が上限ですが、精度は10件を超えたあたりから落ち始めます。総数は分割すれば増やせるので、実際の制約は「1リクエストあたり10件」と「文書数に比例するリクエスト数」の2つです。
-
-| 文書数 | リクエスト数/クエリ | 1クエリの所要（実測からの外挿） |
-|---|---|---|
-| 100 | 10 | 1.5秒 |
-| 1,000 | 100 | 15秒 |
-| 10,000 | 1,000 | 2.5分 |
-
-ユースケースマップの「Replace or supplement embeddings」は、この二つに対応していると読めます。replace が成り立つのは1文書の中やメタデータで絞った後のような境界のある集合で、supplement は境界のない大規模コーパスで埋め込みの後段に置く形です。
+| 文書数 | 1 クエリのリクエスト数 | 所要時間（8 並列） | API 上限での最短 | 1 クエリの費用 |
+|---|---|---|---|---|
+| 1,000 | 100 | 14〜31 秒 | 5 秒 | 約 0.02 ドル |
+| 10,000 | 1,000 | 2.4〜5 分 | 50 秒 | 約 0.2 ドル |
+| 1,000,000 | 100,000 | 4〜8.5 時間 | 約 83 分 | 約 20 ドル |
 
 ## 結果を読むときの注意
 
-日本語での性能。公式ドキュメントの Models は、Jev の主たる学習言語は英語で、CJKを含む他言語は「handled but not equally well」、非英語で使う前に自分のコンテンツで検証し confidence に注意せよと明記しています。このリポジトリは対象もクエリも判定の指示文もすべて日本語なので、英語のベンチマークで報告されている改善幅がそのまま出る前提では読めません。
+- データはすべて日本語。公式ドキュメントの Models は、Jev の主な学習言語は英語で、他言語は英語ほど精度が高くないと書いている
+- MIRACL のラベルには漏れがある。Jev の 1 位がラベル上は無関係だった問題から 10 問を選び、ラベルを伏せて 2 つの AI に判定させると、5 問は両方が「答えが書かれている」と判定した（`.claude/docs/research/miracl-blind-check/`）。全体でどの程度あるかは確かめていない
+- 合成データは LLM が書いた文章で、LLM の書いた文章を AI モデルが判定するときの偏りは確かめていない
+- 所要時間は並列度、通信環境、測定した時間帯で変わる。速さの優劣は結論にしていない
 
-候補の並び順。候補を絞る際は正解を落とさないよう残したうえで、必ずシャッフルしてから各経路に渡しています。これをしないと入力順に正解が偏り、何もしない経路でも満点が出てしまいます。実際に実装当初これが起きました。
+## Jev の 2 経路
 
-指示文の影響。Jev の判定は `instructions` と `criteria` の書き方に左右されます。同梱の指示文は日本語で書いた初期値で、チューニングはしていません。従来手法（Cohere Rerank）は既製のサービスをそのまま呼んでいるので、この点では条件が対等ではありません。一方でバッチサイズは実測にもとづいて選んでいます（掃引の表）。これは指示文の調整とは別で、リクエストが公式の制限に収まるかどうかの問題です。
+同じリクエストボディを 2 つの宛先に送り分けます。`JevClient` から上のコードは経路を知りません。`JEV_TRANSPORT=direct` と `TYPESAFE_API_KEY` で `https://api.typesafe.ai/v1/systemone` に `jev-latest` として送り、`JEV_TRANSPORT=gateway` と `AI_GATEWAY_API_KEY` で Vercel AI Gateway 経由（`typesafe-ai/jev`）で送ります。測定はすべて direct 経路で行いました。
 
-公開値との比較。表に併記した日本語リランカーのスコアは、同じデータセット・同じ指標での公開値ですが、こちらと同じ100問で測ったものではありません。クエリ集合が違うので、順位づけの参考であって対照実験ではありません。
+入力の上限は、state と最長の質問 1 つで 32k トークン、state と全質問で 64k トークンです。上限を超えそうなときは候補文書を自動で分割します。
 
 ## 構成
 
 ```
 src/jev_rag/
-  dataset.py   JQaRA の読み込み、サンプリング、候補のシャッフル
-  metrics.py   nDCG@10 / MRR@10 / Recall@10
-  rankers.py   比較する6経路
-  runner.py    同じ問題を全経路に流して結果を集める
-  report.py    比較表と、順位が上がった例の一覧
-  bedrock.py   Cohere Embed v4 / Cohere Rerank v3.5 / GPT-5.6 Luna
-  usecases.py  公式ユースケースと実装の対応（テストで固定）
-  jev/         Jevクライアントと各ユースケースの実装
+  judge.py      組ごとの採点、PR-AUC などの指標、bootstrap 区間、judge と dilution の実行
+  public.py     J-RAGBench と MIRACL 日本語版の取得と読み込み
+  synthetic.py  合成データの読み込み、検証用ビュー、突き合わせ、素朴な判定器
+  rankers.py    比較する経路
+  bedrock.py    Cohere Embed v4 / Cohere Rerank 3.5 / GPT-5.6 Luna
+  jev/          Jev クライアントと、公式ユースケースごとの実装
+  cli.py        jev-rag コマンド
 ```
 
-`jev/` の中身は公式ドキュメントと照合済みです。取得した公式ページは `.claude/docs/research/typesafe/` に逐語で保存してあります。
+`jev/` の中身は公式ドキュメントと照合済みで、取得した公式ページは `.claude/docs/research/typesafe/` に保存してあります。`uv run jev-rag usecases` で、公式の Search and retrieval ユースケースと実装の対応を表示できます。
+
+## 旧測定（JQaRA）
+
+最初は JQaRA（クイズ形式の日本語検索データ）で nDCG@10 を測っていました。一般的な RAG の、一問一答では終わらない質問を代表しないため、判定器としての評価に切り替えました。`prepare`、`evaluate`、`answer`、`sweep`、`report`、`context` はこの旧測定のコマンドで、動作はしますが、上の結果には使っていません。旧測定の計画は `.claude/docs/archive/jqara-comparison.md` にあります。
 
 ## 出典とライセンス
 
-評価データは [JQaRA](https://huggingface.co/datasets/hotchpotch/JQaRA)（hotchpotch）です。question と answers は JAQKET 由来で CC-BY-SA-4.0、passage は Wikipedia の CC BY-SA 4.0 または GFDL です。利用にあたっては出典表示と継承が必要です。
-
-- [TypeSafe AI ドキュメント](https://docs.typesafe.ai/) — API リファレンス、プリミティブ、ユースケース、cookbook
-- [TypeSafe API with AI Gateway](https://vercel.com/docs/ai-gateway/sdks-and-apis/typesafe) — ゲートウェイ経由の呼び出し
-- [Cohere Embed v4 on Amazon Bedrock](https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-cohere-embed-v4.html)
-- [GPT-5.6 Luna on Amazon Bedrock](https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-openai-gpt-56-luna.html)
+- [MIRACL](https://huggingface.co/datasets/miracl/miracl)（miracl/miracl、miracl/miracl-corpus）: Apache-2.0
+- [J-RAGBench](https://huggingface.co/datasets/neoai-inc/Japanese-RAG-Generator-Benchmark)（neoai-inc）: CC BY-SA 4.0。スコアの掲載は出典表示で足り、データや改変版を再配布するときは同じライセンスを引き継ぐ
+- [JQaRA](https://huggingface.co/datasets/hotchpotch/JQaRA)（旧測定）: question と answers は JAQKET 由来で CC-BY-SA-4.0、passage は Wikipedia の CC BY-SA 4.0 または GFDL
+- [TypeSafe AI ドキュメント](https://docs.typesafe.ai/)、[JEV-as-a-Judge（arXiv:2609.26550）](https://arxiv.org/abs/2609.26550)
+- [Amazon Bedrock の Rerank](https://docs.aws.amazon.com/bedrock/latest/userguide/rerank.html)、[Amazon Bedrock の料金](https://aws.amazon.com/bedrock/pricing/)

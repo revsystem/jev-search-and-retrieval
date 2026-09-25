@@ -1,7 +1,7 @@
 [project]
 name = "jev-rag-comparison"
 version = "0.1.0"
-description = "Does TypeSafe Jev improve retrieval over a classic RAG pipeline? A like-for-like comparison on JQaRA."
+description = "Is TypeSafe Jev a better relevance judge than Cohere Rerank for RAG reranking? Measured on MIRACL Japanese, J-RAGBench and a synthetic business set."
 requires-python = ">=3.11"
 dependencies = [
     "boto3>=1.40.0",
