@@ -147,13 +147,25 @@ def judge_metrics(
     return result
 
 
+def pooled_pr_auc(rows: list[dict[str, Any]]) -> float | None:
+    """PR-AUC with every pair ranked together, or None when one class is missing."""
+    labels = [row["label"] for row in rows]
+    if len(set(labels)) < 2:
+        return None
+    return float(average_precision_score(labels, [row["score"] for row in rows]))
+
+
 def paired_bootstrap(
     rows_a: list[dict[str, Any]],
     rows_b: list[dict[str, Any]],
     samples: int = 2000,
     seed: int = 0,
+    metric: Any = None,
 ) -> dict[str, Any]:
-    """95% interval for PR-AUC(a) - PR-AUC(b), resampling whole queries.
+    """95% interval for metric(a) - metric(b), resampling whole queries.
+
+    ``metric`` takes a list of pair rows and returns a number, or None when it
+    is undefined for that draw; the default is PR-AUC over the pooled pairs.
 
     Pairs within a query are not independent — they share the question — so
     queries, not pairs, are the unit drawn. Both routes are scored on the same
@@ -169,12 +181,10 @@ def paired_bootstrap(
     a, b = grouped(rows_a), grouped(rows_b)
     queries = sorted(set(a) & set(b))
 
+    measure = metric or pooled_pr_auc
+
     def pr_auc(groups, drawn):
-        rows = [row for q in drawn for row in groups[q]]
-        labels = [row["label"] for row in rows]
-        if len(set(labels)) < 2:
-            return None
-        return average_precision_score(labels, [row["score"] for row in rows])
+        return measure([row for q in drawn for row in groups[q]])
 
     rng = np.random.default_rng(seed)
     differences = []

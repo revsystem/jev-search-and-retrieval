@@ -325,6 +325,33 @@ def cmd_synthetic_check(args: argparse.Namespace) -> int:
     return 1 if findings or unverified else 0
 
 
+def cmd_report_judge(args: argparse.Namespace) -> int:
+    """The article's tables from the saved scores. No API is called."""
+    import json
+    from pathlib import Path
+
+    from jev_rag.judge_report import format_report
+
+    root = Path(args.results_dir)
+    judges = {
+        name: json.loads(path.read_text(encoding="utf-8"))
+        for name in args.datasets.split(",")
+        if (path := root / f"judge-{name}.json").exists()
+    }
+    if not judges:
+        print(
+            f"{root} に judge-<dataset>.json がありません。"
+            "先に `jev-rag judge` を実行してください。"
+        )
+        return 1
+    dilution_path = root / "dilution.json"
+    dilution = (
+        json.loads(dilution_path.read_text(encoding="utf-8")) if dilution_path.exists() else None
+    )
+    print(format_report(judges, dilution, samples=args.samples, seed=args.seed), end="")
+    return 0
+
+
 def cmd_report(args: argparse.Namespace) -> int:
     from jev_rag.runner import inconsistent_query_counts, merge_files
 
@@ -516,6 +543,15 @@ def main(argv: list[str] | None = None) -> int:
     dilution.add_argument("--seed", type=int, default=0)
     dilution.add_argument("--out", default="out/dilution.json")
     dilution.set_defaults(func=cmd_dilution)
+
+    report_judge = sub.add_parser(
+        "report-judge", help="保存済みのスコアから記事の表をすべて出す（API は呼ばない）"
+    )
+    report_judge.add_argument("--results-dir", default="out")
+    report_judge.add_argument("--datasets", default="miracl,jragbench,synthetic")
+    report_judge.add_argument("--samples", type=int, default=2000, help="bootstrap の回数")
+    report_judge.add_argument("--seed", type=int, default=0)
+    report_judge.set_defaults(func=cmd_report_judge)
 
     report = sub.add_parser("report", help="旧測定（JQaRA）: 保存済みの結果から表を出し直す")
     report.add_argument(
