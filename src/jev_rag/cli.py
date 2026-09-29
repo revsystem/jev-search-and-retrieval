@@ -526,7 +526,10 @@ def main(argv: list[str] | None = None) -> int:
 
     judge = sub.add_parser("judge", help="各経路を関連度の判定器として評価する")
     judge.add_argument("--dataset", choices=["synthetic", "jragbench", "miracl"], required=True)
-    judge.add_argument("--rankers", default="embedding,cohere_rerank,jev_pointwise,jev_crossencode")
+    judge.add_argument(
+        "--rankers",
+        default="embedding,cohere_rerank,jev_pointwise,jev_pointwise_plain,jev_crossencode",
+    )
     judge.add_argument("--queries", type=int, default=10_000, help="評価する問題数（既定は全問）")
     judge.add_argument("--seed", type=int, default=0)
     judge.add_argument("--out", default=None, help="既定は out/judge-<dataset>.json")

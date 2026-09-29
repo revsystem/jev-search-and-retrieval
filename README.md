@@ -25,7 +25,7 @@ TypeSafe の System One モデル Jev を、RAG の rerank（検索で集めた�
 |---|---|---|---|
 | MIRACL 日本語 dev | Wikipedia の検索結果に人が関連の有無を付けた公開データ。質問は一問一答型 | 860 問、8,354 組 | 21% |
 | J-RAGBench | 架空企業の業務寄りの質問。回答不能な 54 問は関連文書がないので除く | 60 問、709 組 | 21% |
-| 合成データ | 比較・理由・経緯・複数要因・統合の 5 種類の業務の質問。同じ話題で必要な事実だけがない紛らわしい無関係文書を含む | 60 問、600 組 | 33% |
+| 合成データ | 比較・理由・経緯・複数要因・統合の 5 種類の業務の質問。同じ話題で必要な事実だけがない紛らわしい無関係文書を含む | 60 問、600 組 | 32% |
 
 合成データの仕様は `.claude/docs/specs/synthetic-judge-dataset.md` にあります。正解は作り方で決め（必要な事実を書いた文書が関連）、後から AI に判定させて決めてはいません。生成は Claude（Opus 5.5 が 3 問、Sonnet 5 が 27 問）と Grok 4.7 が 30 問ずつ、検証は作っていない側（Cursor Agent と Claude Sonnet 5）が正解を伏せたビューで行い、作成時の正解と全文書で一致しました。無作為に選んだ 6 問は人が目で確認しています。
 
@@ -46,50 +46,78 @@ aws sso login --profile <プロファイル名>  # Bedrock 用。鍵ではなく
 uv run jev-rag check                   # Jev の疎通確認
 uv run jev-rag prepare-judge           # J-RAGBench と MIRACL 日本語版を取得する（MIRACL のコーパスは約 1GB）
 
+# 合成データの関門（有料の測定の前に通す）
 uv run jev-rag synthetic-check --gen data/synthetic/gen_a --verify data/synthetic/verify_a
 uv run jev-rag synthetic-check --gen data/synthetic/gen_b --verify data/synthetic/verify_b
 
-uv run jev-rag judge --dataset miracl      # synthetic / jragbench / miracl
-uv run jev-rag dilution                    # 1 リクエストに載せる件数と判定精度
+# 測定（API を呼ぶ。組ごとのスコアを out/ に保存する）
+uv run jev-rag judge --dataset miracl
+uv run jev-rag judge --dataset jragbench
+uv run jev-rag judge --dataset synthetic
+uv run jev-rag dilution
+
+# 集計（API を呼ばない。保存したスコアから下の「結果」の表をすべて出す）
+uv run jev-rag report-judge                        # 自分で測った out/ を集計する
+uv run jev-rag report-judge --results-dir results  # 私たちの測定結果（results/）を集計する
 ```
 
-`synthetic-check` は有料の測定の前に通す関門です。素朴な判定器の成績と、作成時の正解と検証結果の突き合わせを表示し、食い違いか未検証の問題があれば終了コード 1 を返します。
+測定をやり直さなくても、`results/` に入っている私たちの測定結果から、下の「結果」の表を再現できます。この場合は API も認証情報も要りません。
 
-`judge` は全経路のスコアを組ごとに `out/judge-<dataset>.json` へ保存します。測定済みの経路は再実行しても呼び直さないので、途中で止まっても続きから再開できます。`--rankers` で経路を選べます（既定は `embedding,cohere_rerank,jev_pointwise,jev_crossencode`）。素朴な判定器は毎回あわせて計算します。
+```bash
+uv venv
+uv pip install -e ".[dev]"
+uv run jev-rag report-judge --results-dir results
+```
+
+`synthetic-check` は、素朴な判定器（文書の長さ、語の重なり、BM25）の成績と、作成時の正解と検証結果の突き合わせを表示します。食い違いか未検証の問題があれば、終了コード 1 を返します。
+
+`judge` は、全経路のスコアを組ごとに `out/judge-<dataset>.json` へ保存します。既定の経路は `embedding,cohere_rerank,jev_pointwise,jev_pointwise_plain,jev_crossencode` で、素朴な判定器は毎回あわせて計算します。測定済みの経路は再実行しても呼び直さないので、途中で止まっても続きから再開できます。画面には全問まとめの PR-AUC などを表示します。
+
+`dilution` は、1 リクエストに載せる件数の測定結果を `out/dilution.json` に保存します。
+
+`report-judge` は、この 2 種類のファイルから下の「結果」の表をすべて出します。差の区間は、問題を重複を許して選び直す操作を 2,000 回繰り返したときの 2.5〜97.5 パーセンタイルです。乱数の種は固定（`--seed 0`）なので、同じスコアからは同じ値が出ます。1 回の実行に 1〜2 分かかります。
+
+API の応答は実行ごとに少し揺れるので、`judge` と `dilution` を測り直すと、値は下の表と完全には一致しません。下の表は、`results/` の測定結果を `report-judge` で集計した値です。
 
 `.env` に書く秘密情報は Jev の API キー（`TYPESAFE_API_KEY`、Vercel AI Gateway 経由なら `AI_GATEWAY_API_KEY`）です。Bedrock の認証情報は書かず、`AWS_PROFILE` にプロファイル名を指定して `aws sso login` で認証します。
 
 ## 結果
 
-PR-AUC は、関連文書を上位に、無関係文書を下位に並べられているほど 1 に近づく 0〜1 の値です。差の区間は、問題を重複を許して選び直す操作を 1,000 回以上繰り返したときの 2.5〜97.5 パーセンタイルです。
+PR-AUC は、関連文書を上位に、無関係文書を下位に並べられているほど 1 に近づく 0〜1 の値です。どの表も、3 つのデータの `judge` の結果を `report-judge` で集計したものです。
 
-1 つの質問の候補文書を並べ替える力（問題ごとの PR-AUC の平均。rerank に必要なのはこちら）:
+### 1 つの質問に対する候補文書を並べ替える力
 
-| データ | でたらめ | 埋め込み | Cohere Rerank | Jev | Jev − Cohere Rerank |
+問題ごとに PR-AUC を計算して平均した値です。rerank に必要なのはこちらです。`report-judge` の同じ見出しの表に対応します（`judge` の画面には出ません）。MIRACL は、候補文書がすべて関連文書の 63 問を除いた 797 問で計算しています。
+
+| データ | でたらめ | 埋め込み | Cohere Rerank | Jev | Jev − Cohere Rerank（95% 区間） |
 |---|---|---|---|---|---|
 | MIRACL（797 問） | 0.37 | 0.771 | 0.841 | 0.865 | +0.024（+0.007〜+0.040） |
-| J-RAGBench | 0.36 | 0.880 | 0.932 | 0.931 | −0.001（−0.043〜+0.045） |
-| 合成データ | 0.47 | 0.487 | 0.521 | 0.940 | +0.419（+0.369〜+0.468） |
+| J-RAGBench（60 問） | 0.36 | 0.880 | 0.932 | 0.931 | −0.001（−0.045〜+0.043） |
+| 合成データ（60 問） | 0.47 | 0.487 | 0.521 | 0.940 | +0.419（+0.367〜+0.465） |
 
-質問をまたいでスコアの意味がそろっているか（全問題の組をまとめた PR-AUC。1 つのしきい値で切る使い方に必要なのはこちら）:
+### 質問をまたいでスコアの意味がそろっているか
 
-| データ | でたらめ | BM25 | 埋め込み | Cohere Rerank | Jev | Jev − Cohere Rerank |
+全問題の組をまとめて 1 本に並べて計算した PR-AUC です。1 つのしきい値で全質問を切る使い方に必要なのはこちらです。`report-judge` の同じ見出しの表に対応します。区間以外の値は、`judge` の画面の「PR-AUC」の列にも出ます。
+
+| データ | でたらめ | キーワード一致（BM25） | 埋め込み | Cohere Rerank | Jev | Jev − Cohere Rerank（95% 区間） |
 |---|---|---|---|---|---|---|
 | MIRACL | 0.21 | 0.29 | 0.54 | 0.69 | 0.76 | +0.07（+0.04〜+0.09） |
-| J-RAGBench | 0.21 | 0.64 | 0.70 | 0.79 | 0.88 | +0.09（+0.02〜+0.17） |
-| 合成データ | 0.33 | 0.35 | 0.33 | 0.36 | 0.92 | +0.56（+0.52〜+0.59） |
+| J-RAGBench | 0.21 | 0.64 | 0.70 | 0.79 | 0.88 | +0.09（+0.02〜+0.16） |
+| 合成データ | 0.32 | 0.35 | 0.33 | 0.36 | 0.92 | +0.56（+0.52〜+0.59） |
 
 読み方は次のとおりです。
 
 - 一問一答に近い検索（MIRACL、J-RAGBench）では、並べ替えの精度は Cohere Rerank とほぼ同じ
 - 同じ話題で中身だけが違う文書が並ぶ合成データでは、Cohere Rerank と埋め込みは当て推量の水準まで落ち、Jev との差が大きく開く。ただしこの差は合成データでしか確かめていない
-- 1 つのしきい値で全質問を切る使い方では、Jev の方が無関係な文書を多く落とせる。関連文書の 9 割を残すしきい値で切ると、MIRACL で残った文書のうち関連する割合は Cohere Rerank 42.2%、Jev 57.7%（+15.5 ポイント、+12.5〜+19.4）
-- 判定基準を渡さなくても、合成データで Jev は Cohere Rerank を大きく上回る（0.922 と 0.521）。差の大半はモデル自体から来ている
-- 候補文書 10 件の rerank 1 回の費用は、Jev が約 0.0002 ドル、Cohere Rerank が約 0.002 ドル
+- 1 つのしきい値で全質問を切る使い方では、Jev の方が無関係な文書を多く落とせる。関連文書の 9 割を残すしきい値で切ると、MIRACL で残った文書のうち関連する割合は Cohere Rerank 42.2%、Jev 57.7%（+15.5 ポイント、+12.4〜+19.3）。`report-judge` の「1 つのしきい値で全質問を切ったとき」の表に対応する
+- 判定基準を渡さなくても、合成データで Jev は Cohere Rerank を大きく上回る（0.922 と 0.521）。差の大半はモデル自体から来ている。`report-judge` の「判定基準のありなし」の表に対応する
+- 候補文書 10 件の rerank 1 回の費用は、Jev が約 0.0002 ドル、Cohere Rerank が約 0.002 ドル（料金表からの計算）
+
+`report-judge` は、このほかに上位 k 件の表（1 位が関連文書である問題の割合など）も出します。
 
 ### 1 リクエストに載せる件数
 
-合成データの各問題の 10 件に、他の問題の文書 90 件を混ぜて測りました（`jev-rag dilution`）。値は問題ごとの PR-AUC の平均です。
+合成データの各問題の 10 件に、他の問題の文書 90 件を混ぜて測りました。値は問題ごとの PR-AUC の平均です。`dilution` の結果を `report-judge` で集計した「1 リクエストに載せる件数」の表に対応します。
 
 | 候補文書の中身 | 1 リクエストの件数 | PR-AUC |
 |---|---|---|
@@ -115,7 +143,7 @@ PR-AUC は、関連文書を上位に、無関係文書を下位に並べられ�
 ## 結果を読むときの注意
 
 - データはすべて日本語。公式ドキュメントの Models は、Jev の主な学習言語は英語で、他言語は英語ほど精度が高くないと書いている
-- MIRACL のラベルには漏れがある。Jev の 1 位がラベル上は無関係だった問題から 10 問を選び、ラベルを伏せて 2 つの AI に判定させると、5 問は両方が「答えが書かれている」と判定した（`.claude/docs/research/miracl-blind-check/`）。全体でどの程度あるかは確かめていない
+- MIRACL のラベルには漏れがある。Jev が各問題で 1 位に置いた文書のうち、MIRACL のラベルでは「無関係」と付いていたもの（127 件）から 10 件を選び、ラベルを伏せて 2 つの AI に判定させると、5 件は両方が「答えが書かれている」と判定した（`.claude/docs/research/miracl-blind-check/`）。全体でどの程度あるかは確かめていない
 - 合成データは LLM が書いた文章で、LLM の書いた文章を AI モデルが判定するときの偏りは確かめていない
 - 所要時間は並列度、通信環境、測定した時間帯で変わる。速さの優劣は結論にしていない
 
@@ -128,8 +156,10 @@ PR-AUC は、関連文書を上位に、無関係文書を下位に並べられ�
 ## 構成
 
 ```
+results/        私たちの測定結果（組ごとの ID、正解ラベル、スコア。文書の本文は含まない）
 src/jev_rag/
   judge.py      組ごとの採点、PR-AUC などの指標、bootstrap 区間、judge と dilution の実行
+  judge_report.py  保存済みのスコアから記事の表をすべて計算する（report-judge）
   public.py     J-RAGBench と MIRACL 日本語版の取得と読み込み
   synthetic.py  合成データの読み込み、検証用ビュー、突き合わせ、素朴な判定器
   rankers.py    比較する経路
