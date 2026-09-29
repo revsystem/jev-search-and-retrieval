@@ -2,6 +2,8 @@
 
 TypeSafe の System One モデル Jev を、RAG の rerank（検索で集めた候補文書を、質問への関連度で並べ替える工程）の判定器として使ったとき、Cohere Rerank より関連文書を正しく見分けられるかを測るリポジトリです。質問と候補文書の組ごとに各手法のスコアを付け、「関連する／しない」をどれだけ正しく見分けたかを比べます。
 
+このリポジトリのコマンドは、Qiita の記事「[TypeSafe Jev を RAG の rerank に使うと、Cohere Rerank より関連文書を正しく見分けられるのか検証した](https://qiita.com/revsystem/items/b619a211781af138e738)」の検証を再現するためのものです。記事の執筆時に測定した結果は `results/` に入っており、記事と下の「結果」の表はこの結果から集計しています。
+
 測定結果の詳細は `.claude/docs/research/judge-results.md` にあります。
 
 ## 比べる手法
@@ -57,11 +59,11 @@ uv run jev-rag judge --dataset synthetic
 uv run jev-rag dilution
 
 # 集計（API を呼ばない。保存したスコアから下の「結果」の表をすべて出す）
-uv run jev-rag report-judge                        # 自分で測った out/ を集計する
-uv run jev-rag report-judge --results-dir results  # 私たちの測定結果（results/）を集計する
+uv run jev-rag report-judge                        # 上記コマンドを実行して測定した結果（out/）を集計する
+uv run jev-rag report-judge --results-dir results  # 記事における測定結果（results/）を集計する
 ```
 
-測定をやり直さなくても、`results/` に入っている私たちの測定結果から、下の「結果」の表を再現できます。この場合は API も認証情報も要りません。
+測定をやり直さなくても、`results/` に入っている記事における測定結果から、下の「結果」の表を再現できます。この場合は API も認証情報も要りません。
 
 ```bash
 uv venv
@@ -77,7 +79,7 @@ uv run jev-rag report-judge --results-dir results
 
 `report-judge` は、この 2 種類のファイルから下の「結果」の表をすべて出します。差の区間は、問題を重複を許して選び直す操作を 2,000 回繰り返したときの 2.5〜97.5 パーセンタイルです。乱数の種は固定（`--seed 0`）なので、同じスコアからは同じ値が出ます。1 回の実行に 1〜2 分かかります。
 
-API の応答は実行ごとに少し揺れるので、`judge` と `dilution` を測り直すと、値は下の表と完全には一致しません。下の表は、`results/` の測定結果を `report-judge` で集計した値です。
+API の応答は実行ごとに少し揺れるので、`judge` と `dilution` を測り直すと、値は下の表と完全には一致しません。下の表は、記事における測定結果（`results/`）を `report-judge` で集計した値です。
 
 `.env` に書く秘密情報は Jev の API キー（`TYPESAFE_API_KEY`、Vercel AI Gateway 経由なら `AI_GATEWAY_API_KEY`）です。Bedrock の認証情報は書かず、`AWS_PROFILE` にプロファイル名を指定して `aws sso login` で認証します。
 
@@ -156,7 +158,7 @@ PR-AUC は、関連文書を上位に、無関係文書を下位に並べられ�
 ## 構成
 
 ```
-results/        私たちの測定結果（組ごとの ID、正解ラベル、スコア。文書の本文は含まない）
+results/        記事における測定結果（組ごとの ID、正解ラベル、スコア。文書の本文は含まない）
 src/jev_rag/
   judge.py      組ごとの採点、PR-AUC などの指標、bootstrap 区間、judge と dilution の実行
   judge_report.py  保存済みのスコアから記事の表をすべて計算する（report-judge）
