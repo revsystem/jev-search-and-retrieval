@@ -238,7 +238,7 @@ MIRACL だけが区間の両端プラス。記事では MIRACL に限って「�
 
 ## strands-decider との比較（2026-10-03、ブランチ feat/strands-decider-comparison）
 
-strands-decider 0.1.0（v19、StrandsAgents/strands-decider-2B-hobson-v19）をローカルの RTX 3060 Ti で `strands-decider serve` し、Jev と同じ質問文と判定基準を同じ組に送った。flash-linear-attention は導入済み、causal-conv1d は nvcc がなくビルドできず未導入。入力の上限 4,096 トークンを超える state は 0.1.0 では黙って切り詰められるため、strands-decider のトークナイザーで数えて、state 3,600 トークン以内にまとまりを区切った（1 件ずつは全組が収まる）。リクエストは 1 件ずつ順に送った（同時リクエストは公式に未検証）。表は `uv run jev-rag report-judge --results-dir results` の出力の該当節。
+strands-decider 0.1.0（v19、StrandsAgents/strands-decider-2B-hobson-v19）をローカルの RTX 3060 Ti で `strands-decider serve` し、Jev と同じ質問文と判定基準を同じ組に送った。flash-linear-attention は導入済み。causal-conv1d は当初 nvcc がなくビルドできず、上の表は causal-conv1d なし（transformers の代替の処理）で測った値。CUDA ツールキット 13.0 を入れて causal-conv1d 1.7.0 をビルドし、`decider_single` を測り直した結果を下の「causal-conv1d の有無」に記録した。入力の上限 4,096 トークンを超える state は 0.1.0 では黙って切り詰められるため、strands-decider のトークナイザーで数えて、state 3,600 トークン以内にまとまりを区切った（1 件ずつは全組が収まる）。リクエストは 1 件ずつ順に送った（同時リクエストは公式に未検証）。表は `uv run jev-rag report-judge --results-dir results` の出力の該当節。
 
 ### strands-decider との比較（strands-decider はローカルの GPU で 1 件ずつ順に送信）
 
@@ -277,3 +277,14 @@ J-RAGBench: Jev（10 件ずつ） − strands-decider（1 件ずつ）の問題�
 - 判定基準のありなし、日本語と英語の違いは小さい
 - 確率は「関連」に大きく寄る（MIRACL で 0.5 で切ると適合率 0.26、再現率 0.95、ECE 0.46）
 - 1 リクエストの処理時間はサーバーの計測で中央値 80 ms 前後（候補文書 1 件、RTX 3060 Ti）。1 問あたりの壁時計時間は 1 件ずつ順に送るため 0.8〜1.6 秒で、Jev（ネットワーク越し、10 件ずつ 0.3 秒）とは送り方が違うので速さは比べない
+
+### causal-conv1d の有無（2026-10-03）
+
+CUDA ツールキット 13.0（V13.0.88）を入れて causal-conv1d 1.7.0 をビルドし、サーバーを再起動して `decider_single` を同じ組で測り直した（`out/judge-{synthetic,miracl}-causalconv.json`）。導入前のサーバーのログには「`causal_conv1d_fn` is falling back to its reference PyTorch implementation」の警告が 1 回出ており、導入後は 0 回。
+
+| データ | サーバーの処理時間 中央値（前 → 後） | 95 パーセンタイル（前 → 後） | 1 問あたりの壁時計時間（前 → 後） |
+|---|---|---|---|
+| 合成データ（600 リクエスト） | 79.8 → 79.9 ms | 86.1 → 86.2 ms | 0.823 → 0.842 秒 |
+| MIRACL（8,354 リクエスト） | 82.0 → 81.5 ms | 121.6 → 113.7 ms | 0.884 → 0.861 秒 |
+
+スコアの差は組ごとの絶対値で平均 0.004、最大 0.034（bf16 の計算順の違いと考えられる）。全問まとめの PR-AUC は合成データ 0.599 → 0.600、MIRACL 0.508 → 0.509 で、評価の結論は変わらない。この環境（RTX 3060 Ti、候補文書 1 件のリクエスト）では、causal-conv1d の有無は処理時間にほぼ影響しなかった。
