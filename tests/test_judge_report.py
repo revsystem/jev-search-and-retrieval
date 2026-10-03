@@ -130,3 +130,20 @@ def test_the_command_reads_the_saved_files(tmp_path, capsys):
 def test_the_command_fails_when_nothing_has_been_measured(tmp_path, capsys):
     assert cli.main(["report-judge", "--results-dir", str(tmp_path)]) == 1
     assert "jev-rag judge" in capsys.readouterr().out
+
+
+def test_the_decider_section_appears_when_decider_routes_were_measured():
+    data = small_judge()
+    data["decider_single"] = dict(data["cohere_rerank"])
+    data["decider_single"]["scored"] = dict(
+        data["cohere_rerank"]["scored"], latencies_ms=[80.0, 90.0]
+    )
+    data["jev_pointwise"]["scored"]["seconds"] = 3.0
+    text = format_report({"synthetic": data}, dilution=None, samples=50, seed=0)
+    assert "strands-decider" in text
+    assert "decider_single" in text
+
+
+def test_the_decider_section_is_absent_without_decider_routes():
+    text = format_report({"miracl": small_judge()}, dilution=None, samples=50, seed=0)
+    assert "strands-decider" not in text

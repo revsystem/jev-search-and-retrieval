@@ -15,7 +15,7 @@ from typing import Any
 import numpy as np
 from sklearn.metrics import average_precision_score
 
-from jev_rag.judge import paired_bootstrap, pooled_pr_auc
+from jev_rag.judge import judge_metrics, paired_bootstrap, pooled_pr_auc
 
 Rows = list[dict[str, Any]]
 
@@ -310,6 +310,72 @@ def _criteria_section(judges, samples, seed) -> list[str]:
     )
 
 
+DECIDER_COMPARISON = [
+    ("cohere_rerank", "Cohere Rerank"),
+    ("jev_crossencode", "Jev（1 件ずつ）"),
+    ("jev_pointwise", "Jev（10 件ずつ）"),
+    ("decider_single", "strands-decider（1 件ずつ）"),
+    ("decider_single_plain", "strands-decider（1 件ずつ、判定基準なし）"),
+    ("decider_single_en", "strands-decider（1 件ずつ、英語）"),
+    ("decider_pointwise", "strands-decider（最大 10 件ずつ）"),
+]
+
+
+def _decider_section(judges, samples, seed) -> list[str]:
+    body, notes = [], []
+    for name, result in judges.items():
+        if not any(route.startswith("decider") for route in result):
+            continue
+        label = DATASETS.get(name, name)
+        questions = len({r["query_id"] for r in _pairs(result, "cohere_rerank") or []}) or None
+        for route, title in DECIDER_COMPARISON:
+            rows = _pairs(result, route)
+            if not rows:
+                continue
+            scored = result[route]["scored"]
+            probabilistic = route.startswith(("jev", "decider"))
+            ece = judge_metrics(rows, probabilistic=True)["ece"] if probabilistic else None
+            seconds = scored.get("seconds")
+            per_question = seconds / questions if seconds and questions else None
+            latencies = scored.get("latencies_ms")
+            body.append(
+                [
+                    label,
+                    f"{title} `{route}`",
+                    _num(mean_query_pr_auc(rows), 3),
+                    _num(pooled_pr_auc(rows), 2),
+                    f"{precision_at_recall(rows)[0] * 100:.1f}%",
+                    _num(ece, 3),
+                    _num(per_question, 2),
+                    _num(float(np.median(latencies)), 0) if latencies else "-",
+                ]
+            )
+        jev, decider = _pairs(result, "jev_pointwise"), _pairs(result, "decider_single")
+        if jev and decider:
+            low, high = _interval_of_means(
+                _query_pr_aucs(jev), _query_pr_aucs(decider), samples, seed
+            )
+            diff = _diff(mean_query_pr_auc(jev), mean_query_pr_auc(decider), 3)
+            notes.append(
+                f"{label}: Jev（10 件ずつ） − strands-decider（1 件ずつ）の問題ごとの PR-AUC "
+                f"{diff}（{_interval(low, high, 3)}）"
+            )
+    if not body:
+        return []
+    header = [
+        "データ",
+        "経路",
+        "問題ごとの PR-AUC",
+        "全問まとめ PR-AUC",
+        "9 割を残したときの関連の割合",
+        "ECE",
+        "1 問あたりの秒",
+        "1 リクエストの処理 ms（中央値）",
+    ]
+    title = "### strands-decider との比較（strands-decider はローカルの GPU で 1 件ずつ順に送信）"
+    return [title, ""] + _table(header, body) + ([""] + notes if notes else [])
+
+
 def _dilution_section(dilution, samples, seed) -> list[str]:
     body = []
     for key, pool, batch in BATCHES:
@@ -365,6 +431,7 @@ def format_report(
         _top_k_section(judges),
         _threshold_section(judges, samples, seed),
         _criteria_section(judges, samples, seed),
+        _decider_section(judges, samples, seed),
     ]
     if dilution:
         sections.append(_dilution_section(dilution, samples, seed))
