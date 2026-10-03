@@ -339,3 +339,17 @@ def test_dilution_resumes_finished_settings(tmp_path):
     again = Constant()
     run_dilution(lambda batch: again, {(3, 2): own_and_foreign()}, out)
     assert again.calls == 0
+
+
+def test_a_route_that_times_its_requests_has_the_times_saved(tmp_path):
+    class Timed(Constant):
+        def __init__(self):
+            super().__init__()
+            self.latencies_ms = []
+
+        def rank(self, question, docs):
+            self.latencies_ms.append(42.0)
+            return super().rank(question, docs)
+
+    results = run_judge({"decider_single": Timed()}, two_queries(), tmp_path / "judge.json")
+    assert results["decider_single"]["scored"]["latencies_ms"] == [42.0, 42.0]

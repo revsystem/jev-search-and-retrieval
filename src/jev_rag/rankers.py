@@ -193,6 +193,21 @@ class HybridRanker:
         return _sorted(scored, docs)
 
 
+def _decider(**kwargs):
+    from jev_rag.decider import DeciderRanker
+
+    return DeciderRanker(**kwargs)
+
+
+# strands-decider through its local server; see jev_rag.decider
+DECIDER_ROUTES = {
+    "decider_pointwise": lambda: _decider(batch_size=10),
+    "decider_single": lambda: _decider(batch_size=1),
+    "decider_pointwise_plain": lambda: _decider(batch_size=10, plain=True),
+    "decider_pointwise_en": lambda: _decider(batch_size=10, english=True),
+}
+
+
 def build_rankers(names: list[str], client: JevClient | None = None, settings=None) -> dict:
     """Instantiate the named rankers, creating only the clients they need."""
 
@@ -215,6 +230,7 @@ def build_rankers(names: list[str], client: JevClient | None = None, settings=No
         "cohere_rerank": cohere_rerank,
         "jev_pointwise": lambda: JevPointwiseRanker(client),
         "jev_pointwise_plain": lambda: JevPointwiseRanker(client, plain=True),
+        **{name: make for name, make in DECIDER_ROUTES.items()},
         "jev_crossencode": lambda: JevCrossEncodeRanker(client, with_grade=True),
         "jev_pairwise": lambda: JevPairwiseRanker(client),
         "jev_hybrid": lambda: HybridRanker(embedding(), JevPointwiseRanker(client)),

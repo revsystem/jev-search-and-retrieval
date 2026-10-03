@@ -77,6 +77,11 @@ def cmd_evaluate(args: argparse.Namespace) -> int:
     return 0
 
 
+def _needs_aws(names: list[str]) -> bool:
+    """Routes that call Amazon Bedrock: the embedding, Cohere Rerank, and the hybrid."""
+    return any(name in ("embedding", "cohere_rerank", "jev_hybrid") for name in names)
+
+
 def _preflight(settings, names: list[str], needs_jev: bool) -> None:
     """Fail now rather than forty minutes in.
 
@@ -88,9 +93,17 @@ def _preflight(settings, names: list[str], needs_jev: bool) -> None:
 
     from jev_rag.preflight import check_aws, check_jev
 
-    if any(not n.startswith("jev") or n == "jev_hybrid" for n in names):
+    if _needs_aws(names):
         identity = check_aws(boto3.client("sts", region_name=settings.bedrock.region))
         print(f"AWS: {identity}")
+    if any(name.startswith("decider") for name in names):
+        import httpx
+
+        from jev_rag.decider import DECIDER_URL
+
+        health = httpx.get(DECIDER_URL.removesuffix("/v1") + "/health", timeout=10).json()
+        model, device, window = health["model"], health["device"], health["max_length"]
+        print(f"strands-decider: {model} on {device}, window {window}")
     if needs_jev:
         check_jev(settings.jev.build_client())
         print(f"Jev: {settings.jev.transport} 経路で応答あり")

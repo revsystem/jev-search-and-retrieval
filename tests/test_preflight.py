@@ -64,3 +64,12 @@ def test_a_broken_jev_route_raises_before_the_run_starts():
 
     with pytest.raises(CredentialError, match="401"):
         check_jev(JevClient(Broken()))
+
+
+def test_only_bedrock_routes_need_aws():
+    from jev_rag.cli import _needs_aws
+
+    assert (
+        _needs_aws(["embedding"]) and _needs_aws(["jev_hybrid"]) and _needs_aws(["cohere_rerank"])
+    )
+    assert not _needs_aws(["jev_pointwise", "decider_single", "decider_pointwise_en"])

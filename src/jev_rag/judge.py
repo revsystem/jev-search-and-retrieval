@@ -218,6 +218,8 @@ def run_judge(rankers: dict[str, Any], queries: list[EvalQuery], out: str | Path
         if "pr_auc" in results.get(name, {}):
             continue
         scored = score_pairs(ranker, queries)
+        if hasattr(ranker, "latencies_ms"):
+            scored["latencies_ms"] = list(ranker.latencies_ms)
         if scored["pairs"]:
             metrics = judge_metrics(scored["pairs"], probabilistic=name.startswith("jev"))
         else:
