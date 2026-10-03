@@ -205,6 +205,8 @@ DECIDER_ROUTES = {
     "decider_single": lambda: _decider(batch_size=1),
     "decider_pointwise_plain": lambda: _decider(batch_size=10, plain=True),
     "decider_pointwise_en": lambda: _decider(batch_size=10, english=True),
+    "decider_single_plain": lambda: _decider(batch_size=1, plain=True),
+    "decider_single_en": lambda: _decider(batch_size=1, english=True),
 }
 
 

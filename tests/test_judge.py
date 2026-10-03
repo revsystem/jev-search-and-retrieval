@@ -13,6 +13,8 @@ questions:
 Calibration (ECE, Brier) is computed only for routes that emit a probability.
 """
 
+import json
+
 import pytest
 
 from jev_rag.dataset import EvalQuery
@@ -353,3 +355,20 @@ def test_a_route_that_times_its_requests_has_the_times_saved(tmp_path):
 
     results = run_judge({"decider_single": Timed()}, two_queries(), tmp_path / "judge.json")
     assert results["decider_single"]["scored"]["latencies_ms"] == [42.0, 42.0]
+
+
+def test_a_decider_route_is_scored_as_a_probability(tmp_path):
+    results = run_judge({"decider_single": Constant()}, two_queries(), tmp_path / "judge.json")
+    assert "ece" in results["decider_single"]
+
+
+def test_a_measured_route_has_its_metrics_recomputed_without_calling_it_again(tmp_path):
+    out = tmp_path / "judge.json"
+    run_judge({"decider_single": Constant()}, two_queries(), out)
+    saved = json.loads(out.read_text(encoding="utf-8"))
+    del saved["decider_single"]["ece"]  # as if saved before decider counted as a probability
+    out.write_text(json.dumps(saved), encoding="utf-8")
+    again = Constant()
+    results = run_judge({"decider_single": again}, two_queries(), out)
+    assert again.calls == 0
+    assert "ece" in results["decider_single"]

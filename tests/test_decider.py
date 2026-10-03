@@ -160,4 +160,6 @@ def test_the_routes_are_registered():
         "decider_single",
         "decider_pointwise_plain",
         "decider_pointwise_en",
+        "decider_single_plain",
+        "decider_single_en",
     }

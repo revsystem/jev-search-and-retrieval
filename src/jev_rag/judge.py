@@ -216,12 +216,17 @@ def run_judge(rankers: dict[str, Any], queries: list[EvalQuery], out: str | Path
         results[name] = judge_metrics(rows, probabilistic=False) | {"scored": scored}
     for name, ranker in rankers.items():
         if "pr_auc" in results.get(name, {}):
-            continue
-        scored = score_pairs(ranker, queries)
-        if hasattr(ranker, "latencies_ms"):
-            scored["latencies_ms"] = list(ranker.latencies_ms)
+            # already paid for; only the metrics are recomputed from the saved pairs
+            scored = results[name]["scored"]
+        else:
+            scored = score_pairs(ranker, queries)
+            if hasattr(ranker, "latencies_ms"):
+                scored["latencies_ms"] = list(ranker.latencies_ms)
         if scored["pairs"]:
-            metrics = judge_metrics(scored["pairs"], probabilistic=name.startswith("jev"))
+            # both models return P(true) from a Noul
+            metrics = judge_metrics(
+                scored["pairs"], probabilistic=name.startswith(("jev", "decider"))
+            )
         else:
             metrics = {"error": "全問失敗"}
         results[name] = metrics | {"scored": scored}
