@@ -40,8 +40,7 @@ TypeSafe の System One モデル Jev を、RAG の rerank（検索で集めた�
 ## 使い方
 
 ```bash
-uv venv
-uv pip install -e ".[dev]"
+uv sync --extra dev                    # .venv を作り、uv.lock に固定したバージョンを入れる
 cp .env.example .env
 
 aws sso login --profile <プロファイル名>  # Bedrock 用。鍵ではなく SSO
@@ -66,10 +65,11 @@ uv run jev-rag report-judge --results-dir results  # 記事における測定結
 測定をやり直さなくても、`results/` に入っている記事における測定結果から、下の「結果」の表を再現できます。この場合は API も認証情報も要りません。
 
 ```bash
-uv venv
-uv pip install -e ".[dev]"
+uv sync --extra dev
 uv run jev-rag report-judge --results-dir results
 ```
+
+依存のバージョンは `uv.lock` で固定しており、`uv sync` は `pyproject.toml` の範囲内の新しいバージョンを自動では入れません。依存の脆弱性の修正を取り込むには、`uv lock --upgrade`（1 つだけなら `uv lock --upgrade-package <パッケージ名>`）を自分で実行して `uv.lock` を更新し、テストが通ることを確かめてから commit します。
 
 `synthetic-check` は、素朴な判定器（文書の長さ、語の重なり、BM25）の成績と、作成時の正解と検証結果の突き合わせを表示します。食い違いか未検証の問題があれば、終了コード 1 を返します。
 
