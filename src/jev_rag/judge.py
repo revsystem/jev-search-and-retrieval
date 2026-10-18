@@ -217,9 +217,18 @@ def run_judge(rankers: dict[str, Any], queries: list[EvalQuery], out: str | Path
     for name, ranker in rankers.items():
         if "pr_auc" in results.get(name, {}):
             continue
+        meter = getattr(ranker, "meter", None)
+        if meter is not None:
+            # a client is shared by routes, so each route starts from zero
+            meter.reset()
         scored = score_pairs(ranker, queries)
+        if meter is not None:
+            scored["usage"] = meter.snapshot()
         if scored["pairs"]:
-            metrics = judge_metrics(scored["pairs"], probabilistic=name.startswith("jev"))
+            # both APIs return P(true): Jev from a Noul, Decisions from a predicate
+            metrics = judge_metrics(
+                scored["pairs"], probabilistic=name.startswith(("jev", "decisions"))
+            )
         else:
             metrics = {"error": "全問失敗"}
         results[name] = metrics | {"scored": scored}
@@ -264,6 +273,12 @@ def run_dilution(
     return results
 
 
+def _answer_gaps(result: dict[str, Any]) -> str:
+    """Refusals and answers that never came, or '-' for a route with no meter."""
+    usage = result.get("scored", {}).get("usage")
+    return f"{usage['refusals']}/{usage['missing']}" if usage else "-"
+
+
 def format_judge(results: dict[str, Any]) -> str:
     header = [
         "経路",
@@ -274,6 +289,7 @@ def format_judge(results: dict[str, Any]) -> str:
         "P/R@0.5",
         "ECE",
         "Brier",
+        "拒否/欠け",
         "ペア数",
     ]
     lines = ["| " + " | ".join(header) + " |", "|" + "---|" * len(header)]
@@ -302,6 +318,7 @@ def format_judge(results: dict[str, Any]) -> str:
             half,
             number(result.get("ece")),
             number(result.get("brier")),
+            _answer_gaps(result),
             str(result.get("pairs", "-")),
         ]
         lines.append("| " + " | ".join(cells) + " |")

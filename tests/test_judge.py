@@ -339,3 +339,63 @@ def test_dilution_resumes_finished_settings(tmp_path):
     again = Constant()
     run_dilution(lambda batch: again, {(3, 2): own_and_foreign()}, out)
     assert again.calls == 0
+
+
+class MeteredRanker:
+    """Scores every candidate by its label and records one refusal per question."""
+
+    def __init__(self, name):
+        from jev_rag.usage import UsageMeter
+
+        self.name = name
+        self.meter = UsageMeter()
+
+    def rank(self, question, docs):
+        self.meter.record(model="gpt-6-luna", input_tokens=10, seconds=0.1, refusals=1)
+        for doc in docs:
+            doc.score = 0.9 if doc.label else 0.1
+        return docs
+
+
+def labelled_queries():
+    return [
+        EvalQuery(
+            query_id=f"q{i}",
+            question="問",
+            candidates=[
+                RetrievedDoc(doc_id=f"q{i}-a", text="a", score=0.0, label=1),
+                RetrievedDoc(doc_id=f"q{i}-b", text="b", score=0.0, label=0),
+            ],
+        )
+        for i in range(3)
+    ]
+
+
+def test_run_judge_saves_each_routes_usage_from_a_fresh_meter(tmp_path):
+    ranker = MeteredRanker("decisions_pointwise")
+    ranker.meter.record(model="stale", input_tokens=999, seconds=1.0)
+    results = run_judge({"decisions_pointwise": ranker}, labelled_queries(), tmp_path / "j.json")
+    usage = results["decisions_pointwise"]["scored"]["usage"]
+    assert usage["models"] == ["gpt-6-luna"]
+    assert usage["input_tokens"] == 30
+    assert usage["refusals"] == 3
+
+
+def test_decisions_routes_get_calibration_metrics(tmp_path):
+    results = run_judge(
+        {"decisions_pointwise": MeteredRanker("decisions_pointwise")},
+        labelled_queries(),
+        tmp_path / "j.json",
+    )
+    assert "ece" in results["decisions_pointwise"]
+
+
+def test_the_judge_table_shows_refusals_and_missing_answers(tmp_path):
+    results = run_judge(
+        {"decisions_pointwise": MeteredRanker("decisions_pointwise")},
+        labelled_queries(),
+        tmp_path / "j.json",
+    )
+    table = format_judge(results)
+    assert "拒否/欠け" in table
+    assert "| 3/0 |" in table
