@@ -292,3 +292,7 @@ CUDA ツールキット 13.0（V13.0.88）を入れて causal-conv1d 1.7.0 を�
 ### 1 件ずつどうしの差（記事 newArticle042 用）
 
 問題ごとの PR-AUC の平均で、Jev（1 件ずつ、`jev_crossencode`）− strands-decider（1 件ずつ、`decider_single`）。区間は問題単位の bootstrap 95%（2000 回、seed 0）。MIRACL +0.168 [+0.146, +0.188]、J-RAGBench +0.091 [+0.043, +0.145]、合成データ +0.082 [+0.033, +0.126]。
+
+### strands-decider の上位 k 件（記事 newArticle042 用）
+
+`decider_single` のスコアで質問ごとに候補文書を並べ替え、1 位が関連文書だった質問と、上位 3 件に関連文書が 1 件以上入っていた質問の割合。`report-judge` の「上位に関連文書が来るか」と同じ計算（`top_k_hit`、候補文書がすべて関連文書の問題を除く）を `results/` に当てた値で、`report-judge` の出力には出ない。MIRACL 63% と 85%、J-RAGBench 83% と 93%、合成データ 78% と 98%。
