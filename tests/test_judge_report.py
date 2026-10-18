@@ -185,3 +185,12 @@ def test_the_difference_is_taken_over_questions_both_routes_answered():
     # on q1 alone Jev scores 1.0 and Decisions 1.0, so the difference is zero
     assert "1 問で比較" in report
     assert "PR-AUC +0.000" in report
+
+
+def test_routes_with_no_question_in_common_are_reported_as_not_comparable():
+    judges = decisions_judges()
+    for route, kept in (("jev_pointwise", "q1"), ("decisions_pointwise", "q2")):
+        entry = judges["synthetic"][route]["scored"]
+        entry["pairs"] = [r for r in entry["pairs"] if r["query_id"] == kept]
+    report = format_report(judges, None, samples=50)
+    assert "比較できる問題がない" in report

@@ -351,6 +351,9 @@ def _decisions_section(judges, samples, seed) -> list[str]:
             d_rows = [r for r in decisions if r["query_id"] in shared]
             j_rows = [r for r in jev if r["query_id"] in shared]
             a, b = _query_pr_aucs(d_rows), _query_pr_aucs(j_rows)
+            if not set(a) & set(b):
+                notes.append(f"{label}、{shape}: 両経路が答えた問題に、比較できる問題がない")
+                continue
             low, high = _interval_of_means(a, b, samples, seed)
             ci = paired_bootstrap(d_rows, j_rows, samples=samples, seed=seed)
             notes.append(
