@@ -258,6 +258,46 @@ def cmd_judge(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_probe_order(args: argparse.Namespace) -> int:
+    """Send the same questions in two candidate orders and compare per-document probabilities."""
+    from jev_rag.config import Settings
+    from jev_rag.probe import resolves_paths, run_probe
+
+    settings = Settings()
+    queries = sample_queries(_judge_queries(args.dataset), args.queries, seed=args.seed)
+    names = [n for n in args.rankers.split(",") if n]
+    needs_jev = any(n.startswith("jev") for n in names)
+    _preflight(settings, names, needs_jev=needs_jev)
+    client = settings.jev.build_client() if needs_jev else None
+    decisions = (
+        settings.decisions.build_client() if any(n.startswith("decisions") for n in names) else None
+    )
+    rankers = build_rankers(names, client=client, settings=settings.bedrock, decisions=decisions)
+    results = run_probe(rankers, queries, args.out)
+    print(f"{args.out} に保存しました\n")
+    print("| 経路 | 組 | 差の中央値 | スピアマン | 文書に付いてくる | 問題ごとの PR-AUC | 失敗 |")
+    print("|---|---|---|---|---|---|---|")
+    for name, r in results.items():
+        if "error" in r:
+            print(f"| {name} | {r['error']}（失敗 {len(r['failed'])} 件） | | | | | |")
+            continue
+        print(
+            f"| {name} | {r['pairs']} | {r['median_abs_diff']:.3f} | {r['spearman']:.3f} | "
+            f"{'はい' if r['follows_documents'] else 'いいえ'} | {r['mean_query_pr_auc']:.3f} | "
+            f"{len(r['failed'])} |"
+        )
+    for batched, single in (
+        ("decisions_pointwise", "decisions_crossencode"),
+        ("jev_pointwise", "jev_crossencode"),
+    ):
+        if all("mean_query_pr_auc" in results.get(n, {}) for n in (batched, single)):
+            ok = resolves_paths(
+                results[batched]["mean_query_pr_auc"], results[single]["mean_query_pr_auc"]
+            )
+            print(f"\n{batched} は {single} との差が 0.2 以内か: {'はい' if ok else 'いいえ'}")
+    return 0
+
+
 def cmd_dilution(args: argparse.Namespace) -> int:
     """How many documents can share one request before judging suffers.
 
@@ -545,6 +585,21 @@ def main(argv: list[str] | None = None) -> int:
     judge.add_argument("--seed", type=int, default=0)
     judge.add_argument("--out", default=None, help="既定は out/judge-<dataset>.json")
     judge.set_defaults(func=cmd_judge)
+
+    probe = sub.add_parser(
+        "probe-order", help="候補の順序を逆にして送り、確率が文書に付いてくるかを確かめる"
+    )
+    probe.add_argument(
+        "--dataset", choices=["synthetic", "jragbench", "miracl"], default="synthetic"
+    )
+    probe.add_argument(
+        "--rankers",
+        default="decisions_pointwise,decisions_crossencode,jev_pointwise,jev_crossencode",
+    )
+    probe.add_argument("--queries", type=int, default=5)
+    probe.add_argument("--seed", type=int, default=0)
+    probe.add_argument("--out", default="out/decisions/probe-order.json")
+    probe.set_defaults(func=cmd_probe_order)
 
     dilution = sub.add_parser(
         "dilution", help="無関係な文書を混ぜ、1リクエストの件数と判定精度を測る"
