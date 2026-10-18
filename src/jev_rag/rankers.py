@@ -124,6 +124,10 @@ class JevPointwiseRanker:
             else (f"{base}@all" if batch_size is None else f"{base}@{batch_size}")
         )
 
+    @property
+    def meter(self):
+        return self.reranker.client.meter
+
     def rank(self, question: str, docs: list[RetrievedDoc]) -> list[RetrievedDoc]:
         if not docs:
             return []
@@ -142,6 +146,10 @@ class JevCrossEncodeRanker:
 
     def __init__(self, client: JevClient, with_grade: bool = False) -> None:
         self.encoder = CrossEncoder(client, with_grade=with_grade)
+
+    @property
+    def meter(self):
+        return self.encoder.client.meter
 
     def rank(self, question: str, docs: list[RetrievedDoc]) -> list[RetrievedDoc]:
         return self.encoder.rerank(question, docs) if docs else []

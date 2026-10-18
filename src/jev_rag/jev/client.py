@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
 from jev_rag.jev.budget import batch_by_budget, estimate_tokens
 from jev_rag.jev.questions import Answer, Question, parse_answer
 from jev_rag.jev.transport import JevTransport
+from jev_rag.usage import UsageMeter
 
 
 class JevClient:
@@ -28,6 +30,7 @@ class JevClient:
         self.transport = transport
         self.max_questions = max_questions
         self.max_workers = max_workers
+        self.meter = UsageMeter()
 
     def evaluate(self, state: Any, questions: dict[str, Question]) -> dict[str, Answer]:
         if not questions:
@@ -53,4 +56,13 @@ class JevClient:
 
     def _send(self, state: Any, questions: dict[str, Question]) -> dict[str, Any]:
         wire = {key: question.payload() for key, question in questions.items()}
-        return self.transport.send(self.transport.build_body(state, wire))
+        started = time.monotonic()
+        response = self.transport.send(self.transport.build_body(state, wire))
+        returned = response.get("answers") or {}
+        self.meter.record(
+            model=str(response.get("model") or ""),
+            input_tokens=int((response.get("usage") or {}).get("input_tokens", 0)),
+            seconds=time.monotonic() - started,
+            missing=sum(1 for key in questions if key not in returned),
+        )
+        return response

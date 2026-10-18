@@ -22,7 +22,7 @@
 - 出力先は `out/decisions/`。`results/` と既存の `out/judge-*.json` は変えない
 - 順序の入れ替え確認の基準: 差の絶対値の中央値 0.1 以下、かつスピアマン 0.8 以上。まとめる経路の問題ごと PR-AUC の平均が 1 件ずつの経路より 0.2 以上低ければパスを解釈できていないとみなす
 - untracked の `CLAUDE.md` は commit しない。`git add` はファイルを列挙して行う
-- テストは `uv run pytest -q`、lint は `uv run ruff check src tests` と `uv run ruff format --check src tests`
+- テストは `uv run python -m pytest -q`、lint は `uv run ruff check src tests` と `uv run ruff format --check src tests`
 - ruff は E501（100 文字）を検査する。`ruff format` は文字列を分けないので、計画のコードで 100 文字を超える行は、括弧の中で文字列を連結するか引数ごとに改行して収める
 - commit メッセージは英語のコンベンショナルコミット。末尾に `Co-Authored-By: Claude Opus 5.5 (1M context) <noreply@anthropic.com>` を付ける
 
@@ -127,7 +127,7 @@ def test_the_client_meters_the_model_tokens_and_missing_answers():
 
 - [ ] **Step 2: テストが失敗することを確かめる**
 
-Run: `uv run pytest tests/test_usage.py tests/test_jev_client.py -q`
+Run: `uv run python -m pytest tests/test_usage.py tests/test_jev_client.py -q`
 Expected: FAIL（`ModuleNotFoundError: No module named 'jev_rag.usage'`）
 
 - [ ] **Step 3: 最小の実装を書く**
@@ -229,7 +229,7 @@ class UsageMeter:
 
 - [ ] **Step 4: テストが通ることを確かめる**
 
-Run: `uv run pytest -q`
+Run: `uv run python -m pytest -q`
 Expected: すべて PASS（既存の 338 件に新しい 4 件）
 
 - [ ] **Step 5: Commit**
@@ -318,7 +318,7 @@ def test_the_judge_table_shows_refusals_and_missing_answers(tmp_path):
 
 - [ ] **Step 2: テストが失敗することを確かめる**
 
-Run: `uv run pytest tests/test_judge.py -q`
+Run: `uv run python -m pytest tests/test_judge.py -q`
 Expected: FAIL（`KeyError: 'usage'`、`ece` が無い、「拒否/欠け」が無い）
 
 - [ ] **Step 3: 最小の実装を書く**
@@ -364,7 +364,7 @@ def _answer_gaps(result: dict[str, Any]) -> str:
 
 - [ ] **Step 4: テストが通ることを確かめる**
 
-Run: `uv run pytest -q`
+Run: `uv run python -m pytest -q`
 Expected: すべて PASS。既存の `format_judge` のテストが列数で落ちた場合は、そのテストの期待値に「拒否/欠け」の列を足す（列を足したことによる期待値の更新だけにとどめる）
 
 - [ ] **Step 5: Commit**
@@ -508,7 +508,7 @@ def test_the_input_keeps_japanese_readable():
 
 - [ ] **Step 3: テストが失敗することを確かめる**
 
-Run: `uv run pytest tests/test_decisions.py -q`
+Run: `uv run python -m pytest tests/test_decisions.py -q`
 Expected: FAIL（`ModuleNotFoundError: No module named 'jev_rag.decisions'`）
 
 - [ ] **Step 4: 最小の実装を書く**
@@ -589,7 +589,7 @@ class DecisionsClient:
 
 - [ ] **Step 5: テストが通ることを確かめる**
 
-Run: `uv run pytest -q && uv run ruff check src tests && uv run ruff format --check src tests`
+Run: `uv run python -m pytest -q && uv run ruff check src tests && uv run ruff format --check src tests`
 Expected: すべて PASS。ruff が整形を求めたら `uv run ruff format src tests` を実行してから再確認する
 
 - [ ] **Step 6: Commit**
@@ -720,7 +720,7 @@ def test_every_route_exposes_the_clients_meter():
 
 - [ ] **Step 2: テストが失敗することを確かめる**
 
-Run: `uv run pytest tests/test_decisions.py -q`
+Run: `uv run python -m pytest tests/test_decisions.py -q`
 Expected: FAIL（`ImportError: cannot import name 'DecisionsPointwiseRanker'`）
 
 - [ ] **Step 3: 最小の実装を書く**
@@ -856,7 +856,7 @@ class DecisionsCrossEncodeRanker:
 
 - [ ] **Step 4: テストが通ることを確かめる**
 
-Run: `uv run pytest -q && uv run ruff check src tests && uv run ruff format --check src tests`
+Run: `uv run python -m pytest -q && uv run ruff check src tests && uv run ruff format --check src tests`
 Expected: すべて PASS（整形を求められたら `uv run ruff format src tests`）
 
 - [ ] **Step 5: Commit**
@@ -937,7 +937,7 @@ def test_only_bedrock_routes_need_aws():
 
 - [ ] **Step 2: テストが失敗することを確かめる**
 
-Run: `uv run pytest tests/test_rankers.py tests/test_preflight.py -q`
+Run: `uv run python -m pytest tests/test_rankers.py tests/test_preflight.py -q`
 Expected: FAIL（`build_rankers() got an unexpected keyword argument 'decisions'`、`cannot import name 'check_decisions'`、`cannot import name '_needs_aws'`）
 
 - [ ] **Step 3: 最小の実装を書く**
@@ -1034,7 +1034,7 @@ def _preflight(settings, names: list[str], needs_jev: bool) -> None:
 
 - [ ] **Step 4: テストが通ることを確かめる**
 
-Run: `uv run pytest -q && uv run ruff check src tests && uv run ruff format --check src tests`
+Run: `uv run python -m pytest -q && uv run ruff check src tests && uv run ruff format --check src tests`
 Expected: すべて PASS
 
 - [ ] **Step 5: Commit**
@@ -1156,7 +1156,7 @@ def test_the_thresholds_are_the_ones_in_the_spec():
 
 - [ ] **Step 2: テストが失敗することを確かめる**
 
-Run: `uv run pytest tests/test_probe.py -q`
+Run: `uv run python -m pytest tests/test_probe.py -q`
 Expected: FAIL（`ModuleNotFoundError: No module named 'jev_rag.probe'`）
 
 - [ ] **Step 3: 最小の実装を書く**
@@ -1310,7 +1310,7 @@ def cmd_probe_order(args: argparse.Namespace) -> int:
 
 - [ ] **Step 4: テストが通ることを確かめる**
 
-Run: `uv run pytest -q && uv run ruff check src tests && uv run ruff format --check src tests`
+Run: `uv run python -m pytest -q && uv run ruff check src tests && uv run ruff format --check src tests`
 Expected: すべて PASS（`jev_rag.runner.save` は親ディレクトリを作るので、`out/decisions/` を先に作る必要はない）
 
 - [ ] **Step 5: Commit**
@@ -1383,7 +1383,7 @@ def test_the_decisions_section_is_left_out_without_decisions_routes():
 
 - [ ] **Step 2: テストが失敗することを確かめる**
 
-Run: `uv run pytest tests/test_judge_report.py -q`
+Run: `uv run python -m pytest tests/test_judge_report.py -q`
 Expected: FAIL（`### Decisions と Jev 1.14` が出力に無い）
 
 - [ ] **Step 3: 最小の実装を書く**
@@ -1458,7 +1458,7 @@ def _decisions_section(judges, samples, seed) -> list[str]:
 
 - [ ] **Step 4: テストが通ることを確かめる**
 
-Run: `uv run pytest -q && uv run ruff check src tests && uv run ruff format --check src tests`
+Run: `uv run python -m pytest -q && uv run ruff check src tests && uv run ruff format --check src tests`
 Expected: すべて PASS。`uv run jev-rag report-judge --results-dir results` の出力が変更前と同じ（`results/` に Decisions の経路が無いので新しい節は出ない）ことも確かめる。変更前の出力は Task 7 の着手前に `uv run jev-rag report-judge --results-dir results > out/report-before.md` で保存しておき（`out/` は追跡対象外）、変更後の出力と `command diff` で比べる（zsh の `diff` 関数は壊れているので `command` を付ける）
 
 - [ ] **Step 5: Commit**
@@ -1640,7 +1640,7 @@ Decisions には Jev の `criteria` にあたる欄がないため、判定基�
 
 - [ ] **Step 2: 確かめる**
 
-Run: `uv run pytest -q && uv run ruff check src tests && uv run ruff format --check src tests && git status --short`
+Run: `uv run python -m pytest -q && uv run ruff check src tests && uv run ruff format --check src tests && git status --short`
 Expected: すべて PASS。`git status` に出るのは `README.md` と untracked の `CLAUDE.md` だけ
 
 - [ ] **Step 3: Commit**

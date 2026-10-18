@@ -107,3 +107,20 @@ def test_authentication_and_schema_errors_are_not_retried():
     assert should_retry(401) is False
     assert should_retry(422) is False
     assert should_retry(200) is False
+
+
+def test_the_client_meters_the_model_tokens_and_missing_answers():
+    class Partial(FakeTransport):
+        def send(self, body):
+            response = super().send(body)
+            response["answers"].pop("b")
+            response["usage"] = {"input_tokens": 42}
+            return response
+
+    client = JevClient(Partial(noul=0.7))
+    client.evaluate({"q": "x"}, {"a": Noul("a?"), "b": Noul("b?")})
+    usage = client.meter.snapshot()
+    assert usage["models"] == ["jev-fake"]
+    assert usage["input_tokens"] == 42
+    assert usage["missing"] == 1
+    assert usage["requests"] == 1
