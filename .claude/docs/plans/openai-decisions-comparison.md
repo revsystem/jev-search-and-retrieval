@@ -1126,6 +1126,20 @@ def test_a_judge_that_reads_positions_fails_the_check(tmp_path):
     assert (tmp_path / "p.json").exists()
 
 
+class Broken:
+    name = "broken"
+
+    def rank(self, question, docs):
+        raise RuntimeError("400 bad request")
+
+
+def test_a_route_that_fails_every_question_is_recorded_not_crashed(tmp_path):
+    result = run_probe({"broken": Broken()}, queries(), tmp_path / "p.json")["broken"]
+    assert result["error"] == "全問失敗"
+    assert len(result["failed"]) == 6
+    assert result["follows_documents"] is False
+
+
 def test_agreement_is_computed_per_document_not_per_position():
     forward = [{"query_id": "q", "doc_id": "a", "score": 0.9}, {"query_id": "q", "doc_id": "b", "score": 0.1}]
     backward = [{"query_id": "q", "doc_id": "b", "score": 0.1}, {"query_id": "q", "doc_id": "a", "score": 0.9}]
@@ -1217,11 +1231,16 @@ def run_probe(rankers: dict[str, Any], queries: list[EvalQuery], out: str | Path
     flipped = reversed_queries(queries)
     for name, ranker in rankers.items():
         forward, backward = score_pairs(ranker, queries), score_pairs(ranker, flipped)
+        failed = forward["failed"] + backward["failed"]
+        if not forward["pairs"] or not backward["pairs"]:
+            results[name] = {"error": "全問失敗", "failed": failed, "follows_documents": False}
+            save(results, Path(out))
+            continue
         agreement = order_agreement(forward["pairs"], backward["pairs"])
         results[name] = agreement | {
             "follows_documents": follows_documents(agreement),
             "mean_query_pr_auc": mean_query_pr_auc(forward["pairs"]),
-            "failed": forward["failed"] + backward["failed"],
+            "failed": failed,
             "forward": forward["pairs"],
             "backward": backward["pairs"],
         }
@@ -1252,6 +1271,9 @@ def cmd_probe_order(args: argparse.Namespace) -> int:
     print("| 経路 | 組 | 差の中央値 | スピアマン | 文書に付いてくる | 問題ごとの PR-AUC | 失敗 |")
     print("|---|---|---|---|---|---|---|")
     for name, r in results.items():
+        if "error" in r:
+            print(f"| {name} | {r['error']}（失敗 {len(r['failed'])} 件） | | | | | |")
+            continue
         print(
             f"| {name} | {r['pairs']} | {r['median_abs_diff']:.3f} | {r['spearman']:.3f} | "
             f"{'はい' if r['follows_documents'] else 'いいえ'} | {r['mean_query_pr_auc']:.3f} | "
@@ -1261,7 +1283,7 @@ def cmd_probe_order(args: argparse.Namespace) -> int:
         ("decisions_pointwise", "decisions_crossencode"),
         ("jev_pointwise", "jev_crossencode"),
     ):
-        if batched in results and single in results:
+        if all("mean_query_pr_auc" in results.get(n, {}) for n in (batched, single)):
             ok = resolves_paths(
                 results[batched]["mean_query_pr_auc"], results[single]["mean_query_pr_auc"]
             )
@@ -1469,25 +1491,47 @@ Expected: `JEV_TRANSPORT=direct` と `JEV_DIRECT_MODEL=jev-1.14.0`
 Run: `ls data/synthetic/gen_a | head -3`
 Expected: `a-001.json` などが表示される
 
-- [ ] **Step 3: 確認を実行する**
+- [ ] **Step 3: 各リクエストの形を 1 回ずつ送って、エラーの中身を確かめる**
+
+`score_pairs` は例外を問題 ID だけにして握りつぶすので、リクエストの形が API に拒まれても理由が残らない。preflight は `predicate` 1 問しか送らないので、`score`（日本語の `levels[].label`）と 10 件まとめた形は、ここで初めて送られる。次のスクリプトをスクラッチのファイル（例: `out/smoke_decisions.py`）に書き、`uv run python out/smoke_decisions.py` で実行する。
+
+```python
+from jev_rag.cli import _judge_queries
+from jev_rag.config import Settings
+from jev_rag.decisions import DecisionsCrossEncodeRanker, DecisionsPointwiseRanker
+from jev_rag.settings_file import load_env_file
+
+load_env_file()
+client = Settings().decisions.build_client()
+query = _judge_queries("synthetic")[0]
+docs = query.as_documents()
+print(DecisionsPointwiseRanker(client)._judge(query.question, docs[:10]))
+print(DecisionsCrossEncodeRanker(client)._judge(query.question, docs[0]))
+print(client.meter.snapshot())
+```
+
+Expected: 例外なしで、10 件の確率、1 件の（確率, 4 段階のスコア）、`refusals` と `missing` が 0 の利用量が出る。例外が出たら、その本文（HTTP の状態と API のメッセージ）を見てリクエストの形を直し、Task 3・4 のテストに同じ形を足してから先に進む
+
+- [ ] **Step 4: 確認を実行する**
 
 Run: `uv run jev-rag probe-order`
 Expected: preflight で `Jev: direct 経路で応答あり` と `Decisions API: gpt-6-luna が応答` が出て、4 経路の表と 2 行の判定が出る。`out/decisions/probe-order.json` が作られる
 
-- [ ] **Step 4: 答えたモデルを確かめる**
+- [ ] **Step 5: 失敗がないことを確かめる**
 
 Run: `uv run python -c "import json; d=json.load(open('out/decisions/probe-order.json')); print({k: len(v['failed']) for k, v in d.items()})"`
 Expected: どの経路も失敗 0。Jev 1.14 で答えたかは、Task 9 の `usage.models` で `jev-1.14.0` を確かめる（probe の結果には usage を保存しない）
 
-- [ ] **Step 5: 結果を記録する**
+- [ ] **Step 6: 結果を記録する**
 
-`.claude/docs/research/decisions-probe.md` に、実行日、実行したコマンド、4 経路の表（Step 3 の出力をそのまま）、2 行の判定、そこから決めた本測定の経路を書く。判定のルールは次のとおり。
+`.claude/docs/research/decisions-probe.md` に、実行日、実行したコマンド、4 経路の表（Step 4 の出力をそのまま）、2 行の判定、そこから決めた本測定の経路を書く。判定のルールは次のとおり。
 
+- 最初に `decisions_crossencode` と `jev_crossencode` を見る。1 件ずつの経路は順序を入れ替えても入力が変わらないので、2 回の差は実行ごとの揺れだけを表す。1 件ずつの経路が基準（差の中央値 0.1 以下、スピアマン 0.8 以上）を満たさない場合、基準は位置ではなく揺れを測っている。この場合はまとめる経路の扱いを決めず、数値をユーザーに報告して判断を仰ぐ
 - `decisions_pointwise` が「文書に付いてくる: はい」かつ「差が 0.2 以内: はい」なら、Decisions の 3 経路をすべて本測定する
 - どちらかが「いいえ」なら、`decisions_pointwise` と `decisions_pointwise_plain` を外し、`decisions_crossencode` だけを本測定する。外した理由と数値を書く
 - Jev の 2 経路の結果も同じ表に残す（Jev 1.14 でもまとめる経路が成り立つかの確認）
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 7: Commit**
 
 ```bash
 git add .claude/docs/research/decisions-probe.md

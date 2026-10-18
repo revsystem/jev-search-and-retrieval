@@ -62,7 +62,7 @@ Jev の経路は `JEV_DIRECT_MODEL=jev-1.14.0` で測り直す。埋め込みと
   "questions": [
     {
       "type": "predicate",
-      "name": "<chunk_id>",
+      "name": "c0",
       "instructions": "`candidates[0].text` は `query` に答えるための根拠として役に立ちますか。\n判定基準: はい（true）= クエリが指す対象そのものを扱い、回答を裏づける事実・数値・定義を含む。いいえ（false）= 話題が重なるだけ、参照先が異なる、または根拠となる情報を含まない。"
     }
   ]
@@ -70,6 +70,7 @@ Jev の経路は `JEV_DIRECT_MODEL=jev-1.14.0` で測り直す。埋め込みと
 ```
 
 - `input` は `jev_rag.jev.state.candidate_state` が作る state を `json.dumps(ensure_ascii=False)` した文字列
+- 質問の `name` は候補の位置（`c0`、`c1`、…）にし、答えを名前から文書に戻す。データの文書 ID の書式が API の名前の規則と衝突しないようにするため
 - `_plain` の経路は `PLAIN_NOUL_INSTRUCTION` だけを送り、判定基準の文を足さない
 - 1 リクエストの件数は Jev と同じく 10 件（`JevPointwiseRanker.DEFAULT_BATCH_SIZE`）
 - 1 件ずつの経路の `input` は `{"query": …, "candidate": …}`。質問は `crossencode.RELEVANCE`（判定基準を足した `predicate`）と `crossencode.GRADE`（`RELEVANCE_LEVELS` の 4 文を順に `levels[].label` にした `score`）
