@@ -8,36 +8,71 @@ Jev is TypeSafe's flagship model and the first [System One model](/concepts/syst
 
 ## Current models
 
-| Jev 1.13                    | `jev-1.13.0`                                                                              |
-| :-------------------------- | :---------------------------------------------------------------------------------------- |
-| Price (per Btok / per Mtok) | \$42 / \$0.042                                                                            |
-| Rate limits                 | 250,000 tokens per second / 1,200 requests per minute                                     |
-| Context length              | 64k tokens per request; 32k tokens for `state` plus the longest question                  |
-| Input                       | Text only. String, JSON object, or array of text values. No image, audio, or video input. |
+| | Jev 1.14 | Jev 1.13 |
+| :- | :- | :- |
+| Model ID | `jev-1.14.0` | `jev-1.13.0` |
+| Price (per Btok / per Mtok) | \$42 / \$0.042 | \$42 / \$0.042 |
+| Context length | 64k per-request / 32k per-question | 64k per-request / 32k per-question |
+| Input | Text | Text |
 
-* **Price:** Charged per input token. Output tokens are free. A Btok is a billion tokens and an Mtok is a million tokens.
-* **Rate limits:** Measured in tokens per second and requests per minute. A request over either limit returns `429 Too Many Requests`. Our [client SDKs](/sdk) retry with backoff by default and honor the `retry-after` header when the response carries one. If you call the HTTP API directly, see [Handling rate limits](/api#handling-rate-limits).
-* **Context length:** Jev ingests the `state` once and evaluates every question against it in parallel. The 64k budget covers the `state` plus all questions combined; the 32k budget applies to the `state` plus the single longest question. See [Speculative fan-out](/patterns/fan-out) for packing many questions into one request, and [Jev 1.13 jaggedness](/model-jaggedness/jev-1.13) for how accuracy shifts as the state grows.
-* **Input:** Jev evaluates natural-language text. Pre-process non-text inputs (images, audio, video, binaries) into text or structured fields before sending them as `state`. See [State](/concepts/state) for supported shapes.
+Jev 1.14 is the newest Jev release, available from October 14, 2026.
 
-<Warning>
-  **Rate limits are adjusting dynamically.** We are serving a very large volume of demand, and the limits above can change without notice while we do, as upcoming large GPU deals land and we let in more users. Once things settle down more, we'll be able to offer more stable limits. Higher limits are available on custom and enterprise plans. Contact [sales@typesafe.ai](mailto:sales@typesafe.ai).
-</Warning>
+* **Price:** You pay per input token. Output tokens are free. A Btok is a billion tokens and an Mtok is a million tokens.
+* **Context length:** Two limits, the per-request context and the per-question context. See [Context length](#context-length). To raise both, see [Long context](#long-context).
+* **Input:** Jev reads natural-language text, sent as a string, a JSON object, or an array of text values. It does not accept audio or video. Convert those into text or structured fields before you send them as `state`. See [State](/concepts/state) for the shapes `state` accepts.
+
+## Context length
+
+Jev ingests the `state` once and evaluates every question against it in parallel. A request has to fit two context limits:
+
+* **Per-request context** (`per_request_context`): the `state` plus all questions combined.
+* **Per-question context** (`per_question_context`): the `state` plus any one question.
+
+There is no separate limit on the number of questions in a request. Any number of questions is allowed as long as the request fits both limits. See [Speculative fan-out](/patterns/fan-out) for packing many questions into one request, and [Jev 1.13 jaggedness](/model-jaggedness/jev-1.13) for how accuracy shifts as the state grows.
+
+To raise both limits, see [Long context](#long-context).
+
+### Long context
+
+Long context is off by default and works on both Jev 1.14 and Jev 1.13. To turn it on, send the `TypeSafe-Danger-Zone-Long-Context: true` header with each request that needs it. With the header, the per-request context and the per-question context are both 262k tokens. Requests without the header keep the default limits in the table above.
+
+```bash theme={null}
+curl https://api.typesafe.ai/v1/systemone \
+  -H "Authorization: Bearer $TYPESAFE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -H "TypeSafe-Danger-Zone-Long-Context: true" \
+  -d '{
+    "model": "jev-latest",
+    "state": "<a long contract, transcript, or record>",
+    "questions": {
+      "has_termination_clause": {
+        "type": "noul",
+        "instructions": "Does the `state` include a clause that lets either party end the agreement early?"
+      }
+    }
+  }'
+```
+
+Long context costs the same per token as any other request. It is slower and less accurate than staying within the default limits, so turn it on only for requests that need it.
+
+## Rate limits
+
+Rate limits are set per organization. Your organization's current limits are in the [developer console](https://console.typesafe.ai/rate-limits).
+
+Limits are measured in tokens per second and requests per second. A request over either limit returns `429 Too Many Requests`. Our [client SDKs](/sdk) retry these requests by default, waiting longer between each attempt, and follow the `retry-after` header when the response includes one. If you call the HTTP API directly, see [Handling rate limits](/api#handling-rate-limits).
+
+Higher limits are available on custom and enterprise plans. Contact [sales@typesafe.ai](mailto:sales@typesafe.ai).
 
 ## Aliases
 
-An alias is a model name that resolves to a versioned model ID. Send it in the `model` field like any other name.
+An alias is a model name that points to a versioned model ID. Send it in the `model` field the same way you send a model ID.
 
-| Alias         | Points to    | Meaning                                                                                                                       |
-| :------------ | :----------- | :---------------------------------------------------------------------------------------------------------------------------- |
-| `jev-latest`  | `jev-1.13.0` | The most recent stable, official release. The default in our client SDKs, and the name the examples in these docs use.        |
-| `jev-preview` | `jev-1.13.0` | The most recent release, whether or not it is an official one. Moves ahead of `jev-latest` when a preview build is available. |
+| Alias | Points to | Meaning |
+| :- | :- | :- |
+| `jev-latest` | `jev-1.13.0` | The most recent stable, official release. The default in our client SDKs, and the name the examples in these docs use. |
+| `jev-preview` | `jev-1.14.0` | The most recent release, official or not. Moves ahead of `jev-latest` when a preview build is available. |
 
-<Warning>
-  `jev-preview` currently points to the same model as `jev-latest`. There is no preview build available right now.
-</Warning>
-
-An alias moves when a new release ships, so the answers behind it can change without a change on your side. The response's `model` field reports the versioned ID that answered, so you can log which model produced each result. If you have tuned confidence thresholds against a specific version, pin that version's ID instead of the alias and move to the new one on your own schedule.
+An alias moves when a new release ships, so its answers can change without any change to your code. Each response's `model` field gives the versioned ID that answered, so you can log which model produced each result. If you have tuned confidence thresholds against one version, send that version's ID instead of the alias, and switch to the new version when you are ready.
 
 ## Customizing Jev
 
@@ -57,7 +92,7 @@ Jev is not trained on customer requests or responses. See [Legal](/legal) for th
 
 ## Listing models
 
-`GET /v1/models` returns the names your account can send in the `model` field, with a description and release date for each. It currently lists the aliases. Versioned IDs such as `jev-1.13.0` are accepted by the `model` field whether or not they appear in the list.
+`GET /v1/models` returns the names your account can send in the `model` field, each with a description and a release date. It currently lists the aliases. Versioned IDs such as `jev-1.14.0` are accepted by the `model` field whether or not they appear in the list.
 
 <CodeGroup>
   ```bash cURL theme={null}
@@ -103,3 +138,6 @@ Jev is not trained on customer requests or responses. See [Legal](/legal) for th
 </ResponseField>
 
 See the [Python](/sdk/python/api/clients/sync#typesafe_sdk.Models.list) and [JavaScript](/sdk/javascript/api/interfaces/Models) SDK references for the full method signatures.
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.
