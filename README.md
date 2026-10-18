@@ -8,13 +8,13 @@ Strands Agents の判定専用モデル strands-decider（Strands Decider 2B）�
 
 ## 比べる手法
 
-どの手法も、データセットに含まれる同じ候補文書にスコアを付けます。strands-decider と Jev には、判定させる材料（質問と候補文書。API では state と呼ぶ）と、「この候補文書は質問に答えるための根拠として役に立ちますか」という問いを送り、「はい」の確率を返させます。strands-decider の経路は `src/jev_rag/decider.py` にあり、Jev と同じ `POST /v1/systemone` の形でローカルのサーバーに送ります。
+どの手法も、データセットに含まれる同じ候補文書にスコアを付けます。strands-decider と Jev には、判定させる材料（質問と候補文書。API では state と呼ぶ）と、「この候補文書は質問に答えるための根拠として役に立ちますか」という質問文を送り、「はい」の確率を返させます。strands-decider の経路は `src/jev_rag/decider.py` にあり、Jev と同じ `POST /v1/systemone` の形でローカルのサーバーに送ります。
 
 | 経路 | 中身 |
 |---|---|
-| `decider_single` | strands-decider。候補文書 1 件ずつ、Jev と同じ日本語の問いと判定基準（何を「はい」とするかの説明）で尋ねる |
+| `decider_single` | strands-decider。候補文書 1 件ずつ、Jev と同じ日本語の質問文と判定基準（何を「はい」とするかの説明）で尋ねる |
 | `decider_single_plain` | strands-decider。1 件ずつで、判定基準を渡さず「関連しますか」とだけ尋ねる。0.1.0 のサーバーは、判定基準を省くと英語の汎用の基準で補う |
-| `decider_single_en` | strands-decider。1 件ずつで、問いと判定基準を英語にする（候補文書は日本語のまま） |
+| `decider_single_en` | strands-decider。1 件ずつで、質問文と判定基準を英語にする（候補文書は日本語のまま） |
 | `decider_pointwise` | strands-decider。候補文書を最大 10 件まとめて送り、`candidates[0].text` のように 1 件ずつ指して尋ねる（`jev_pointwise` と同じ形） |
 | `jev_pointwise` | Jev。1 つの質問の候補文書を 10 件ずつまとめて送る |
 | `jev_crossencode` | Jev。候補文書 1 件ずつ送る |
@@ -22,7 +22,7 @@ Strands Agents の判定専用モデル strands-decider（Strands Decider 2B）�
 
 `results/` には、判定基準なしと英語を最大 10 件ずつで測った `decider_pointwise_plain`、`decider_pointwise_en` のスコアも入っています。記事と `report-judge` では扱っていません。
 
-strands-decider 0.1.0 が一度に読める入力は 4,096 トークン（モデルが文章を数える単位）までで、超えた分はエラーにならずに切り捨てられます。`decider.py` は、strands-decider と同じ数え方（`Qwen/Qwen3.5-2B-Base` のトークナイザー）で送る材料の長さを数え、問いの分を残して 3,600 トークン以内に収まるように候補文書を区切ってから送ります。そのため、候補文書が長いデータでは、`decider_pointwise` の 1 回に送る件数が 10 件未満になります。1 件ずつなら、すべての候補文書が上限に収まります。同時にリクエストを送ったときの動作は公式に検証されていないので、リクエストは 1 件ずつ順に送ります。
+strands-decider 0.1.0 が一度に読める入力は 4,096 トークン（モデルが文章を数える単位）までで、超えた分はエラーにならずに切り捨てられます。`decider.py` は、strands-decider と同じ数え方（`Qwen/Qwen3.5-2B-Base` のトークナイザー）で送る材料の長さを数え、質問文の分を残して 3,600 トークン以内に収まるように候補文書を区切ってから送ります。そのため、候補文書が長いデータでは、`decider_pointwise` の 1 回に送る件数が 10 件未満になります。1 件ずつなら、すべての候補文書が上限に収まります。同時にリクエストを送ったときの動作は公式に検証されていないので、リクエストは 1 件ずつ順に送ります。
 
 ## データ
 
@@ -98,11 +98,11 @@ Jev と strands-decider（1 件ずつ）の差です。渡し方が同じ「1 �
 
 3 つのデータすべてで Jev が上回り、どちらの比べ方でも区間の両端はプラスでした。1 件ずつの strands-decider は、Cohere Rerank と比べると、合成データでは上回り、MIRACL と J-RAGBench では下回りました。
 
-候補文書を最大 10 件まとめて渡すと、でたらめに並べた場合（MIRACL 0.37、J-RAGBench 0.36、合成データ 0.47）に近い成績になります。strands-decider 0.1.0 のサーバーは、送った材料を JSON の文字列にしてそのまま読むだけで、問いの中の `candidates[1].text` のような書き方で候補文書を指す仕組みがありません。そのため、どの候補文書について問われているかを区別できなかったと考えられます。
+候補文書を最大 10 件まとめて渡すと、でたらめに並べた場合（MIRACL 0.37、J-RAGBench 0.36、合成データ 0.47）に近い成績になります。strands-decider 0.1.0 のサーバーは、送った材料を JSON の文字列にしてそのまま読むだけで、質問文の中の `candidates[1].text` のような書き方で候補文書を指す仕組みがありません。そのため、どの候補文書について問われているかを区別できなかったと考えられます。
 
-### 判定基準のありなしと、問いの言語
+### 判定基準のありなしと、質問文の言語
 
-strands-decider の 1 件ずつの経路で比べた、質問ごとの PR-AUC の平均です。どれも差は小さく、判定基準や問いの言語を変えても成績はほとんど変わりませんでした。
+strands-decider の 1 件ずつの経路で比べた、質問ごとの PR-AUC の平均です。どれも差は小さく、判定基準や質問文の言語を変えても成績はほとんど変わりませんでした。
 
 | データ | 判定基準あり（日本語） `decider_single` | 判定基準なし `decider_single_plain` | 判定基準あり（英語） `decider_single_en` |
 |---|---|---|---|
