@@ -96,5 +96,24 @@ def test_the_thresholds_are_the_ones_in_the_spec():
     assert follows_documents({"median_abs_diff": 0.1, "spearman": 0.8}) is True
     assert follows_documents({"median_abs_diff": 0.11, "spearman": 0.9}) is False
     assert follows_documents({"median_abs_diff": 0.05, "spearman": 0.79}) is False
-    assert resolves_paths(batched=0.70, single=0.90) is True
-    assert resolves_paths(batched=0.69, single=0.90) is False
+    # the spec fails a batched route that is 0.2 or more below its counterpart
+    assert resolves_paths(batched=0.71, single=0.90) is True
+    assert resolves_paths(batched=0.70, single=0.90) is False
+
+
+class FailsWhenReversed:
+    """Reads documents, but every request for q0 fails when the order is reversed."""
+
+    name = "fails_when_reversed"
+
+    def rank(self, question, docs):
+        if docs[0].doc_id == "q0-d3":
+            raise RuntimeError("429 rate limited")
+        return ByDocument().rank(question, docs)
+
+
+def test_a_question_that_fails_in_one_order_is_left_out_of_the_comparison(tmp_path):
+    result = run_probe({"r": FailsWhenReversed()}, queries(), tmp_path / "p.json")["r"]
+    assert result["pairs"] == 8
+    assert result["unmatched"] == 4
+    assert result["failed"] == ["q0"]

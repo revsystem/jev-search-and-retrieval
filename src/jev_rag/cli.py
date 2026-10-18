@@ -294,7 +294,7 @@ def cmd_probe_order(args: argparse.Namespace) -> int:
             ok = resolves_paths(
                 results[batched]["mean_query_pr_auc"], results[single]["mean_query_pr_auc"]
             )
-            print(f"\n{batched} は {single} との差が 0.2 以内か: {'はい' if ok else 'いいえ'}")
+            print(f"\n{batched} は {single} との差が 0.2 未満か: {'はい' if ok else 'いいえ'}")
     return 0
 
 

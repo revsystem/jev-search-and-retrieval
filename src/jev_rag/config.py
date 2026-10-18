@@ -96,8 +96,10 @@ class DecisionsSettings:
 
         if not self.api_key:
             raise ValueError("OPENAI_API_KEY が設定されていない。.env に書く")
-        # the SDK retries 429 and 5xx with backoff; a full run sends thousands of requests
-        return DecisionsClient(OpenAI(api_key=self.api_key, max_retries=5), model=self.model)
+        # three attempts and a 60-second timeout, as HttpTransport gives Jev, so a
+        # transient fault fails a question on either side under the same rule
+        sdk = OpenAI(api_key=self.api_key, max_retries=2, timeout=60)
+        return DecisionsClient(sdk, model=self.model)
 
 
 @dataclass

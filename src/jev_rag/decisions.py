@@ -65,11 +65,11 @@ class DecisionsClient:
             model=self.model, input=input_text, questions=questions
         )
         answers: dict[str, dict[str, Any]] = {}
-        refused: set[str | None] = set()
+        refused: list[str | None] = []
         for answer in decision.answers:
             body = answer.model_dump()
             if body["type"] == "refusal":
-                refused.add(body.get("name"))
+                refused.append(body.get("name"))
             else:
                 answers[body["name"]] = body
         self.meter.record(

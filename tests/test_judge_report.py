@@ -174,3 +174,14 @@ def test_the_decisions_section_is_left_out_without_decisions_routes():
     judges = decisions_judges()
     del judges["synthetic"]["decisions_pointwise"]
     assert "Decisions と Jev" not in format_report(judges, None, samples=50)
+
+
+def test_the_difference_is_taken_over_questions_both_routes_answered():
+    judges = decisions_judges()
+    entry = judges["synthetic"]["decisions_pointwise"]["scored"]
+    entry["pairs"] = [r for r in entry["pairs"] if r["query_id"] == "q1"]
+    entry["failed"] = ["q2"]
+    report = format_report(judges, None, samples=50)
+    # on q1 alone Jev scores 1.0 and Decisions 1.0, so the difference is zero
+    assert "1 問で比較" in report
+    assert "PR-AUC +0.000" in report

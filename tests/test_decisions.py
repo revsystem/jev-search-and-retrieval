@@ -218,3 +218,21 @@ def test_every_route_exposes_the_clients_meter():
     client = DecisionsClient(FakeSDK(by_position))
     assert DecisionsPointwiseRanker(client).meter is client.meter
     assert DecisionsCrossEncodeRanker(client).meter is client.meter
+
+
+def test_refusals_without_a_name_are_each_counted():
+    def reply(body):
+        return [{"type": "refusal"}, {"type": "refusal"}]
+
+    client = DecisionsClient(FakeSDK(reply))
+    client.evaluate("{}", [predicate("c0", "q"), predicate("c1", "q")])
+    assert client.meter.snapshot()["refusals"] == 2
+
+
+def test_the_sdk_retries_and_times_out_like_the_jev_transport():
+    from jev_rag.config import DecisionsSettings
+
+    sdk = DecisionsSettings(api_key="sk-test").build_client().sdk
+    # Jev makes three attempts with a 60-second timeout; the SDK counts retries after the first
+    assert sdk.max_retries == 2
+    assert sdk.timeout == 60

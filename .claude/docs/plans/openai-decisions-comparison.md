@@ -1287,7 +1287,7 @@ def cmd_probe_order(args: argparse.Namespace) -> int:
             ok = resolves_paths(
                 results[batched]["mean_query_pr_auc"], results[single]["mean_query_pr_auc"]
             )
-            print(f"\n{batched} は {single} との差が 0.2 以内か: {'はい' if ok else 'いいえ'}")
+            print(f"\n{batched} は {single} との差が 0.2 未満か: {'はい' if ok else 'いいえ'}")
     return 0
 ```
 
@@ -1527,7 +1527,7 @@ Expected: どの経路も失敗 0。Jev 1.14 で答えたかは、Task 9 の `us
 `.claude/docs/research/decisions-probe.md` に、実行日、実行したコマンド、4 経路の表（Step 4 の出力をそのまま）、2 行の判定、そこから決めた本測定の経路を書く。判定のルールは次のとおり。
 
 - 最初に `decisions_crossencode` と `jev_crossencode` を見る。1 件ずつの経路は順序を入れ替えても入力が変わらないので、2 回の差は実行ごとの揺れだけを表す。1 件ずつの経路が基準（差の中央値 0.1 以下、スピアマン 0.8 以上）を満たさない場合、基準は位置ではなく揺れを測っている。この場合はまとめる経路の扱いを決めず、数値をユーザーに報告して判断を仰ぐ
-- `decisions_pointwise` が「文書に付いてくる: はい」かつ「差が 0.2 以内: はい」なら、Decisions の 3 経路をすべて本測定する
+- `decisions_pointwise` が「文書に付いてくる: はい」かつ「差が 0.2 未満: はい」なら、Decisions の 3 経路をすべて本測定する
 - どちらかが「いいえ」なら、`decisions_pointwise` と `decisions_pointwise_plain` を外し、`decisions_crossencode` だけを本測定する。外した理由と数値を書く
 - Jev の 2 経路の結果も同じ表に残す（Jev 1.14 でもまとめる経路が成り立つかの確認）
 

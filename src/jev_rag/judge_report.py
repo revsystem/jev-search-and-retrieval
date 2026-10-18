@@ -346,15 +346,18 @@ def _decisions_section(judges, samples, seed) -> list[str]:
             for route, rows in ((jev_route, jev), (decisions_route, decisions)):
                 cells = _usage_cells(route, rows, result[route]["scored"])
                 body.append([label, shape, f"`{route}`"] + cells)
-            low, high = _interval_of_means(
-                _query_pr_aucs(decisions), _query_pr_aucs(jev), samples, seed
-            )
-            ci = paired_bootstrap(decisions, jev, samples=samples, seed=seed)
+            # a question one route failed is left out of both sides of the difference
+            shared = {r["query_id"] for r in decisions} & {r["query_id"] for r in jev}
+            d_rows = [r for r in decisions if r["query_id"] in shared]
+            j_rows = [r for r in jev if r["query_id"] in shared]
+            a, b = _query_pr_aucs(d_rows), _query_pr_aucs(j_rows)
+            low, high = _interval_of_means(a, b, samples, seed)
+            ci = paired_bootstrap(d_rows, j_rows, samples=samples, seed=seed)
             notes.append(
-                f"{label}、{shape}: Decisions − Jev は問題ごとの PR-AUC "
-                f"{_diff(mean_query_pr_auc(decisions), mean_query_pr_auc(jev), 3)}"
+                f"{label}、{shape}（{len(shared)} 問で比較）: Decisions − Jev は問題ごとの PR-AUC "
+                f"{_diff(mean_query_pr_auc(d_rows), mean_query_pr_auc(j_rows), 3)}"
                 f"（{_interval(low, high, 3)}）、全問まとめ PR-AUC "
-                f"{_diff(pooled_pr_auc(decisions), pooled_pr_auc(jev), 2)}"
+                f"{_diff(pooled_pr_auc(d_rows), pooled_pr_auc(j_rows), 2)}"
                 f"（{_interval(ci['low'], ci['high'], 2)}）"
             )
     if not body:

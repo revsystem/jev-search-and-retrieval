@@ -28,6 +28,7 @@ from jev_rag.runner import save
 
 MAX_MEDIAN_DIFF = 0.1
 MIN_SPEARMAN = 0.8
+# a batched route this far or more below its one-at-a-time counterpart fails
 MAX_BATCH_GAP = 0.2
 
 
@@ -38,11 +39,23 @@ def reversed_queries(queries: list[EvalQuery]) -> list[EvalQuery]:
 def order_agreement(
     forward: list[dict[str, Any]], backward: list[dict[str, Any]]
 ) -> dict[str, Any]:
+    # a question that failed in one order has nothing to be compared with
     other = {(r["query_id"], r["doc_id"]): r["score"] for r in backward}
-    pairs = [(r["score"], other[(r["query_id"], r["doc_id"])]) for r in forward]
+    pairs = [
+        (r["score"], other[key]) for r in forward if (key := (r["query_id"], r["doc_id"])) in other
+    ]
+    unmatched = len(forward) + len(backward) - 2 * len(pairs)
+    if not pairs:
+        return {
+            "pairs": 0,
+            "unmatched": unmatched,
+            "median_abs_diff": math.nan,
+            "spearman": math.nan,
+        }
     a, b = (np.array(side, dtype=float) for side in zip(*pairs, strict=True))
     return {
         "pairs": len(pairs),
+        "unmatched": unmatched,
         "median_abs_diff": float(np.median(np.abs(a - b))),
         # a constant score has no rank order; nan fails the check below
         "spearman": float(spearmanr(a, b).statistic),
@@ -60,7 +73,7 @@ def follows_documents(agreement: dict[str, Any]) -> bool:
 
 def resolves_paths(batched: float, single: float) -> bool:
     """A batched route far below its one-at-a-time counterpart is not reading the paths."""
-    return round(single - batched, 10) <= MAX_BATCH_GAP
+    return round(single - batched, 10) < MAX_BATCH_GAP
 
 
 def run_probe(rankers: dict[str, Any], queries: list[EvalQuery], out: str | Path) -> dict[str, Any]:
