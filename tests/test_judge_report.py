@@ -147,3 +147,24 @@ def test_the_decider_section_appears_when_decider_routes_were_measured():
 def test_the_decider_section_is_absent_without_decider_routes():
     text = format_report({"miracl": small_judge()}, dilution=None, samples=50, seed=0)
     assert "strands-decider" not in text
+
+
+def with_decider():
+    data = small_judge()
+    good, poor = data["jev_pointwise"]["scored"]["pairs"], data["cohere_rerank"]["scored"]["pairs"]
+    data["jev_crossencode"] = {"scored": {"pairs": good}}
+    data["decider_single"] = {"scored": {"pairs": poor}}
+    return data
+
+
+def test_the_decider_differences_cover_both_ways_of_sending_jev():
+    text = format_report({"synthetic": with_decider()}, dilution=None, samples=50, seed=0)
+    assert "Jev（1 件ずつ）− strands-decider（1 件ずつ）" in text
+    assert "Jev（10 件ずつ）− strands-decider（1 件ずつ）" in text
+
+
+def test_the_top_k_table_has_a_decider_row_when_it_was_measured():
+    text = format_report({"synthetic": with_decider()}, dilution=None, samples=50, seed=0)
+    top_k = text.split("### 上位に関連文書が来るか")[1].split("###")[0]
+    # the decider route puts the relevant document second in every question
+    assert "| 合成データ | strands-decider（1 件ずつ） | 0% | 100% |" in top_k

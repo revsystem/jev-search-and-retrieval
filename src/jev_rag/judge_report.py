@@ -223,7 +223,10 @@ def _top_k_section(judges) -> list[str]:
                 f"{random_top_k(cohere, 3):.0%}",
             ]
         )
-        for route, rows in (("Cohere Rerank", cohere), ("Jev", jev)):
+        routes = [("Cohere Rerank", cohere), ("Jev", jev)]
+        if decider := _pairs(result, "decider_single"):
+            routes.append(("strands-decider（1 件ずつ）", decider))
+        for route, rows in routes:
             body.append([label, route, f"{top_k_hit(rows, 1):.0%}", f"{top_k_hit(rows, 3):.0%}"])
     header = ["データ", "並べ方", "1 位が関連文書", "上位 3 件に関連文書を含む"]
     title = "### 上位に関連文書が来るか（候補文書がすべて関連文書の問題を除く）"
@@ -322,7 +325,7 @@ DECIDER_COMPARISON = [
 
 
 def _decider_section(judges, samples, seed) -> list[str]:
-    body, notes = [], []
+    body, differences = [], []
     for name, result in judges.items():
         if not any(route.startswith("decider") for route in result):
             continue
@@ -350,16 +353,20 @@ def _decider_section(judges, samples, seed) -> list[str]:
                     _num(float(np.median(latencies)), 0) if latencies else "-",
                 ]
             )
-        jev, decider = _pairs(result, "jev_pointwise"), _pairs(result, "decider_single")
-        if jev and decider:
-            low, high = _interval_of_means(
-                _query_pr_aucs(jev), _query_pr_aucs(decider), samples, seed
-            )
-            diff = _diff(mean_query_pr_auc(jev), mean_query_pr_auc(decider), 3)
-            notes.append(
-                f"{label}: Jev（10 件ずつ） − strands-decider（1 件ずつ）の問題ごとの PR-AUC "
-                f"{diff}（{_interval(low, high, 3)}）"
-            )
+        decider = _pairs(result, "decider_single")
+        if decider:
+            cells = [label]
+            for route in ("jev_crossencode", "jev_pointwise"):
+                jev = _pairs(result, route)
+                if not jev:
+                    cells.append("-")
+                    continue
+                low, high = _interval_of_means(
+                    _query_pr_aucs(jev), _query_pr_aucs(decider), samples, seed
+                )
+                diff = _diff(mean_query_pr_auc(jev), mean_query_pr_auc(decider), 3)
+                cells.append(f"{diff}（{_interval(low, high, 3)}）")
+            differences.append(cells)
     if not body:
         return []
     header = [
@@ -373,7 +380,22 @@ def _decider_section(judges, samples, seed) -> list[str]:
         "1 リクエストの処理 ms（中央値）",
     ]
     title = "### strands-decider との比較（strands-decider はローカルの GPU で 1 件ずつ順に送信）"
-    return [title, ""] + _table(header, body) + ([""] + notes if notes else [])
+    lines = [title, ""] + _table(header, body)
+    if differences:
+        lines += [
+            "",
+            "問題ごとの PR-AUC の差（95% 区間）",
+            "",
+            *_table(
+                [
+                    "データ",
+                    "Jev（1 件ずつ）− strands-decider（1 件ずつ）",
+                    "Jev（10 件ずつ）− strands-decider（1 件ずつ）",
+                ],
+                differences,
+            ),
+        ]
+    return lines
 
 
 def _dilution_section(dilution, samples, seed) -> list[str]:
