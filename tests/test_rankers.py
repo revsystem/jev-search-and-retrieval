@@ -134,3 +134,19 @@ def test_the_registry_rejects_an_unknown_name():
 
     with pytest.raises(SystemExit, match="unknown"):
         build_rankers(["nope"], client=JevClient(FakeTransport()))
+
+
+def test_the_registry_builds_the_decisions_routes_from_their_client():
+    from jev_rag.decisions import DecisionsClient
+
+    decisions = DecisionsClient(sdk=None)
+    rankers = build_rankers(
+        ["decisions_pointwise", "decisions_pointwise_plain", "decisions_crossencode"],
+        decisions=decisions,
+    )
+    assert {name: r.name for name, r in rankers.items()} == {
+        "decisions_pointwise": "decisions_pointwise",
+        "decisions_pointwise_plain": "decisions_pointwise_plain",
+        "decisions_crossencode": "decisions_crossencode",
+    }
+    assert all(r.meter is decisions.meter for r in rankers.values())

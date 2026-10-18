@@ -64,3 +64,35 @@ def test_a_broken_jev_route_raises_before_the_run_starts():
 
     with pytest.raises(CredentialError, match="401"):
         check_jev(JevClient(Broken()))
+
+
+def test_a_working_decisions_route_passes_and_reports_the_model():
+    from tests.test_decisions import FakeSDK, predicates
+
+    from jev_rag.decisions import DecisionsClient
+    from jev_rag.preflight import check_decisions
+
+    assert check_decisions(DecisionsClient(FakeSDK(predicates({"ok": 0.9})))) == "gpt-6-luna"
+
+
+def test_a_broken_decisions_route_raises_before_the_run_starts():
+    from jev_rag.decisions import DecisionsClient
+    from jev_rag.preflight import check_decisions
+
+    class Broken:
+        class decisions:  # noqa: N801 - mirrors the SDK attribute
+            @staticmethod
+            def create(**body):
+                raise RuntimeError("401 invalid_api_key")
+
+    with pytest.raises(CredentialError, match="OPENAI_API_KEY"):
+        check_decisions(DecisionsClient(Broken()))
+
+
+def test_only_bedrock_routes_need_aws():
+    from jev_rag.cli import _needs_aws
+
+    assert (
+        _needs_aws(["embedding"]) and _needs_aws(["jev_hybrid"]) and _needs_aws(["cohere_rerank"])
+    )
+    assert not _needs_aws(["jev_pointwise", "decisions_pointwise", "decisions_crossencode"])

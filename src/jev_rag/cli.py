@@ -77,23 +77,31 @@ def cmd_evaluate(args: argparse.Namespace) -> int:
     return 0
 
 
+def _needs_aws(names: list[str]) -> bool:
+    """Routes that call Amazon Bedrock: the embedding, Cohere Rerank, and the hybrid."""
+    return any(name in ("embedding", "cohere_rerank", "jev_hybrid") for name in names)
+
+
 def _preflight(settings, names: list[str], needs_jev: bool) -> None:
     """Fail now rather than forty minutes in.
 
-    A route needing AWS and a route needing Jev are checked before any
+    A route needing AWS, Jev or the Decisions API is checked before any
     measurement starts, because an expiring credential mid-run costs the whole
     run and reads as a route scoring zero.
     """
     import boto3
 
-    from jev_rag.preflight import check_aws, check_jev
+    from jev_rag.preflight import check_aws, check_decisions, check_jev
 
-    if any(not n.startswith("jev") or n == "jev_hybrid" for n in names):
+    if _needs_aws(names):
         identity = check_aws(boto3.client("sts", region_name=settings.bedrock.region))
         print(f"AWS: {identity}")
     if needs_jev:
         check_jev(settings.jev.build_client())
         print(f"Jev: {settings.jev.transport} 経路で応答あり")
+    if any(name.startswith("decisions") for name in names):
+        model = check_decisions(settings.decisions.build_client())
+        print(f"Decisions API: {model} が応答")
 
 
 def cmd_answer(args: argparse.Namespace) -> int:
@@ -235,7 +243,10 @@ def cmd_judge(args: argparse.Namespace) -> int:
     if names:
         _preflight(settings, names, needs_jev=needs_jev)
     client = settings.jev.build_client() if needs_jev else None
-    rankers = build_rankers(names, client=client, settings=settings.bedrock)
+    decisions = (
+        settings.decisions.build_client() if any(n.startswith("decisions") for n in names) else None
+    )
+    rankers = build_rankers(names, client=client, settings=settings.bedrock, decisions=decisions)
     pairs = sum(len(q.candidates) for q in queries)
     print(
         f"{args.dataset}: {len(queries)} 問 / ペア {pairs} 件、{len(names)} 経路を判定器として評価"

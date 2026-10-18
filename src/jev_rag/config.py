@@ -85,10 +85,27 @@ class JevSettings:
 
 
 @dataclass
+class DecisionsSettings:
+    api_key: str = field(default_factory=lambda: _env("OPENAI_API_KEY"))
+    model: str = field(default_factory=lambda: _env("DECISIONS_MODEL", "gpt-6-luna"))
+
+    def build_client(self):
+        from openai import OpenAI
+
+        from jev_rag.decisions import DecisionsClient
+
+        if not self.api_key:
+            raise ValueError("OPENAI_API_KEY が設定されていない。.env に書く")
+        # the SDK retries 429 and 5xx with backoff; a full run sends thousands of requests
+        return DecisionsClient(OpenAI(api_key=self.api_key, max_retries=5), model=self.model)
+
+
+@dataclass
 class Settings:
     bedrock: BedrockSettings = field(default_factory=BedrockSettings)
     store: VectorStoreSettings = field(default_factory=VectorStoreSettings)
     jev: JevSettings = field(default_factory=JevSettings)
+    decisions: DecisionsSettings = field(default_factory=DecisionsSettings)
     pdf_url: str = PDF_URL
     chunk_size: int = 700
     chunk_overlap: int = 120

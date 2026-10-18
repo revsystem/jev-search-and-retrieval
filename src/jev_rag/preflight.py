@@ -39,3 +39,23 @@ def check_jev(client: Any) -> bool:
             f"Jevへのリクエストが通らない: {error}\n  .env の JEV_TRANSPORT と鍵を確認する。"
         ) from error
     return True
+
+
+def check_decisions(client: Any) -> str:
+    """Confirm the Decisions API answers a trivial question, and return the model that did."""
+    import json
+
+    from jev_rag.decisions import predicate
+
+    state = {"query": "赤い惑星", "candidates": [{"text": "火星は赤い惑星と呼ばれる。"}]}
+    try:
+        client.evaluate(
+            json.dumps(state, ensure_ascii=False),
+            [predicate("ok", "`candidates[0].text` は `query` の根拠になりますか。")],
+        )
+    except Exception as error:  # noqa: BLE001 - any failure here is the same failure
+        raise CredentialError(
+            f"Decisions API へのリクエストが通らない: {error}\n"
+            "  .env の OPENAI_API_KEY を確認する。"
+        ) from error
+    return ", ".join(client.meter.snapshot()["models"])

@@ -16,6 +16,7 @@ import math
 from dataclasses import replace
 from typing import Protocol
 
+from jev_rag.decisions import DecisionsCrossEncodeRanker, DecisionsPointwiseRanker
 from jev_rag.jev.client import JevClient
 from jev_rag.jev.crossencode import CrossEncoder
 from jev_rag.jev.pairwise import PairwiseReranker
@@ -201,7 +202,9 @@ class HybridRanker:
         return _sorted(scored, docs)
 
 
-def build_rankers(names: list[str], client: JevClient | None = None, settings=None) -> dict:
+def build_rankers(
+    names: list[str], client: JevClient | None = None, settings=None, decisions=None
+) -> dict:
     """Instantiate the named rankers, creating only the clients they need."""
 
     shared: dict[str, Ranker] = {}
@@ -224,6 +227,9 @@ def build_rankers(names: list[str], client: JevClient | None = None, settings=No
         "jev_pointwise": lambda: JevPointwiseRanker(client),
         "jev_pointwise_plain": lambda: JevPointwiseRanker(client, plain=True),
         "jev_crossencode": lambda: JevCrossEncodeRanker(client, with_grade=True),
+        "decisions_pointwise": lambda: DecisionsPointwiseRanker(decisions),
+        "decisions_pointwise_plain": lambda: DecisionsPointwiseRanker(decisions, plain=True),
+        "decisions_crossencode": lambda: DecisionsCrossEncodeRanker(decisions),
         "jev_pairwise": lambda: JevPairwiseRanker(client),
         "jev_hybrid": lambda: HybridRanker(embedding(), JevPointwiseRanker(client)),
     }
