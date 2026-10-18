@@ -15,7 +15,7 @@ from typing import Any
 import numpy as np
 from sklearn.metrics import average_precision_score
 
-from jev_rag.judge import paired_bootstrap, pooled_pr_auc
+from jev_rag.judge import judge_metrics, paired_bootstrap, pooled_pr_auc
 
 Rows = list[dict[str, Any]]
 
@@ -310,6 +310,70 @@ def _criteria_section(judges, samples, seed) -> list[str]:
     )
 
 
+# USD per million input tokens, from the official pages fetched on 2026-10-19
+PRICE_PER_MTOK = {"jev": 0.042, "decisions": 0.10}
+DECISIONS_PAIRS = [
+    ("jev_pointwise", "decisions_pointwise", "10 件ずつ、判定基準あり"),
+    ("jev_pointwise_plain", "decisions_pointwise_plain", "10 件ずつ、判定基準なし"),
+    ("jev_crossencode", "decisions_crossencode", "1 件ずつ"),
+]
+
+
+def _usage_cells(route: str, rows: Rows, scored: dict[str, Any]) -> list[str]:
+    usage = scored.get("usage") or {}
+    tokens = usage.get("input_tokens")
+    price = PRICE_PER_MTOK["jev" if route.startswith("jev") else "decisions"]
+    gaps = f"{usage.get('refusals', 0)}/{usage.get('missing', 0)}/{len(scored['failed'])}"
+    return [
+        ", ".join(usage.get("models", [])) or "-",
+        _num(mean_query_pr_auc(rows), 3),
+        _num(pooled_pr_auc(rows), 2),
+        _num(judge_metrics(rows, probabilistic=True).get("ece"), 3),
+        gaps,
+        "-" if tokens is None else f"{tokens:,}",
+        "-" if tokens is None else f"{tokens / 1e6 * price:.4f}",
+    ]
+
+
+def _decisions_section(judges, samples, seed) -> list[str]:
+    body, notes = [], []
+    for name, result in judges.items():
+        label = DATASETS.get(name, name)
+        for jev_route, decisions_route, shape in DECISIONS_PAIRS:
+            jev, decisions = _pairs(result, jev_route), _pairs(result, decisions_route)
+            if not jev or not decisions:
+                continue
+            for route, rows in ((jev_route, jev), (decisions_route, decisions)):
+                cells = _usage_cells(route, rows, result[route]["scored"])
+                body.append([label, shape, f"`{route}`"] + cells)
+            low, high = _interval_of_means(
+                _query_pr_aucs(decisions), _query_pr_aucs(jev), samples, seed
+            )
+            ci = paired_bootstrap(decisions, jev, samples=samples, seed=seed)
+            notes.append(
+                f"{label}、{shape}: Decisions − Jev は問題ごとの PR-AUC "
+                f"{_diff(mean_query_pr_auc(decisions), mean_query_pr_auc(jev), 3)}"
+                f"（{_interval(low, high, 3)}）、全問まとめ PR-AUC "
+                f"{_diff(pooled_pr_auc(decisions), pooled_pr_auc(jev), 2)}"
+                f"（{_interval(ci['low'], ci['high'], 2)}）"
+            )
+    if not body:
+        return []
+    header = [
+        "データ",
+        "形",
+        "経路",
+        "答えたモデル",
+        "問題ごとの PR-AUC",
+        "全問まとめ PR-AUC",
+        "ECE",
+        "拒否/欠け/失敗した問題",
+        "入力トークン",
+        "費用（ドル）",
+    ]
+    return ["### Decisions と Jev 1.14", ""] + _table(header, body) + [""] + notes
+
+
 def _dilution_section(dilution, samples, seed) -> list[str]:
     body = []
     for key, pool, batch in BATCHES:
@@ -365,6 +429,7 @@ def format_report(
         _top_k_section(judges),
         _threshold_section(judges, samples, seed),
         _criteria_section(judges, samples, seed),
+        _decisions_section(judges, samples, seed),
     ]
     if dilution:
         sections.append(_dilution_section(dilution, samples, seed))

@@ -130,3 +130,47 @@ def test_the_command_reads_the_saved_files(tmp_path, capsys):
 def test_the_command_fails_when_nothing_has_been_measured(tmp_path, capsys):
     assert cli.main(["report-judge", "--results-dir", str(tmp_path)]) == 1
     assert "jev-rag judge" in capsys.readouterr().out
+
+
+def measured(rows_, models, tokens, refusals=0):
+    return {
+        "scored": {
+            "pairs": rows_,
+            "failed": [],
+            "usage": {
+                "requests": 1,
+                "input_tokens": tokens,
+                "refusals": refusals,
+                "missing": 0,
+                "models": models,
+                "request_seconds": [0.1],
+            },
+        }
+    }
+
+
+def decisions_judges():
+    jev = rows("q1", [(0.9, 1), (0.1, 0)]) + rows("q2", [(0.8, 1), (0.3, 0)])
+    decisions = rows("q1", [(0.7, 1), (0.6, 0)]) + rows("q2", [(0.4, 1), (0.5, 0)])
+    return {
+        "synthetic": {
+            "jev_pointwise": measured(jev, ["jev-1.14.0"], 1_000_000),
+            "decisions_pointwise": measured(decisions, ["gpt-6-luna"], 2_000_000, refusals=1),
+        }
+    }
+
+
+def test_the_report_compares_decisions_with_jev():
+    report = format_report(decisions_judges(), None, samples=50)
+    assert "### Decisions と Jev 1.14" in report
+    assert "jev-1.14.0" in report and "gpt-6-luna" in report
+    # Jev bills $0.042 and Decisions $0.10 per million input tokens
+    assert "0.0420" in report and "0.2000" in report
+    assert "| 1/0/0 |" in report
+    assert "Decisions − Jev" in report
+
+
+def test_the_decisions_section_is_left_out_without_decisions_routes():
+    judges = decisions_judges()
+    del judges["synthetic"]["decisions_pointwise"]
+    assert "Decisions と Jev" not in format_report(judges, None, samples=50)
