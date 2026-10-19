@@ -401,7 +401,8 @@ def _decisions_section(judges, samples, seed) -> list[str]:
         top.append(
             [label, "でたらめに並べた場合"] + [f"{random_top_k(any_rows, k):.0%}" for k in (1, 3)]
         )
-        chance.append(f"{label} {random_query_pr_auc(any_rows, seed=seed):.2f}")
+        # 2,000 shuffles: at the default 100 the synthetic set's 0.4665 rounds to 0.46
+        chance.append(f"{label} {random_query_pr_auc(any_rows, draws=2000, seed=seed):.2f}")
         for route in compared:
             rows = _pairs(result, route)
             cells = _usage_cells(route, rows, result[route]["scored"])
