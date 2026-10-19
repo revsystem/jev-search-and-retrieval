@@ -149,6 +149,30 @@ PR-AUC は、関連文書を上位に、無関係文書を下位に並べられ�
 - 合成データは LLM が書いた文章で、LLM の書いた文章を AI モデルが判定するときの偏りは確かめていない
 - 所要時間は並列度、通信環境、測定した時間帯で変わる。速さの優劣は結論にしていない
 
+## Decisions API との比較
+
+OpenAI の Decisions API（`gpt-6-luna`、public beta）を、Jev 1.14（`jev-1.14.0`）と同じデータ、指示文、指標で比べます。設計は `.claude/docs/specs/openai-decisions-comparison.md`、本測定の前の確認は `.claude/docs/research/decisions-probe.md`、結果は `.claude/docs/research/decisions-results.md` にあります。
+
+| 経路 | 中身 |
+|---|---|
+| `decisions_crossencode` | 候補文書 1 件ごとに 1 リクエスト。判定基準を指示文の末尾に足した `predicate`（関連）と、4 段階の `score` の組 |
+| `decisions_pointwise` | 候補文書 10 件を JSON の文字列にして 1 リクエストにまとめ、判定基準を足した `predicate` |
+| `decisions_pointwise_plain` | `decisions_pointwise` から判定基準を除いたもの |
+
+10 件まとめる 2 経路は、候補の順序を逆にすると確率が大きく動いたため（`decisions-probe.md`）、本測定では測っていません。
+
+`.env` に `OPENAI_API_KEY` を書き、`JEV_DIRECT_MODEL=jev-1.14.0` にしてから実行します。制限付きの API キーには `api.decisions.write` の権限が要ります。
+
+```bash
+uv run jev-rag probe-order   # 候補の順序を逆にして、確率が文書に付いてくるかを確かめる
+uv run jev-rag judge --dataset synthetic \
+  --rankers jev_pointwise,jev_pointwise_plain,jev_crossencode,decisions_crossencode \
+  --out out/decisions/judge-synthetic.json
+uv run jev-rag report-judge --results-dir out/decisions
+```
+
+Decisions には Jev の `criteria` にあたる欄がないため、判定基準は指示文の文面に入れています。この点は Jev と同じ条件ではありません。
+
 ## Jev の 2 経路
 
 同じリクエストボディを 2 つの宛先に送り分けます。`JevClient` から上のコードは経路を知りません。`JEV_TRANSPORT=direct` と `TYPESAFE_API_KEY` で `https://api.typesafe.ai/v1/systemone` に `jev-latest` として送り、`JEV_TRANSPORT=gateway` と `AI_GATEWAY_API_KEY` で Vercel AI Gateway 経由（`typesafe-ai/jev`）で送ります。測定はすべて direct 経路で行いました。
@@ -165,6 +189,8 @@ src/jev_rag/
   public.py     J-RAGBench と MIRACL 日本語版の取得と読み込み
   synthetic.py  合成データの読み込み、検証用ビュー、突き合わせ、素朴な判定器
   rankers.py    比較する経路
+  decisions.py  OpenAI Decisions API のクライアントと経路
+  probe.py      候補の順序の入れ替え確認（probe-order）
   bedrock.py    Cohere Embed v4 / Cohere Rerank 3.5 / GPT-5.6 Luna
   jev/          Jev クライアントと、公式ユースケースごとの実装
   cli.py        jev-rag コマンド
