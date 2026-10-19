@@ -399,3 +399,22 @@ def test_the_judge_table_shows_refusals_and_missing_answers(tmp_path):
     table = format_judge(results)
     assert "拒否/欠け" in table
     assert "| 3/0 |" in table
+
+
+class Graded:
+    """Ties every candidate on probability and breaks the tie with a four-level grade."""
+
+    def rank(self, question, docs):
+        for doc in docs:
+            doc.score, doc.jev_score = 0.0, 2.0 if doc.label else 0.5
+        return sorted(docs, key=lambda d: (d.score, d.jev_score), reverse=True)
+
+
+def test_score_pairs_keeps_the_grade_a_route_breaks_ties_with():
+    rows = score_pairs(Graded(), [query()])["pairs"]
+    assert {r["doc_id"]: r["grade"] for r in rows} == {"a": 2.0, "b": 0.5}
+
+
+def test_score_pairs_leaves_out_the_grade_for_routes_without_one():
+    rows = score_pairs(Constant(), [query()])["pairs"]
+    assert all("grade" not in r for r in rows)

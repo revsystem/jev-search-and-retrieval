@@ -39,9 +39,20 @@ def _mixed(rows: Rows) -> dict[str, Rows]:
     return {q: g for q, g in groups.items() if 0 < sum(r["label"] for r in g) < len(g)}
 
 
+def _order_key(row: dict[str, Any]) -> tuple[float, float]:
+    """How a route ranked a candidate: the score, then the grade that breaks its ties."""
+    return row["score"], row.get("grade", float("-inf"))
+
+
+def _ranking_scores(group: Rows) -> list[int]:
+    """One number per candidate that orders like _order_key, keeping full ties tied."""
+    rank = {key: i for i, key in enumerate(sorted({_order_key(r) for r in group}))}
+    return [rank[_order_key(r)] for r in group]
+
+
 def _query_pr_aucs(rows: Rows) -> dict[str, float]:
     return {
-        q: float(average_precision_score([r["label"] for r in g], [r["score"] for r in g]))
+        q: float(average_precision_score([r["label"] for r in g], _ranking_scores(g)))
         for q, g in _mixed(rows).items()
     }
 
@@ -72,7 +83,7 @@ def precision_at_recall(rows: Rows, keep: float = 0.9) -> tuple[float, float]:
 def top_k_hit(rows: Rows, k: int) -> float:
     """Share of questions with at least one relevant document in the top k."""
     groups = _mixed(rows).values()
-    hits = [any(r["label"] for r in sorted(g, key=lambda r: -r["score"])[:k]) for g in groups]
+    hits = [any(r["label"] for r in sorted(g, key=_order_key, reverse=True)[:k]) for g in groups]
     return float(np.mean(hits))
 
 
@@ -375,7 +386,7 @@ def _comparison_note(label: str, title: str, decisions: Rows, jev: Rows, samples
 
 
 def _decisions_section(judges, samples, seed) -> list[str]:
-    body, notes = [], []
+    body, notes, top, chance = [], [], [], []
     for name, result in judges.items():
         label = DATASETS.get(name, name)
         pairs = [
@@ -385,11 +396,17 @@ def _decisions_section(judges, samples, seed) -> list[str]:
         ]
         if not pairs:
             continue
-        compared = {route for j, d, _ in pairs for route in (j, d)}
-        for route, shape in ROUTE_SHAPES.items():
-            if route in compared:
-                cells = _usage_cells(route, _pairs(result, route), result[route]["scored"])
-                body.append([label, shape, f"`{route}`"] + cells)
+        compared = [r for r in ROUTE_SHAPES if r in {x for j, d, _ in pairs for x in (j, d)}]
+        any_rows = _pairs(result, compared[0])
+        top.append(
+            [label, "でたらめに並べた場合"] + [f"{random_top_k(any_rows, k):.0%}" for k in (1, 3)]
+        )
+        chance.append(f"{label} {random_query_pr_auc(any_rows, seed=seed):.2f}")
+        for route in compared:
+            rows = _pairs(result, route)
+            cells = _usage_cells(route, rows, result[route]["scored"])
+            body.append([label, ROUTE_SHAPES[route], f"`{route}`"] + cells)
+            top.append([label, f"`{route}`"] + [f"{top_k_hit(rows, k):.0%}" for k in (1, 3)])
         notes += [
             _comparison_note(label, title, _pairs(result, d), _pairs(result, j), samples, seed)
             for j, d, title in pairs
@@ -409,7 +426,15 @@ def _decisions_section(judges, samples, seed) -> list[str]:
         "入力トークン",
         "費用（ドル）",
     ]
-    return ["### Decisions と Jev 1.14", ""] + _table(header, body) + [""] + notes
+    return (
+        ["### Decisions と Jev 1.14", ""]
+        + _table(header, body)
+        + [""]
+        + notes
+        + ["", "上位に関連文書が来るか（候補文書がすべて関連文書の問題を除く）:", ""]
+        + _table(["データ", "並べ方", "1 位が関連文書", "上位 3 件に関連文書を含む"], top)
+        + ["", "でたらめに並べた場合の問題ごとの PR-AUC: " + "、".join(chance)]
+    )
 
 
 def _dilution_section(dilution, samples, seed) -> list[str]:

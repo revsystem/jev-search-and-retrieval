@@ -217,8 +217,8 @@ def test_jev_batched_is_compared_with_decisions_one_at_a_time():
     judges["synthetic"]["decisions_crossencode"] = entry
     report = format_report(judges, None, samples=50)
     assert "Jev は 10 件ずつ、Decisions は 1 件ずつ（2 問で比較）" in report
-    # each route has one row in the table, however many comparisons it is in
-    assert report.count("| `decisions_crossencode` |") == 1
+    # each route has one row in the main table, however many comparisons it is in
+    assert report.count("| 合成データ | 1 件ずつ | `decisions_crossencode` |") == 1
 
 
 def test_the_decisions_table_shows_precision_when_nine_tenths_are_kept():
@@ -226,3 +226,36 @@ def test_the_decisions_table_shows_precision_when_nine_tenths_are_kept():
     assert "9 割を残したときの関連の割合" in report
     # Jev ranks every relevant document first, so keeping them all keeps only them
     assert "| 100.0% |" in report
+
+
+def graded(query_id, scored):
+    return [
+        {
+            "query_id": query_id,
+            "doc_id": f"{query_id}-{i}",
+            "label": label,
+            "score": score,
+            "grade": grade,
+        }
+        for i, (score, grade, label) in enumerate(scored)
+    ]
+
+
+def test_tied_probabilities_are_ordered_by_the_grade():
+    # both candidates score 0.0; the grade puts the relevant one first, as the route did
+    table = graded("q1", [(0.0, 0.5, 0), (0.0, 2.0, 1)])
+    assert mean_query_pr_auc(table) == pytest.approx(1.0)
+    assert top_k_hit(table, 1) == pytest.approx(1.0)
+
+
+def test_without_a_grade_tied_probabilities_stay_tied():
+    table = rows("q1", [(0.0, 0), (0.0, 1)])
+    assert mean_query_pr_auc(table) == pytest.approx(0.5)
+
+
+def test_the_decisions_section_shows_top_k_against_random_order():
+    report = format_report(decisions_judges(), None, samples=50)
+    assert "上位に関連文書が来るか" in report
+    assert "| 合成データ | でたらめに並べた場合 |" in report
+    # Jev puts a relevant document first in both questions
+    assert "| 合成データ | `jev_pointwise` | 100% | 100% |" in report

@@ -60,15 +60,18 @@ def score_pairs(ranker: Any, queries: list[EvalQuery]) -> dict[str, Any]:
         # a route returning fewer candidates than it was given would bias the
         # pooled metrics toward whatever it kept
         dropped += len(query.candidates) - len(ranked)
-        rows.extend(
-            {
+        for doc in ranked:
+            row = {
                 "query_id": query.query_id,
                 "doc_id": doc.doc_id,
                 "label": int(doc.label),
                 "score": float(doc.score),
             }
-            for doc in ranked
-        )
+            # the cross-encode routes order equal probabilities by a four-level
+            # grade; keeping it lets the ranking metrics use the order they returned
+            if doc.jev_score is not None:
+                row["grade"] = float(doc.jev_score)
+            rows.append(row)
     return {
         "pairs": rows,
         "failed": failed,
