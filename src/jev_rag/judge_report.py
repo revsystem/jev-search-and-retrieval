@@ -109,6 +109,21 @@ def random_query_pr_auc(rows: Rows, draws: int = 100, seed: int = 0) -> float:
     return float(np.mean(values))
 
 
+def expected_random_query_pr_auc(rows: Rows) -> float:
+    """Per-question PR-AUC of a random order, averaged, computed exactly.
+
+    Each relevant document's rank is uniform over 1..n, and the precision at
+    rank r is then (1 + (r - 1)(R - 1)/(n - 1)) / r in expectation, so the
+    expected average precision is (H_n + (R - 1)/(n - 1) (n - H_n)) / n.
+    """
+    values = []
+    for g in _mixed(rows).values():
+        n, relevant = len(g), sum(r["label"] for r in g)
+        harmonic = sum(1 / i for i in range(1, n + 1))
+        values.append((harmonic + (relevant - 1) / (n - 1) * (n - harmonic)) / n)
+    return float(np.mean(values))
+
+
 def _interval_of_means(a: dict[str, float], b: dict[str, float], samples: int, seed: int):
     """Paired bootstrap of a mean over questions, from values computed once per question."""
     queries = sorted(set(a) & set(b))
@@ -401,8 +416,7 @@ def _decisions_section(judges, samples, seed) -> list[str]:
         top.append(
             [label, "でたらめに並べた場合"] + [f"{random_top_k(any_rows, k):.0%}" for k in (1, 3)]
         )
-        # 2,000 shuffles: at the default 100 the synthetic set's 0.4665 rounds to 0.46
-        chance.append(f"{label} {random_query_pr_auc(any_rows, draws=2000, seed=seed):.2f}")
+        chance.append(f"{label} {expected_random_query_pr_auc(any_rows):.2f}")
         for route in compared:
             rows = _pairs(result, route)
             cells = _usage_cells(route, rows, result[route]["scored"])

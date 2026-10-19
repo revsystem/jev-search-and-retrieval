@@ -259,3 +259,16 @@ def test_the_decisions_section_shows_top_k_against_random_order():
     assert "| 合成データ | でたらめに並べた場合 |" in report
     # Jev puts a relevant document first in both questions
     assert "| 合成データ | `jev_pointwise` | 100% | 100% |" in report
+
+
+def test_the_expected_random_pr_auc_is_exact():
+    from jev_rag.judge_report import expected_random_query_pr_auc
+
+    # one relevant of two: AP is 1 or 1/2 with equal chance
+    assert expected_random_query_pr_auc(rows("q", [(0.0, 1), (0.0, 0)])) == pytest.approx(0.75)
+    # agrees with shuffling many times
+    table = rows("q1", [(0.0, 1), (0.0, 0), (0.0, 1), (0.0, 0), (0.0, 0)])
+    from jev_rag.judge_report import random_query_pr_auc
+
+    shuffled = random_query_pr_auc(table, draws=20000, seed=1)
+    assert expected_random_query_pr_auc(table) == pytest.approx(shuffled, abs=0.01)
