@@ -18,62 +18,46 @@ ROUTES=jev_pointwise,jev_pointwise_plain,jev_crossencode,decisions_crossencode
 uv run jev-rag judge --dataset synthetic --rankers $ROUTES --out out/decisions/judge-synthetic.json
 uv run jev-rag judge --dataset jragbench --rankers $ROUTES --out out/decisions/judge-jragbench.json
 uv run jev-rag judge --dataset miracl --rankers $ROUTES --out out/decisions/judge-miracl.json
-uv run jev-rag report-judge --results-dir out/decisions
 ```
 
-最初の MIRACL の測定では、`jev_crossencode` の 54 問が失敗した。その後の再実行が `402 billing_error`（TypeSafe のクレジット切れ）で止まったので、失敗もクレジット切れによると考えられる（失敗した時点の応答本文は残っていないので未確認）。ユーザーがクレジットを追加してから `jev_crossencode` だけを測り直し、失敗は 0 問になった。最初の結果は `out/decisions/judge-miracl.before-rerun.json` に残してある。
+保存したスコアは `results/decisions/` に写した（組ごとの ID、正解ラベル、スコアと、経路ごとの利用量。文書の本文は含まない）。下の表と差の行は、すべて次のコマンドで再現できる。API も認証情報も要らない。
+
+```bash
+uv run jev-rag report-judge --results-dir results/decisions
+```
+
+最初の MIRACL の測定では、`jev_crossencode` の 54 問が失敗した。その後の再実行が `402 billing_error`（TypeSafe のクレジット切れ）で止まったので、失敗もクレジット切れによると考えられる（失敗した時点の応答本文は残っていないので未確認）。ユーザーがクレジットを追加してから `jev_crossencode` だけを測り直し、失敗は 0 問になった。最初の結果は `out/decisions/judge-miracl.before-rerun.json`（追跡対象外）に残してある。
 
 すべての経路で、拒否、欠けた答え、失敗した問題は 0 件だった。Jev のまとめる経路のリクエスト数は、3 つのデータとも「問題ごとの候補数を 10 件ずつに分けた数」と一致した（MIRACL 1,134、J-RAGBench 117、合成 60）。入力の上限による分割は起きていない。
 
-## 1 件ずつの経路どうしの比較
+## 結果
 
-`report-judge --results-dir out/decisions` の出力:
+`report-judge --results-dir results/decisions` の出力:
 
-| データ | 経路 | 答えたモデル | 問題ごとの PR-AUC | 全問まとめ PR-AUC | ECE | 拒否/欠け/失敗した問題 | 入力トークン | 費用（ドル） |
-|---|---|---|---|---|---|---|---|---|
-| MIRACL | `jev_crossencode` | jev-1.14.0 | 0.862 | 0.75 | 0.160 | 0/0/0 | 7,325,018 | 0.3077 |
-| MIRACL | `decisions_crossencode` | gpt-6-luna | 0.799 | 0.68 | 0.133 | 0/0/0 | 5,976,555 | 0.5977 |
-| J-RAGBench | `jev_crossencode` | jev-1.14.0 | 0.905 | 0.79 | 0.069 | 0/0/0 | 855,195 | 0.0359 |
-| J-RAGBench | `decisions_crossencode` | gpt-6-luna | 0.777 | 0.71 | 0.112 | 0/0/0 | 701,465 | 0.0701 |
-| 合成データ | `jev_crossencode` | jev-1.14.0 | 0.840 | 0.74 | 0.078 | 0/0/0 | 480,386 | 0.0202 |
-| 合成データ | `decisions_crossencode` | gpt-6-luna | 0.826 | 0.73 | 0.157 | 0/0/0 | 397,627 | 0.0398 |
+| データ | 形 | 経路 | 答えたモデル | 問題ごとの PR-AUC | 全問まとめ PR-AUC | 9 割を残したときの関連の割合 | ECE | 拒否/欠け/失敗した問題 | 入力トークン | 費用（ドル） |
+|---|---|---|---|---|---|---|---|---|---|---|
+| MIRACL | 10 件ずつ、判定基準あり | `jev_pointwise` | jev-1.14.0 | 0.866 | 0.76 | 59.4% | 0.156 | 0/0/0 | 3,896,652 | 0.1637 |
+| MIRACL | 1 件ずつ | `jev_crossencode` | jev-1.14.0 | 0.862 | 0.75 | 57.6% | 0.160 | 0/0/0 | 7,325,018 | 0.3077 |
+| MIRACL | 1 件ずつ | `decisions_crossencode` | gpt-6-luna | 0.799 | 0.68 | 56.0% | 0.133 | 0/0/0 | 5,976,555 | 0.5977 |
+| J-RAGBench | 10 件ずつ、判定基準あり | `jev_pointwise` | jev-1.14.0 | 0.938 | 0.87 | 62.0% | 0.051 | 0/0/0 | 552,982 | 0.0232 |
+| J-RAGBench | 1 件ずつ | `jev_crossencode` | jev-1.14.0 | 0.905 | 0.79 | 53.9% | 0.069 | 0/0/0 | 855,195 | 0.0359 |
+| J-RAGBench | 1 件ずつ | `decisions_crossencode` | gpt-6-luna | 0.777 | 0.71 | 20.7% | 0.112 | 0/0/0 | 701,465 | 0.0701 |
+| 合成データ | 10 件ずつ、判定基準あり | `jev_pointwise` | jev-1.14.0 | 0.952 | 0.92 | 84.1% | 0.055 | 0/0/0 | 208,811 | 0.0088 |
+| 合成データ | 1 件ずつ | `jev_crossencode` | jev-1.14.0 | 0.840 | 0.74 | 64.7% | 0.078 | 0/0/0 | 480,386 | 0.0202 |
+| 合成データ | 1 件ずつ | `decisions_crossencode` | gpt-6-luna | 0.826 | 0.73 | 53.9% | 0.157 | 0/0/0 | 397,627 | 0.0398 |
 
 Decisions − Jev（問題を単位に 2,000 回の bootstrap、95% 区間）:
 
-| データ | 比べた問題 | 問題ごとの PR-AUC | 全問まとめ PR-AUC |
-|---|---|---|---|
-| MIRACL | 797 問 | −0.063（−0.075〜−0.049） | −0.07（−0.08〜−0.05） |
-| J-RAGBench | 60 問 | −0.128（−0.184〜−0.075） | −0.08（−0.14〜−0.02） |
-| 合成データ | 60 問 | −0.014（−0.048〜+0.020） | −0.01（−0.05〜+0.02） |
-
-MIRACL は、候補がすべて関連文書の 63 問を除いた 797 問で比べた（既存の表と同じ扱い）。
-
-## Jev のまとめる経路を含めた比較
-
-Decisions で測ったのは 1 件ずつの経路だけだが、Jev は記事の主経路である 10 件まとめる `jev_pointwise` の方が、1 件ずつより成績がよい。`decisions_crossencode` と `jev_pointwise` の差も、保存したスコアから同じ方法で計算した（`judge_report` の関数を直接呼んだ。report-judge の表にはない）。J-RAGBench では、判定基準なしの `jev_pointwise_plain` が `jev_pointwise` をわずかに上回った。
-
-| データ | 経路 | 問題ごとの PR-AUC | 全問まとめ PR-AUC | 関連文書の 9 割を残したときの関連の割合 |
+| データ | 比べた形 | 比べた問題 | 問題ごとの PR-AUC | 全問まとめ PR-AUC |
 |---|---|---|---|---|
-| MIRACL | `jev_pointwise` | 0.866 | 0.761 | 59.4% |
-| MIRACL | `jev_pointwise_plain` | 0.849 | 0.729 | 54.2% |
-| MIRACL | `jev_crossencode` | 0.862 | 0.749 | 57.6% |
-| MIRACL | `decisions_crossencode` | 0.799 | 0.680 | 56.0% |
-| J-RAGBench | `jev_pointwise` | 0.938 | 0.871 | 62.0% |
-| J-RAGBench | `jev_pointwise_plain` | 0.948 | 0.872 | 56.6% |
-| J-RAGBench | `jev_crossencode` | 0.905 | 0.787 | 53.9% |
-| J-RAGBench | `decisions_crossencode` | 0.777 | 0.711 | 20.7% |
-| 合成データ | `jev_pointwise` | 0.952 | 0.921 | 84.1% |
-| 合成データ | `jev_pointwise_plain` | 0.928 | 0.906 | 72.3% |
-| 合成データ | `jev_crossencode` | 0.840 | 0.741 | 64.7% |
-| 合成データ | `decisions_crossencode` | 0.826 | 0.727 | 53.9% |
+| MIRACL | 1 件ずつどうし | 797 問 | −0.063（−0.075〜−0.049） | −0.07（−0.08〜−0.05） |
+| MIRACL | Jev は 10 件ずつ、Decisions は 1 件ずつ | 797 問 | −0.067（−0.080〜−0.053） | −0.08（−0.10〜−0.06） |
+| J-RAGBench | 1 件ずつどうし | 60 問 | −0.128（−0.184〜−0.075） | −0.08（−0.14〜−0.02） |
+| J-RAGBench | Jev は 10 件ずつ、Decisions は 1 件ずつ | 60 問 | −0.161（−0.218〜−0.111） | −0.16（−0.22〜−0.10） |
+| 合成データ | 1 件ずつどうし | 60 問 | −0.014（−0.048〜+0.020） | −0.01（−0.05〜+0.02） |
+| 合成データ | Jev は 10 件ずつ、Decisions は 1 件ずつ | 60 問 | −0.126（−0.168〜−0.085） | −0.19（−0.25〜−0.14） |
 
-`decisions_crossencode` − `jev_pointwise`（95% 区間）:
-
-| データ | 問題ごとの PR-AUC | 全問まとめ PR-AUC |
-|---|---|---|
-| MIRACL（797 問） | −0.067（−0.080〜−0.053） | −0.081（−0.097〜−0.064） |
-| J-RAGBench（60 問） | −0.161（−0.218〜−0.111） | −0.160（−0.218〜−0.102） |
-| 合成データ（60 問） | −0.126（−0.168〜−0.085） | −0.194（−0.249〜−0.138） |
+MIRACL は、候補がすべて関連文書の 63 問を除いた 797 問で比べた（既存の表と同じ扱い）。`jev_pointwise` は記事の主経路で、Decisions の 10 件まとめる経路は本測定で測っていないので、この組み合わせは形の違う経路どうしの比較になる。判定基準なしの `jev_pointwise_plain` も測ったが、Decisions に対応する経路がないので、この節の表には出ない（全問まとめ PR-AUC は `judge` の画面で MIRACL 0.729、J-RAGBench 0.872、合成 0.906）。
 
 ## 読み方
 

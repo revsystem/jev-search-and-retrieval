@@ -151,7 +151,7 @@ PR-AUC は、関連文書を上位に、無関係文書を下位に並べられ�
 
 ## Decisions API との比較
 
-OpenAI の Decisions API（`gpt-6-luna`、public beta）を、Jev 1.14（`jev-1.14.0`）と同じデータ、指示文、指標で比べます。設計は `.claude/docs/specs/openai-decisions-comparison.md`、本測定の前の確認は `.claude/docs/research/decisions-probe.md`、結果は `.claude/docs/research/decisions-results.md` にあります。
+OpenAI の Decisions API（`gpt-6-luna`、public beta）を、Jev 1.14（`jev-1.14.0`）と同じデータ、指示文、指標で比べます。設計は `.claude/docs/specs/openai-decisions-comparison.md`、本測定の前の確認は `.claude/docs/research/decisions-probe.md`、結果は `.claude/docs/research/decisions-results.md` にあり、保存したスコア（`results/decisions/`）から `uv run jev-rag report-judge --results-dir results/decisions` で再現できます。
 
 | 経路 | 中身 |
 |---|---|

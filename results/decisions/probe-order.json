@@ -1,0 +1,2454 @@
+{
+  "decisions_pointwise": {
+    "pairs": 50,
+    "unmatched": 0,
+    "median_abs_diff": 0.03,
+    "spearman": 0.5866647935192797,
+    "follows_documents": false,
+    "mean_query_pr_auc": 0.9177777777777777,
+    "failed": [],
+    "forward": [
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d08",
+        "label": 1,
+        "score": 1.0
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d01",
+        "label": 1,
+        "score": 1.0
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d06",
+        "label": 0,
+        "score": 0.59
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d05",
+        "label": 1,
+        "score": 0.55
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d02",
+        "label": 0,
+        "score": 0.06
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d09",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d03",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d10",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d07",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d04",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d05",
+        "label": 1,
+        "score": 1.0
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d01",
+        "label": 1,
+        "score": 0.77
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d03",
+        "label": 1,
+        "score": 0.47
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d06",
+        "label": 0,
+        "score": 0.15
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d08",
+        "label": 0,
+        "score": 0.12
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d09",
+        "label": 0,
+        "score": 0.04
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d04",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d07",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d02",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d10",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d05",
+        "label": 1,
+        "score": 0.38
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d08",
+        "label": 1,
+        "score": 0.32
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d02",
+        "label": 1,
+        "score": 0.02
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d06",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d10",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d09",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d07",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d03",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d04",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d01",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d05",
+        "label": 1,
+        "score": 1.0
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d07",
+        "label": 0,
+        "score": 0.87
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d08",
+        "label": 1,
+        "score": 0.65
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d04",
+        "label": 0,
+        "score": 0.51
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d02",
+        "label": 1,
+        "score": 0.44
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d06",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d03",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d10",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d09",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d01",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d01",
+        "label": 1,
+        "score": 0.92
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d03",
+        "label": 1,
+        "score": 0.77
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d06",
+        "label": 0,
+        "score": 0.75
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d05",
+        "label": 1,
+        "score": 0.04
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d10",
+        "label": 0,
+        "score": 0.01
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d02",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d04",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d07",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d08",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d09",
+        "label": 0,
+        "score": 0.0
+      }
+    ],
+    "backward": [
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d08",
+        "label": 1,
+        "score": 1.0
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d05",
+        "label": 1,
+        "score": 0.97
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d01",
+        "label": 1,
+        "score": 0.47
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d02",
+        "label": 0,
+        "score": 0.13
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d06",
+        "label": 0,
+        "score": 0.02
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d04",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d07",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d10",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d03",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d09",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d05",
+        "label": 1,
+        "score": 0.95
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d08",
+        "label": 0,
+        "score": 0.51
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d04",
+        "label": 0,
+        "score": 0.05
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d01",
+        "label": 1,
+        "score": 0.05
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d09",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d10",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d02",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d06",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d07",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d03",
+        "label": 1,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d08",
+        "label": 1,
+        "score": 0.95
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d05",
+        "label": 1,
+        "score": 0.53
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d10",
+        "label": 0,
+        "score": 0.02
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d06",
+        "label": 0,
+        "score": 0.02
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d02",
+        "label": 1,
+        "score": 0.01
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d01",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d04",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d03",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d07",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d09",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d08",
+        "label": 1,
+        "score": 1.0
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d06",
+        "label": 0,
+        "score": 0.66
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d02",
+        "label": 1,
+        "score": 0.61
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d05",
+        "label": 1,
+        "score": 0.18
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d03",
+        "label": 0,
+        "score": 0.13
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d04",
+        "label": 0,
+        "score": 0.05
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d07",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d01",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d09",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d10",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d03",
+        "label": 1,
+        "score": 0.66
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d05",
+        "label": 1,
+        "score": 0.5
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d02",
+        "label": 0,
+        "score": 0.29
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d01",
+        "label": 1,
+        "score": 0.14
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d04",
+        "label": 0,
+        "score": 0.02
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d10",
+        "label": 0,
+        "score": 0.01
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d06",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d09",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d08",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d07",
+        "label": 0,
+        "score": 0.0
+      }
+    ]
+  },
+  "decisions_crossencode": {
+    "pairs": 50,
+    "unmatched": 0,
+    "median_abs_diff": 0.0,
+    "spearman": 1.0,
+    "follows_documents": true,
+    "mean_query_pr_auc": 0.9077777777777778,
+    "failed": [],
+    "forward": [
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d08",
+        "label": 1,
+        "score": 1.0
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d01",
+        "label": 1,
+        "score": 0.98
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d05",
+        "label": 1,
+        "score": 0.91
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d06",
+        "label": 0,
+        "score": 0.09
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d02",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d07",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d10",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d04",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d03",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d09",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d05",
+        "label": 1,
+        "score": 0.56
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d02",
+        "label": 0,
+        "score": 0.33
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d01",
+        "label": 1,
+        "score": 0.26
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d10",
+        "label": 0,
+        "score": 0.16
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d03",
+        "label": 1,
+        "score": 0.03
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d07",
+        "label": 0,
+        "score": 0.02
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d08",
+        "label": 0,
+        "score": 0.01
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d04",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d06",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d09",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d08",
+        "label": 1,
+        "score": 0.69
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d05",
+        "label": 1,
+        "score": 0.04
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d10",
+        "label": 0,
+        "score": 0.02
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d02",
+        "label": 1,
+        "score": 0.01
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d03",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d04",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d06",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d07",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d09",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d01",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d02",
+        "label": 1,
+        "score": 0.99
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d08",
+        "label": 1,
+        "score": 0.98
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d04",
+        "label": 0,
+        "score": 0.19
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d01",
+        "label": 0,
+        "score": 0.07
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d05",
+        "label": 1,
+        "score": 0.02
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d09",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d07",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d10",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d06",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d03",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d03",
+        "label": 1,
+        "score": 0.57
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d01",
+        "label": 1,
+        "score": 0.51
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d05",
+        "label": 1,
+        "score": 0.26
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d02",
+        "label": 0,
+        "score": 0.1
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d10",
+        "label": 0,
+        "score": 0.04
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d06",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d04",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d07",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d09",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d08",
+        "label": 0,
+        "score": 0.0
+      }
+    ],
+    "backward": [
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d08",
+        "label": 1,
+        "score": 1.0
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d01",
+        "label": 1,
+        "score": 0.98
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d05",
+        "label": 1,
+        "score": 0.91
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d06",
+        "label": 0,
+        "score": 0.09
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d02",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d07",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d10",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d04",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d03",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d09",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d05",
+        "label": 1,
+        "score": 0.56
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d02",
+        "label": 0,
+        "score": 0.33
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d01",
+        "label": 1,
+        "score": 0.26
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d10",
+        "label": 0,
+        "score": 0.16
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d03",
+        "label": 1,
+        "score": 0.03
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d07",
+        "label": 0,
+        "score": 0.02
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d08",
+        "label": 0,
+        "score": 0.01
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d04",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d06",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d09",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d08",
+        "label": 1,
+        "score": 0.69
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d05",
+        "label": 1,
+        "score": 0.04
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d10",
+        "label": 0,
+        "score": 0.02
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d02",
+        "label": 1,
+        "score": 0.01
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d03",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d04",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d07",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d06",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d09",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d01",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d02",
+        "label": 1,
+        "score": 0.99
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d08",
+        "label": 1,
+        "score": 0.98
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d04",
+        "label": 0,
+        "score": 0.19
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d01",
+        "label": 0,
+        "score": 0.07
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d05",
+        "label": 1,
+        "score": 0.02
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d09",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d07",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d10",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d06",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d03",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d03",
+        "label": 1,
+        "score": 0.57
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d01",
+        "label": 1,
+        "score": 0.51
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d05",
+        "label": 1,
+        "score": 0.26
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d02",
+        "label": 0,
+        "score": 0.1
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d10",
+        "label": 0,
+        "score": 0.04
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d06",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d04",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d07",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d09",
+        "label": 0,
+        "score": 0.0
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d08",
+        "label": 0,
+        "score": 0.0
+      }
+    ]
+  },
+  "jev_pointwise": {
+    "pairs": 50,
+    "unmatched": 0,
+    "median_abs_diff": 0.03,
+    "spearman": 0.9348028963267654,
+    "follows_documents": true,
+    "mean_query_pr_auc": 1.0,
+    "failed": [],
+    "forward": [
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d08",
+        "label": 1,
+        "score": 0.94
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d05",
+        "label": 1,
+        "score": 0.86
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d01",
+        "label": 1,
+        "score": 0.81
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d06",
+        "label": 0,
+        "score": 0.36
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d02",
+        "label": 0,
+        "score": 0.19
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d04",
+        "label": 0,
+        "score": 0.06
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d10",
+        "label": 0,
+        "score": 0.05
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d07",
+        "label": 0,
+        "score": 0.04
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d03",
+        "label": 0,
+        "score": 0.03
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d09",
+        "label": 0,
+        "score": 0.02
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d01",
+        "label": 1,
+        "score": 0.94
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d05",
+        "label": 1,
+        "score": 0.94
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d03",
+        "label": 1,
+        "score": 0.75
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d02",
+        "label": 0,
+        "score": 0.34
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d08",
+        "label": 0,
+        "score": 0.29
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d07",
+        "label": 0,
+        "score": 0.1
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d04",
+        "label": 0,
+        "score": 0.08
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d06",
+        "label": 0,
+        "score": 0.07
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d10",
+        "label": 0,
+        "score": 0.06
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d09",
+        "label": 0,
+        "score": 0.02
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d08",
+        "label": 1,
+        "score": 0.95
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d05",
+        "label": 1,
+        "score": 0.67
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d02",
+        "label": 1,
+        "score": 0.21
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d06",
+        "label": 0,
+        "score": 0.06
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d04",
+        "label": 0,
+        "score": 0.05
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d10",
+        "label": 0,
+        "score": 0.03
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d07",
+        "label": 0,
+        "score": 0.03
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d09",
+        "label": 0,
+        "score": 0.02
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d03",
+        "label": 0,
+        "score": 0.02
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d01",
+        "label": 0,
+        "score": 0.02
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d02",
+        "label": 1,
+        "score": 0.89
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d05",
+        "label": 1,
+        "score": 0.88
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d08",
+        "label": 1,
+        "score": 0.83
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d04",
+        "label": 0,
+        "score": 0.54
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d10",
+        "label": 0,
+        "score": 0.17
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d01",
+        "label": 0,
+        "score": 0.08
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d09",
+        "label": 0,
+        "score": 0.05
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d06",
+        "label": 0,
+        "score": 0.03
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d03",
+        "label": 0,
+        "score": 0.03
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d07",
+        "label": 0,
+        "score": 0.03
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d03",
+        "label": 1,
+        "score": 0.95
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d01",
+        "label": 1,
+        "score": 0.92
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d05",
+        "label": 1,
+        "score": 0.69
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d02",
+        "label": 0,
+        "score": 0.35
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d10",
+        "label": 0,
+        "score": 0.25
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d07",
+        "label": 0,
+        "score": 0.14
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d09",
+        "label": 0,
+        "score": 0.09
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d06",
+        "label": 0,
+        "score": 0.08
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d04",
+        "label": 0,
+        "score": 0.06
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d08",
+        "label": 0,
+        "score": 0.05
+      }
+    ],
+    "backward": [
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d08",
+        "label": 1,
+        "score": 0.94
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d05",
+        "label": 1,
+        "score": 0.89
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d01",
+        "label": 1,
+        "score": 0.86
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d06",
+        "label": 0,
+        "score": 0.38
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d02",
+        "label": 0,
+        "score": 0.16
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d07",
+        "label": 0,
+        "score": 0.08
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d03",
+        "label": 0,
+        "score": 0.06
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d04",
+        "label": 0,
+        "score": 0.05
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d10",
+        "label": 0,
+        "score": 0.03
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d09",
+        "label": 0,
+        "score": 0.02
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d05",
+        "label": 1,
+        "score": 0.93
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d01",
+        "label": 1,
+        "score": 0.85
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d02",
+        "label": 0,
+        "score": 0.84
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d03",
+        "label": 1,
+        "score": 0.69
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d08",
+        "label": 0,
+        "score": 0.35
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d10",
+        "label": 0,
+        "score": 0.16
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d04",
+        "label": 0,
+        "score": 0.1
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d07",
+        "label": 0,
+        "score": 0.09
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d06",
+        "label": 0,
+        "score": 0.06
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d09",
+        "label": 0,
+        "score": 0.03
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d08",
+        "label": 1,
+        "score": 0.91
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d05",
+        "label": 1,
+        "score": 0.86
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d02",
+        "label": 1,
+        "score": 0.44
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d10",
+        "label": 0,
+        "score": 0.07
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d04",
+        "label": 0,
+        "score": 0.04
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d07",
+        "label": 0,
+        "score": 0.04
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d06",
+        "label": 0,
+        "score": 0.04
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d03",
+        "label": 0,
+        "score": 0.03
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d09",
+        "label": 0,
+        "score": 0.03
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d01",
+        "label": 0,
+        "score": 0.02
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d02",
+        "label": 1,
+        "score": 0.87
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d05",
+        "label": 1,
+        "score": 0.79
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d08",
+        "label": 1,
+        "score": 0.77
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d04",
+        "label": 0,
+        "score": 0.35
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d07",
+        "label": 0,
+        "score": 0.15
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d10",
+        "label": 0,
+        "score": 0.11
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d01",
+        "label": 0,
+        "score": 0.05
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d09",
+        "label": 0,
+        "score": 0.03
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d03",
+        "label": 0,
+        "score": 0.02
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d06",
+        "label": 0,
+        "score": 0.02
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d03",
+        "label": 1,
+        "score": 0.94
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d01",
+        "label": 1,
+        "score": 0.88
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d05",
+        "label": 1,
+        "score": 0.78
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d02",
+        "label": 0,
+        "score": 0.44
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d10",
+        "label": 0,
+        "score": 0.21
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d07",
+        "label": 0,
+        "score": 0.18
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d06",
+        "label": 0,
+        "score": 0.12
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d09",
+        "label": 0,
+        "score": 0.1
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d04",
+        "label": 0,
+        "score": 0.07
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d08",
+        "label": 0,
+        "score": 0.06
+      }
+    ]
+  },
+  "jev_crossencode": {
+    "pairs": 50,
+    "unmatched": 0,
+    "median_abs_diff": 0.009999999999999995,
+    "spearman": 0.9949447605831918,
+    "follows_documents": true,
+    "mean_query_pr_auc": 0.9466666666666667,
+    "failed": [],
+    "forward": [
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d08",
+        "label": 1,
+        "score": 0.95
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d05",
+        "label": 1,
+        "score": 0.77
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d01",
+        "label": 1,
+        "score": 0.71
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d06",
+        "label": 0,
+        "score": 0.54
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d07",
+        "label": 0,
+        "score": 0.07
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d03",
+        "label": 0,
+        "score": 0.05
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d02",
+        "label": 0,
+        "score": 0.05
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d04",
+        "label": 0,
+        "score": 0.04
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d10",
+        "label": 0,
+        "score": 0.04
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d09",
+        "label": 0,
+        "score": 0.04
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d01",
+        "label": 1,
+        "score": 0.59
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d05",
+        "label": 1,
+        "score": 0.57
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d02",
+        "label": 0,
+        "score": 0.54
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d10",
+        "label": 0,
+        "score": 0.52
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d03",
+        "label": 1,
+        "score": 0.48
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d08",
+        "label": 0,
+        "score": 0.29
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d07",
+        "label": 0,
+        "score": 0.13
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d04",
+        "label": 0,
+        "score": 0.06
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d06",
+        "label": 0,
+        "score": 0.03
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d09",
+        "label": 0,
+        "score": 0.02
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d08",
+        "label": 1,
+        "score": 0.63
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d02",
+        "label": 1,
+        "score": 0.19
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d09",
+        "label": 0,
+        "score": 0.18
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d06",
+        "label": 0,
+        "score": 0.17
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d05",
+        "label": 1,
+        "score": 0.15
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d10",
+        "label": 0,
+        "score": 0.08
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d07",
+        "label": 0,
+        "score": 0.07
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d04",
+        "label": 0,
+        "score": 0.05
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d03",
+        "label": 0,
+        "score": 0.05
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d01",
+        "label": 0,
+        "score": 0.03
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d02",
+        "label": 1,
+        "score": 0.86
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d05",
+        "label": 1,
+        "score": 0.84
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d08",
+        "label": 1,
+        "score": 0.71
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d07",
+        "label": 0,
+        "score": 0.34
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d04",
+        "label": 0,
+        "score": 0.26
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d01",
+        "label": 0,
+        "score": 0.21
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d10",
+        "label": 0,
+        "score": 0.08
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d09",
+        "label": 0,
+        "score": 0.07
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d03",
+        "label": 0,
+        "score": 0.06
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d06",
+        "label": 0,
+        "score": 0.06
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d03",
+        "label": 1,
+        "score": 0.68
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d05",
+        "label": 1,
+        "score": 0.67
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d01",
+        "label": 1,
+        "score": 0.44
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d02",
+        "label": 0,
+        "score": 0.38
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d06",
+        "label": 0,
+        "score": 0.16
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d10",
+        "label": 0,
+        "score": 0.12
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d07",
+        "label": 0,
+        "score": 0.1
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d04",
+        "label": 0,
+        "score": 0.07
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d09",
+        "label": 0,
+        "score": 0.05
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d08",
+        "label": 0,
+        "score": 0.05
+      }
+    ],
+    "backward": [
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d08",
+        "label": 1,
+        "score": 0.94
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d05",
+        "label": 1,
+        "score": 0.79
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d01",
+        "label": 1,
+        "score": 0.77
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d06",
+        "label": 0,
+        "score": 0.56
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d07",
+        "label": 0,
+        "score": 0.07
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d03",
+        "label": 0,
+        "score": 0.06
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d02",
+        "label": 0,
+        "score": 0.05
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d04",
+        "label": 0,
+        "score": 0.04
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d10",
+        "label": 0,
+        "score": 0.04
+      },
+      {
+        "query_id": "b-025",
+        "doc_id": "b-025-d09",
+        "label": 0,
+        "score": 0.04
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d02",
+        "label": 0,
+        "score": 0.6
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d01",
+        "label": 1,
+        "score": 0.59
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d05",
+        "label": 1,
+        "score": 0.56
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d03",
+        "label": 1,
+        "score": 0.47
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d10",
+        "label": 0,
+        "score": 0.46
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d08",
+        "label": 0,
+        "score": 0.28
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d07",
+        "label": 0,
+        "score": 0.15
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d04",
+        "label": 0,
+        "score": 0.06
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d06",
+        "label": 0,
+        "score": 0.03
+      },
+      {
+        "query_id": "a-025",
+        "doc_id": "a-025-d09",
+        "label": 0,
+        "score": 0.02
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d08",
+        "label": 1,
+        "score": 0.68
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d09",
+        "label": 0,
+        "score": 0.27
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d02",
+        "label": 1,
+        "score": 0.18
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d05",
+        "label": 1,
+        "score": 0.17
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d06",
+        "label": 0,
+        "score": 0.17
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d10",
+        "label": 0,
+        "score": 0.07
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d07",
+        "label": 0,
+        "score": 0.07
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d03",
+        "label": 0,
+        "score": 0.06
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d04",
+        "label": 0,
+        "score": 0.05
+      },
+      {
+        "query_id": "b-019",
+        "doc_id": "b-019-d01",
+        "label": 0,
+        "score": 0.03
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d02",
+        "label": 1,
+        "score": 0.88
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d05",
+        "label": 1,
+        "score": 0.83
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d08",
+        "label": 1,
+        "score": 0.74
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d07",
+        "label": 0,
+        "score": 0.31
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d04",
+        "label": 0,
+        "score": 0.25
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d01",
+        "label": 0,
+        "score": 0.16
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d10",
+        "label": 0,
+        "score": 0.08
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d09",
+        "label": 0,
+        "score": 0.07
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d03",
+        "label": 0,
+        "score": 0.06
+      },
+      {
+        "query_id": "b-027",
+        "doc_id": "b-027-d06",
+        "label": 0,
+        "score": 0.06
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d03",
+        "label": 1,
+        "score": 0.68
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d05",
+        "label": 1,
+        "score": 0.66
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d01",
+        "label": 1,
+        "score": 0.47
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d02",
+        "label": 0,
+        "score": 0.31
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d06",
+        "label": 0,
+        "score": 0.15
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d10",
+        "label": 0,
+        "score": 0.12
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d07",
+        "label": 0,
+        "score": 0.11
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d04",
+        "label": 0,
+        "score": 0.08
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d09",
+        "label": 0,
+        "score": 0.05
+      },
+      {
+        "query_id": "a-027",
+        "doc_id": "a-027-d08",
+        "label": 0,
+        "score": 0.05
+      }
+    ]
+  }
+}
