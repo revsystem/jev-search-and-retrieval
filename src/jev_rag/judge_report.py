@@ -159,6 +159,8 @@ def _ranking_section(judges, samples, seed) -> list[str]:
                 f"{_diff(mean_a, mean_b, 3)}（{_interval(low, high, 3)}）",
             ]
         )
+    if not body:
+        return []
     header = [
         "データ",
         "でたらめ",
@@ -195,6 +197,8 @@ def _pooled_section(judges, samples, seed) -> list[str]:
                 f"{_diff(a, b, 2)}（{_interval(ci['low'], ci['high'], 2)}）",
             ]
         )
+    if not body:
+        return []
     header = [
         "データ",
         "でたらめ",
@@ -225,6 +229,8 @@ def _top_k_section(judges) -> list[str]:
         )
         for route, rows in (("Cohere Rerank", cohere), ("Jev", jev)):
             body.append([label, route, f"{top_k_hit(rows, 1):.0%}", f"{top_k_hit(rows, 3):.0%}"])
+    if not body:
+        return []
     header = ["データ", "並べ方", "1 位が関連文書", "上位 3 件に関連文書を含む"]
     title = "### 上位に関連文書が来るか（候補文書がすべて関連文書の問題を除く）"
     return [title, ""] + _table(header, body)
@@ -252,6 +258,8 @@ def _threshold_section(judges, samples, seed) -> list[str]:
             ]
         )
         cuts.append([label, _num(te, 2), _num(tb, 2), _num(ta, 2)])
+    if not body:
+        return []
     header = [
         "データ",
         "でたらめ",
@@ -357,7 +365,8 @@ def _decisions_section(judges, samples, seed) -> list[str]:
             low, high = _interval_of_means(a, b, samples, seed)
             ci = paired_bootstrap(d_rows, j_rows, samples=samples, seed=seed)
             notes.append(
-                f"{label}、{shape}（{len(shared)} 問で比較）: Decisions − Jev は問題ごとの PR-AUC "
+                f"{label}、{shape}（{len(set(a) & set(b))} 問で比較）: "
+                "Decisions − Jev は問題ごとの PR-AUC "
                 f"{_diff(mean_query_pr_auc(d_rows), mean_query_pr_auc(j_rows), 3)}"
                 f"（{_interval(low, high, 3)}）、全問まとめ PR-AUC "
                 f"{_diff(pooled_pr_auc(d_rows), pooled_pr_auc(j_rows), 2)}"

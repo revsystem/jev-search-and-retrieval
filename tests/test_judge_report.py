@@ -194,3 +194,18 @@ def test_routes_with_no_question_in_common_are_reported_as_not_comparable():
         entry["pairs"] = [r for r in entry["pairs"] if r["query_id"] == kept]
     report = format_report(judges, None, samples=50)
     assert "比較できる問題がない" in report
+
+
+def test_sections_with_no_rows_are_left_out():
+    report = format_report(decisions_judges(), None, samples=50)
+    assert "Cohere Rerank" not in report
+    assert report.startswith("### Decisions と Jev 1.14")
+
+
+def test_the_question_count_is_the_questions_the_difference_was_computed_on():
+    judges = decisions_judges()
+    for route in ("jev_pointwise", "decisions_pointwise"):
+        # q3 has only relevant candidates, so it has no per-question PR-AUC
+        judges["synthetic"][route]["scored"]["pairs"] += rows("q3", [(0.9, 1), (0.8, 1)])
+    report = format_report(judges, None, samples=50)
+    assert "2 問で比較" in report
