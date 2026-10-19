@@ -320,10 +320,20 @@ def _criteria_section(judges, samples, seed) -> list[str]:
 
 # USD per million input tokens, from the official pages fetched on 2026-10-19
 PRICE_PER_MTOK = {"jev": 0.042, "decisions": 0.10}
+ROUTE_SHAPES = {
+    "jev_pointwise": "10 件ずつ、判定基準あり",
+    "jev_pointwise_plain": "10 件ずつ、判定基準なし",
+    "jev_crossencode": "1 件ずつ",
+    "decisions_pointwise": "10 件ずつ、判定基準あり",
+    "decisions_pointwise_plain": "10 件ずつ、判定基準なし",
+    "decisions_crossencode": "1 件ずつ",
+}
 DECISIONS_PAIRS = [
     ("jev_pointwise", "decisions_pointwise", "10 件ずつ、判定基準あり"),
     ("jev_pointwise_plain", "decisions_pointwise_plain", "10 件ずつ、判定基準なし"),
     ("jev_crossencode", "decisions_crossencode", "1 件ずつ"),
+    # the article's main Jev route against the one Decisions route that passed probe-order
+    ("jev_pointwise", "decisions_crossencode", "Jev は 10 件ずつ、Decisions は 1 件ずつ"),
 ]
 
 
@@ -336,6 +346,7 @@ def _usage_cells(route: str, rows: Rows, scored: dict[str, Any]) -> list[str]:
         ", ".join(usage.get("models", [])) or "-",
         _num(mean_query_pr_auc(rows), 3),
         _num(pooled_pr_auc(rows), 2),
+        f"{precision_at_recall(rows)[0] * 100:.1f}%",
         _num(judge_metrics(rows, probabilistic=True).get("ece"), 3),
         gaps,
         "-" if tokens is None else f"{tokens:,}",
@@ -343,35 +354,46 @@ def _usage_cells(route: str, rows: Rows, scored: dict[str, Any]) -> list[str]:
     ]
 
 
+def _comparison_note(label: str, title: str, decisions: Rows, jev: Rows, samples, seed) -> str:
+    # a question one route failed is left out of both sides of the difference
+    shared = {r["query_id"] for r in decisions} & {r["query_id"] for r in jev}
+    d_rows = [r for r in decisions if r["query_id"] in shared]
+    j_rows = [r for r in jev if r["query_id"] in shared]
+    a, b = _query_pr_aucs(d_rows), _query_pr_aucs(j_rows)
+    if not set(a) & set(b):
+        return f"{label}、{title}: 両経路が答えた問題に、比較できる問題がない"
+    low, high = _interval_of_means(a, b, samples, seed)
+    ci = paired_bootstrap(d_rows, j_rows, samples=samples, seed=seed)
+    return (
+        f"{label}、{title}（{len(set(a) & set(b))} 問で比較）: "
+        "Decisions − Jev は問題ごとの PR-AUC "
+        f"{_diff(mean_query_pr_auc(d_rows), mean_query_pr_auc(j_rows), 3)}"
+        f"（{_interval(low, high, 3)}）、全問まとめ PR-AUC "
+        f"{_diff(pooled_pr_auc(d_rows), pooled_pr_auc(j_rows), 2)}"
+        f"（{_interval(ci['low'], ci['high'], 2)}）"
+    )
+
+
 def _decisions_section(judges, samples, seed) -> list[str]:
     body, notes = [], []
     for name, result in judges.items():
         label = DATASETS.get(name, name)
-        for jev_route, decisions_route, shape in DECISIONS_PAIRS:
-            jev, decisions = _pairs(result, jev_route), _pairs(result, decisions_route)
-            if not jev or not decisions:
-                continue
-            for route, rows in ((jev_route, jev), (decisions_route, decisions)):
-                cells = _usage_cells(route, rows, result[route]["scored"])
+        pairs = [
+            (j, d, title)
+            for j, d, title in DECISIONS_PAIRS
+            if _pairs(result, j) and _pairs(result, d)
+        ]
+        if not pairs:
+            continue
+        compared = {route for j, d, _ in pairs for route in (j, d)}
+        for route, shape in ROUTE_SHAPES.items():
+            if route in compared:
+                cells = _usage_cells(route, _pairs(result, route), result[route]["scored"])
                 body.append([label, shape, f"`{route}`"] + cells)
-            # a question one route failed is left out of both sides of the difference
-            shared = {r["query_id"] for r in decisions} & {r["query_id"] for r in jev}
-            d_rows = [r for r in decisions if r["query_id"] in shared]
-            j_rows = [r for r in jev if r["query_id"] in shared]
-            a, b = _query_pr_aucs(d_rows), _query_pr_aucs(j_rows)
-            if not set(a) & set(b):
-                notes.append(f"{label}、{shape}: 両経路が答えた問題に、比較できる問題がない")
-                continue
-            low, high = _interval_of_means(a, b, samples, seed)
-            ci = paired_bootstrap(d_rows, j_rows, samples=samples, seed=seed)
-            notes.append(
-                f"{label}、{shape}（{len(set(a) & set(b))} 問で比較）: "
-                "Decisions − Jev は問題ごとの PR-AUC "
-                f"{_diff(mean_query_pr_auc(d_rows), mean_query_pr_auc(j_rows), 3)}"
-                f"（{_interval(low, high, 3)}）、全問まとめ PR-AUC "
-                f"{_diff(pooled_pr_auc(d_rows), pooled_pr_auc(j_rows), 2)}"
-                f"（{_interval(ci['low'], ci['high'], 2)}）"
-            )
+        notes += [
+            _comparison_note(label, title, _pairs(result, d), _pairs(result, j), samples, seed)
+            for j, d, title in pairs
+        ]
     if not body:
         return []
     header = [
@@ -381,6 +403,7 @@ def _decisions_section(judges, samples, seed) -> list[str]:
         "答えたモデル",
         "問題ごとの PR-AUC",
         "全問まとめ PR-AUC",
+        "9 割を残したときの関連の割合",
         "ECE",
         "拒否/欠け/失敗した問題",
         "入力トークン",

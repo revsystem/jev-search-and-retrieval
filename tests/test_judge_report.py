@@ -209,3 +209,20 @@ def test_the_question_count_is_the_questions_the_difference_was_computed_on():
         judges["synthetic"][route]["scored"]["pairs"] += rows("q3", [(0.9, 1), (0.8, 1)])
     report = format_report(judges, None, samples=50)
     assert "2 問で比較" in report
+
+
+def test_jev_batched_is_compared_with_decisions_one_at_a_time():
+    judges = decisions_judges()
+    entry = judges["synthetic"].pop("decisions_pointwise")
+    judges["synthetic"]["decisions_crossencode"] = entry
+    report = format_report(judges, None, samples=50)
+    assert "Jev は 10 件ずつ、Decisions は 1 件ずつ（2 問で比較）" in report
+    # each route has one row in the table, however many comparisons it is in
+    assert report.count("| `decisions_crossencode` |") == 1
+
+
+def test_the_decisions_table_shows_precision_when_nine_tenths_are_kept():
+    report = format_report(decisions_judges(), None, samples=50)
+    assert "9 割を残したときの関連の割合" in report
+    # Jev ranks every relevant document first, so keeping them all keeps only them
+    assert "| 100.0% |" in report
