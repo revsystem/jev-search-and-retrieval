@@ -81,7 +81,7 @@ uv run jev-rag report-judge --results-dir results
 
 API の応答は実行ごとに少し揺れるので、`judge` と `dilution` を測り直すと、値は下の表と完全には一致しません。下の表は、記事における測定結果（`results/`）を `report-judge` で集計した値です。
 
-`.env` に書く秘密情報は Jev の API キー（`TYPESAFE_API_KEY`、Vercel AI Gateway 経由なら `AI_GATEWAY_API_KEY`）です。Bedrock の認証情報は書かず、`AWS_PROFILE` にプロファイル名を指定して `aws sso login` で認証します。
+`.env` に書く秘密情報は Jev の API キー（`TYPESAFE_API_KEY`、Vercel AI Gateway 経由なら `AI_GATEWAY_API_KEY`）と、Decisions API と比べるときの OpenAI の API キー（`OPENAI_API_KEY`）です。Bedrock の認証情報は書かず、`AWS_PROFILE` にプロファイル名を指定して `aws sso login` で認証します。
 
 ## 結果
 
